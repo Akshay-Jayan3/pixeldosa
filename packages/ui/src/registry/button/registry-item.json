@@ -1,0 +1,34 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button",
+  "title": "Button",
+  "description": "A clickable control that triggers an action. Renders a native button element, or any element via the asChild prop when the trigger must be a link. Supports six visual variants (default, secondary, outline, ghost, destructive, link), four sizes including a square icon size, and a loading state that blocks interaction while announcing itself as busy to assistive technology. Use for actions such as submitting, saving or opening a dialog; use a plain anchor for navigation that changes the URL.",
+  "type": "registry:ui",
+  "categories": ["core", "form", "action"],
+  "dependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/button/button.tsx",
+      "target": "components/ui/button.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "cssVars": {
+    "theme": {
+      "--pd-duration-instant": "100ms",
+      "--pd-ease-standard": "cubic-bezier(0.4, 0, 0.2, 1)"
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. The press-feedback transition reads --pd-duration-instant and --pd-ease-standard; these are installed with this component, and the full token set arrives with the pixeldosa-theme item. When using asChild the rendered child receives aria-disabled rather than the disabled attribute, since non-button elements do not support it — handle click suppression in your own handler if the child is interactive.",
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Variants are declared with CVA rather than conditional className strings so that the full variant matrix is a single serialisable object: it can be type-derived (VariantProps), documented from source, and extended by consumers via buttonVariants() without forking the component. The loading state disables the button but deliberately keeps it mounted and in the tab order — swapping a button for a spinner element moves focus to the document body mid-interaction, which is the most common accessibility regression in loading buttons. asChild uses Radix Slot instead of a render-prop so that ref forwarding and event composition are handled by the primitive rather than reimplemented here.",
+    "motionNotes": "The only motion is a 2% active-state scale, driven by CSS transition rather than Motion — a button appears dozens of times per page and forcing a JS animation runtime into it would be a bundle cost with no interaction benefit. Duration (instant, 100ms) and easing come from CSS custom properties generated from the motion tokens, so the press feedback stays in step with the rest of the system. The motion solves one problem: confirming that a press registered before the resulting state change lands. Under prefers-reduced-motion the transform is dropped entirely and the state remains legible through the background and focus-ring changes, which is a fallback rather than a silent removal."
+  }
+}

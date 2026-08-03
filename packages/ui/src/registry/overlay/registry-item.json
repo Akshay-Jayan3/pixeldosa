@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "overlay",
+  "title": "Overlay Motion Primitive",
+  "description": "The shared enter/exit animation layer for every overlay surface in the system — Dialog, Sheet, Popover and Drawer. Exports OverlayScrim (the backdrop) and OverlayContent (the panel, with a placement prop of center, top, bottom, left or right that controls which axis it translates from) plus a re-exported AnimatePresence. Not a standalone component: it has no dismiss behaviour, focus trapping or portal logic of its own. Compose it underneath a Radix primitive (Dialog.Overlay/Content, Sheet, Popover) so that primitive owns interaction semantics while this owns motion.",
+  "type": "registry:ui",
+  "categories": ["core", "motion", "overlay"],
+  "dependencies": ["motion"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/overlay/overlay.tsx",
+      "target": "components/ui/overlay.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Render OverlayScrim and OverlayContent inside AnimatePresence, controlled by the same boolean/state that drives your Radix primitive's open prop. Neither component owns mount/unmount timing — AnimatePresence does, via whatever is conditionally rendering them.",
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Extracted as its own primitive rather than duplicated inside Dialog, Sheet, Popover and Drawer because those four are the same motion problem (scrim fade + panel translate/scale) wearing four different Radix primitives underneath. Without this, four components would each hand-roll slightly different durations the first time someone patches one of them, and the system's visual coherence — the actual point of a token-driven motion scale — degrades one component at a time. Deliberately excludes dismiss-on-click-outside, focus trapping and portalling: those are interaction semantics Radix already solves correctly, and re-solving them here would create two competing sources of truth for overlay behaviour.",
+    "motionNotes": "Two states only: scrim opacity, and content opacity+scale+translate along one axis determined by `placement`. Enter uses duration.fast with easing.decelerate (content is arriving, should feel like it's settling in); exit uses duration.instant with easing.accelerate (dismissal should feel immediate, not lingering) — this asymmetry is deliberate, not an oversight. The motion solves orientation: a Sheet sliding in from the right tells the user where it came from and, on exit, where it's returning to, which a plain fade does not. Reduced motion swaps the whole transition object for the shared `reducedMotion` token (near-zero duration) rather than removing the animation, so Motion's exit callback still fires and AnimatePresence still unmounts the content correctly."
+  }
+}

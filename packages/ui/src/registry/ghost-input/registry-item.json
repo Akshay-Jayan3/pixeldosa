@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ghost-input",
+  "title": "Ghost Input",
+  "description": "A single-line text input with inline AI ghost-text completion: after the user pauses typing, a dimmed continuation appears past the caret, accepted with Tab or the right-arrow key (only when the caret is already at the end of the text) and dismissed with Escape. Takes a fetchSuggestion(value, signal) prop that the consumer implements against their own model — the component owns debouncing, request cancellation on every keystroke, staleness checking (a suggestion that doesn't continue the current text is discarded), and the accessible announcement of the suggestion via a live region. It never inserts text automatically; acceptance is always an explicit keypress. Use for reply drafting, search boxes, or any single-line field where predictive continuation should stay out of the way until the user asks for it. Not for multi-field or full-document autocomplete — this is a single <input>, not an editor.",
+  "type": "registry:ui",
+  "categories": ["ai", "form"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme", "@pixeldosa/field"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/ghost-input/ghost-input.tsx",
+      "target": "components/ui/ghost-input.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "value/onValueChange are required — this is a controlled component only. fetchSuggestion must resolve to the FULL continued string (current value + completion), not just the completion tail; the component slices the tail itself and drops any result that doesn't start with the value it was requested for, so a response arriving after the user has kept typing can't overwrite what they see. Drops into <FieldControl> directly since id/aria-invalid/aria-describedby/ref all forward to the underlying <input>.",
+  "meta": {
+    "pillar": "ai",
+    "engineeringNotes": "The ghost text is rendered as a separate mirror div positioned exactly behind the real <input>, with the typed-text portion set to transparent — not as a styled fake caret or a contentEditable trick. This is the only approach that keeps native input behaviour (IME composition, selection, undo, autofill, screen-reader field semantics) completely intact, at the cost of the mirror div needing identical padding/font/line-height to the input, which is why both come from the same className. The whole request lifecycle — debounce timer, AbortController — lives in refs rather than state so that a rapid keystroke can synchronously cancel the previous request without waiting for a re-render; a state-based cancellation would let a slow response race a fast one and briefly show a stale suggestion. The right-arrow accept only fires when the caret is already at the end of the value (checked via selectionStart/selectionEnd), because otherwise it would silently hijack normal in-text cursor movement, which is a worse failure mode than requiring Tab.",
+    "motionNotes": "The suggestion's appearance is a plain opacity transition using duration.fast and easing.standard from the token scale — deliberately not a slide or typewriter reveal, both of which would misrepresent what happened: the whole continuation exists immediately (it was already fetched), so animating it in character-by-character would be a fabricated sense of the model 'typing', not a real progressive state. Under prefers-reduced-motion this reduces to a duration.instant swap via the same token path every other component in the system uses; nothing here required a component-specific reduced-motion branch, which is itself a signal the animation is doing the minimum necessary rather than something decorative."
+  }
+}

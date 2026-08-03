@@ -1,0 +1,55 @@
+---
+title: Button
+description: A clickable control that triggers an action, with six variants, four sizes, an accessible loading state, and asChild support for rendering as a link.
+---
+
+## Usage
+
+```tsx
+import { Button } from "@/components/ui/button";
+
+export function SaveBar() {
+  return <Button onClick={save}>Save changes</Button>;
+}
+```
+
+Render as a link — the child element receives all styling and behaviour, so use this
+whenever the trigger navigates rather than acts:
+
+```tsx
+<Button asChild variant="outline">
+  <Link href="/docs">Read the docs</Link>
+</Button>
+```
+
+Async actions should use `loading` rather than swapping the button for a spinner. The
+button stays mounted, keeps focus, and is announced as busy:
+
+```tsx
+<Button loading={isSaving} loadingLabel="Saving changes">
+  Save
+</Button>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `"default" \| "secondary" \| "outline" \| "ghost" \| "destructive" \| "link"` | `"default"` | Visual treatment. Use `default` for the single primary action in a view. |
+| `size` | `"sm" \| "default" \| "lg" \| "icon"` | `"default"` | `icon` renders a square button; always pair it with an `aria-label`. |
+| `asChild` | `boolean` | `false` | Render the child element instead of a `<button>`, forwarding styles and behaviour. |
+| `loading` | `boolean` | `false` | Show a busy indicator and block interaction. Sets `aria-busy` and keeps the button focusable. |
+| `loadingLabel` | `string` | `"Loading"` | Screen-reader text announced while `loading` is true. |
+| `disabled` | `boolean` | `false` | Standard native disabled state. With `asChild`, `aria-disabled` is applied instead. |
+
+All other props are forwarded to the underlying `<button>` element.
+
+## Accessibility
+
+- Renders a native `<button>`, so keyboard activation via Enter and Space is browser-native.
+- The focus ring is a 3px `ring` token offset from the border colour, visible in both themes.
+- `size="icon"` has no text content — supply `aria-label`. The demo above shows the pattern.
+- `loading` sets `aria-busy` and renders visually hidden status text rather than removing
+  the label, so the button's accessible name never changes mid-interaction.
+- Under `prefers-reduced-motion` the press transform is removed; colour and ring changes
+  still communicate the state.

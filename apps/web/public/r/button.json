@@ -1,0 +1,41 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button",
+  "title": "Button",
+  "description": "A clickable control that triggers an action. Renders a native button element, or any element via the asChild prop when the trigger must be a link. Supports six visual variants (default, secondary, outline, ghost, destructive, link), four sizes including a square icon size, and a loading state that blocks interaction while announcing itself as busy to assistive technology. Use for actions such as submitting, saving or opening a dialog; use a plain anchor for navigation that changes the URL.",
+  "dependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/button/button.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { Slot, Slottable } from \"@radix-ui/react-slot\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\n\nimport { cn } from \"@/lib/utils\";\n\nconst buttonVariants = cva(\n  [\n    \"inline-flex items-center justify-center gap-2 shrink-0 whitespace-nowrap\",\n    \"rounded-md text-sm font-medium\",\n    \"outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:border-ring\",\n    \"disabled:pointer-events-none disabled:opacity-50\",\n    \"aria-invalid:ring-destructive/20 aria-invalid:border-destructive\",\n    \"[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4\",\n    // Duration and easing come from the generated motion-token custom properties\n    // rather than Tailwind's numeric scale, so the press feedback stays in step\n    // with every other transition in the system.\n    \"transition-[color,background-color,border-color,box-shadow,transform]\",\n    \"duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)]\",\n    \"active:scale-[0.98]\",\n    // Reduced-motion fallback: the scale cue is dropped, but the colour and ring\n    // state changes remain, so pressed state is still communicated.\n    \"motion-reduce:transition-none motion-reduce:active:scale-100\",\n  ],\n  {\n    variants: {\n      variant: {\n        default: \"bg-primary text-primary-foreground hover:bg-primary/90\",\n        secondary: \"bg-secondary text-secondary-foreground hover:bg-secondary/80\",\n        outline:\n          \"border border-input bg-background hover:bg-accent hover:text-accent-foreground\",\n        ghost: \"hover:bg-accent hover:text-accent-foreground\",\n        destructive:\n          \"bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/40\",\n        link: \"text-primary underline-offset-4 hover:underline active:scale-100\",\n      },\n      size: {\n        sm: \"h-8 px-3 has-[>svg]:px-2.5\",\n        default: \"h-9 px-4 has-[>svg]:px-3\",\n        lg: \"h-11 px-6 text-base has-[>svg]:px-5\",\n        icon: \"size-9 p-0\",\n      },\n    },\n    defaultVariants: {\n      variant: \"default\",\n      size: \"default\",\n    },\n  }\n);\n\nexport interface ButtonProps\n  extends React.ComponentPropsWithoutRef<\"button\">,\n    VariantProps<typeof buttonVariants> {\n  /**\n   * Render the child element instead of a `<button>`, forwarding all styling and\n   * behaviour onto it. Use for links that should look like buttons.\n   */\n  asChild?: boolean;\n  /**\n   * Show a busy indicator and block interaction. The button stays in the tab\n   * order and is announced as busy rather than being removed from it.\n   */\n  loading?: boolean;\n  /** Accessible label announced while `loading` is true. */\n  loadingLabel?: string;\n}\n\n/**\n * The primary action trigger. Renders a native `<button>` by default, or any\n * element via `asChild`, with variant/size styling driven by CVA and colours\n * sourced entirely from PixelDosa theme tokens.\n *\n * Use for actions; use an anchor (optionally `asChild`) for navigation.\n */\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(\n  {\n    className,\n    variant,\n    size,\n    asChild = false,\n    loading = false,\n    loadingLabel = \"Loading\",\n    disabled,\n    children,\n    ...props\n  },\n  ref\n) {\n  const Comp = asChild ? Slot : \"button\";\n\n  return (\n    <Comp\n      ref={ref}\n      data-slot=\"button\"\n      data-loading={loading || undefined}\n      className={cn(buttonVariants({ variant, size }), className)}\n      disabled={asChild ? undefined : disabled || loading}\n      aria-disabled={asChild && (disabled || loading) ? true : undefined}\n      aria-busy={loading || undefined}\n      {...props}\n    >\n      {loading ? <Spinner label={loadingLabel} /> : null}\n      {/* Slottable keeps `asChild` working while the spinner sits beside the\n          children: without it, Slot sees two children and throws. */}\n      <Slottable>{children}</Slottable>\n    </Comp>\n  );\n});\n\nfunction Spinner({ label }: { label: string }) {\n  return (\n    <>\n      <svg\n        aria-hidden=\"true\"\n        viewBox=\"0 0 24 24\"\n        fill=\"none\"\n        className=\"size-4 animate-spin\"\n      >\n        <circle cx=\"12\" cy=\"12\" r=\"9\" stroke=\"currentColor\" strokeOpacity=\"0.25\" strokeWidth=\"3\" />\n        <path\n          d=\"M21 12a9 9 0 0 0-9-9\"\n          stroke=\"currentColor\"\n          strokeWidth=\"3\"\n          strokeLinecap=\"round\"\n        />\n      </svg>\n      <span className=\"sr-only\">{label}</span>\n    </>\n  );\n}\n\nexport { Button, buttonVariants };\n",
+      "type": "registry:ui",
+      "target": "components/ui/button.tsx"
+    }
+  ],
+  "cssVars": {
+    "theme": {
+      "--pd-duration-instant": "100ms",
+      "--pd-ease-standard": "cubic-bezier(0.4, 0, 0.2, 1)"
+    }
+  },
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Variants are declared with CVA rather than conditional className strings so that the full variant matrix is a single serialisable object: it can be type-derived (VariantProps), documented from source, and extended by consumers via buttonVariants() without forking the component. The loading state disables the button but deliberately keeps it mounted and in the tab order — swapping a button for a spinner element moves focus to the document body mid-interaction, which is the most common accessibility regression in loading buttons. asChild uses Radix Slot instead of a render-prop so that ref forwarding and event composition are handled by the primitive rather than reimplemented here.",
+    "motionNotes": "The only motion is a 2% active-state scale, driven by CSS transition rather than Motion — a button appears dozens of times per page and forcing a JS animation runtime into it would be a bundle cost with no interaction benefit. Duration (instant, 100ms) and easing come from CSS custom properties generated from the motion tokens, so the press feedback stays in step with the rest of the system. The motion solves one problem: confirming that a press registered before the resulting state change lands. Under prefers-reduced-motion the transform is dropped entirely and the state remains legible through the background and focus-ring changes, which is a fallback rather than a silent removal."
+  },
+  "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. The press-feedback transition reads --pd-duration-instant and --pd-ease-standard; these are installed with this component, and the full token set arrives with the pixeldosa-theme item. When using asChild the rendered child receives aria-disabled rather than the disabled attribute, since non-button elements do not support it — handle click suppression in your own handler if the child is interactive.",
+  "categories": [
+    "core",
+    "form",
+    "action"
+  ],
+  "type": "registry:ui"
+}

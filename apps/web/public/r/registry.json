@@ -1,0 +1,211 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "pixeldosa",
+  "homepage": "https://pixeldosa.dev",
+  "items": [
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "button",
+      "title": "Button",
+      "description": "A clickable control that triggers an action. Renders a native button element, or any element via the asChild prop when the trigger must be a link. Supports six visual variants (default, secondary, outline, ghost, destructive, link), four sizes including a square icon size, and a loading state that blocks interaction while announcing itself as busy to assistive technology. Use for actions such as submitting, saving or opening a dialog; use a plain anchor for navigation that changes the URL.",
+      "type": "registry:ui",
+      "categories": [
+        "core",
+        "form",
+        "action"
+      ],
+      "dependencies": [
+        "@radix-ui/react-slot",
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/button/button.tsx",
+          "target": "components/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "--pd-duration-instant": "100ms",
+          "--pd-ease-standard": "cubic-bezier(0.4, 0, 0.2, 1)"
+        }
+      },
+      "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. The press-feedback transition reads --pd-duration-instant and --pd-ease-standard; these are installed with this component, and the full token set arrives with the pixeldosa-theme item. When using asChild the rendered child receives aria-disabled rather than the disabled attribute, since non-button elements do not support it — handle click suppression in your own handler if the child is interactive.",
+      "meta": {
+        "pillar": "core",
+        "engineeringNotes": "Variants are declared with CVA rather than conditional className strings so that the full variant matrix is a single serialisable object: it can be type-derived (VariantProps), documented from source, and extended by consumers via buttonVariants() without forking the component. The loading state disables the button but deliberately keeps it mounted and in the tab order — swapping a button for a spinner element moves focus to the document body mid-interaction, which is the most common accessibility regression in loading buttons. asChild uses Radix Slot instead of a render-prop so that ref forwarding and event composition are handled by the primitive rather than reimplemented here.",
+        "motionNotes": "The only motion is a 2% active-state scale, driven by CSS transition rather than Motion — a button appears dozens of times per page and forcing a JS animation runtime into it would be a bundle cost with no interaction benefit. Duration (instant, 100ms) and easing come from CSS custom properties generated from the motion tokens, so the press feedback stays in step with the rest of the system. The motion solves one problem: confirming that a press registered before the resulting state change lands. Under prefers-reduced-motion the transform is dropped entirely and the state remains legible through the background and focus-ring changes, which is a fallback rather than a silent removal."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "field",
+      "title": "Field",
+      "description": "A composable form-field wrapper providing Field, FieldLabel, FieldControl, FieldDescription and FieldError parts that share one generated id set and automatically wire aria-describedby and aria-invalid onto whatever control is placed inside FieldControl. Has no opinion on form-state management — works with plain useState, react-hook-form, or any other library. Use it as the base every labeled input, textarea or custom control composes on top of; it is the primitive that GhostInput, SmartField and every other AI-in-product component in this system builds on.",
+      "type": "registry:ui",
+      "categories": [
+        "core",
+        "form"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/field/field.tsx",
+          "target": "components/ui/field.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "FieldControl clones its single child rather than rendering a wrapper element, so pass exactly one React element (an <input>, <textarea>, or a component that forwards id/aria-invalid/aria-describedby/ref to a real form control) as its child.",
+      "meta": {
+        "pillar": "core",
+        "engineeringNotes": "Built as a compound-component set sharing React context rather than a single Field component with many props, because form fields have a genuinely variable shape (some have descriptions, some don't; some controls are custom comboboxes, not <input>) and a large prop-driven API would force every consumer through the same limited combinations. FieldControl clones its child instead of rendering its own DOM node specifically so that input+icon or input+button compositions keep their existing layout — a wrapper div would break those. FieldDescription and FieldError register their presence into context via an effect so FieldControl's aria-describedby is always accurate even when a description or error mounts after the control, which happens constantly with async validation.",
+        "motionNotes": "No motion. This is a compound primitive other components render inside of, not a state that changes visibly on its own — anything Field itself animated would be inherited (and likely duplicated) by every component built on top of it. Error text appearing or disappearing is the one plausible candidate for a transition; it is left as a plain instantaneous swap here so that a consumer building a specific validation UX (e.g. GhostInput's inline error) chooses its own timing rather than inheriting one that might not fit."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "ghost-input",
+      "title": "Ghost Input",
+      "description": "A single-line text input with inline AI ghost-text completion: after the user pauses typing, a dimmed continuation appears past the caret, accepted with Tab or the right-arrow key (only when the caret is already at the end of the text) and dismissed with Escape. Takes a fetchSuggestion(value, signal) prop that the consumer implements against their own model — the component owns debouncing, request cancellation on every keystroke, staleness checking (a suggestion that doesn't continue the current text is discarded), and the accessible announcement of the suggestion via a live region. It never inserts text automatically; acceptance is always an explicit keypress. Use for reply drafting, search boxes, or any single-line field where predictive continuation should stay out of the way until the user asks for it. Not for multi-field or full-document autocomplete — this is a single <input>, not an editor.",
+      "type": "registry:ui",
+      "categories": [
+        "ai",
+        "form"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/field"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/ghost-input/ghost-input.tsx",
+          "target": "components/ui/ghost-input.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "value/onValueChange are required — this is a controlled component only. fetchSuggestion must resolve to the FULL continued string (current value + completion), not just the completion tail; the component slices the tail itself and drops any result that doesn't start with the value it was requested for, so a response arriving after the user has kept typing can't overwrite what they see. Drops into <FieldControl> directly since id/aria-invalid/aria-describedby/ref all forward to the underlying <input>.",
+      "meta": {
+        "pillar": "ai",
+        "engineeringNotes": "The ghost text is rendered as a separate mirror div positioned exactly behind the real <input>, with the typed-text portion set to transparent — not as a styled fake caret or a contentEditable trick. This is the only approach that keeps native input behaviour (IME composition, selection, undo, autofill, screen-reader field semantics) completely intact, at the cost of the mirror div needing identical padding/font/line-height to the input, which is why both come from the same className. The whole request lifecycle — debounce timer, AbortController — lives in refs rather than state so that a rapid keystroke can synchronously cancel the previous request without waiting for a re-render; a state-based cancellation would let a slow response race a fast one and briefly show a stale suggestion. The right-arrow accept only fires when the caret is already at the end of the value (checked via selectionStart/selectionEnd), because otherwise it would silently hijack normal in-text cursor movement, which is a worse failure mode than requiring Tab.",
+        "motionNotes": "The suggestion's appearance is a plain opacity transition using duration.fast and easing.standard from the token scale — deliberately not a slide or typewriter reveal, both of which would misrepresent what happened: the whole continuation exists immediately (it was already fetched), so animating it in character-by-character would be a fabricated sense of the model 'typing', not a real progressive state. Under prefers-reduced-motion this reduces to a duration.instant swap via the same token path every other component in the system uses; nothing here required a component-specific reduced-motion branch, which is itself a signal the animation is doing the minimum necessary rather than something decorative."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "overlay",
+      "title": "Overlay Motion Primitive",
+      "description": "The shared enter/exit animation layer for every overlay surface in the system — Dialog, Sheet, Popover and Drawer. Exports OverlayScrim (the backdrop) and OverlayContent (the panel, with a placement prop of center, top, bottom, left or right that controls which axis it translates from) plus a re-exported AnimatePresence. Not a standalone component: it has no dismiss behaviour, focus trapping or portal logic of its own. Compose it underneath a Radix primitive (Dialog.Overlay/Content, Sheet, Popover) so that primitive owns interaction semantics while this owns motion.",
+      "type": "registry:ui",
+      "categories": [
+        "core",
+        "motion",
+        "overlay"
+      ],
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/overlay/overlay.tsx",
+          "target": "components/ui/overlay.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Render OverlayScrim and OverlayContent inside AnimatePresence, controlled by the same boolean/state that drives your Radix primitive's open prop. Neither component owns mount/unmount timing — AnimatePresence does, via whatever is conditionally rendering them.",
+      "meta": {
+        "pillar": "core",
+        "engineeringNotes": "Extracted as its own primitive rather than duplicated inside Dialog, Sheet, Popover and Drawer because those four are the same motion problem (scrim fade + panel translate/scale) wearing four different Radix primitives underneath. Without this, four components would each hand-roll slightly different durations the first time someone patches one of them, and the system's visual coherence — the actual point of a token-driven motion scale — degrades one component at a time. Deliberately excludes dismiss-on-click-outside, focus trapping and portalling: those are interaction semantics Radix already solves correctly, and re-solving them here would create two competing sources of truth for overlay behaviour.",
+        "motionNotes": "Two states only: scrim opacity, and content opacity+scale+translate along one axis determined by `placement`. Enter uses duration.fast with easing.decelerate (content is arriving, should feel like it's settling in); exit uses duration.instant with easing.accelerate (dismissal should feel immediate, not lingering) — this asymmetry is deliberate, not an oversight. The motion solves orientation: a Sheet sliding in from the right tells the user where it came from and, on exit, where it's returning to, which a plain fade does not. Reduced motion swaps the whole transition object for the shared `reducedMotion` token (near-zero duration) rather than removing the animation, so Motion's exit callback still fires and AnimatePresence still unmounts the content correctly."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "pixeldosa-theme",
+      "title": "PixelDosa Theme",
+      "description": "The PixelDosa design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every PixelDosa component animates against. Install this once per project before or alongside any other PixelDosa component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
+      "type": "registry:theme",
+      "categories": [
+        "core",
+        "theme"
+      ],
+      "files": [],
+      "cssVars": {
+        "theme": {
+          "radius": "0.75rem",
+          "--pd-duration-instant": "100ms",
+          "--pd-duration-fast": "200ms",
+          "--pd-duration-base": "300ms",
+          "--pd-duration-slow": "500ms",
+          "--pd-duration-deliberate": "800ms",
+          "--pd-ease-standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+          "--pd-ease-decelerate": "cubic-bezier(0, 0, 0.2, 1)",
+          "--pd-ease-accelerate": "cubic-bezier(0.4, 0, 1, 1)",
+          "--pd-stagger-tight": "30ms",
+          "--pd-stagger-base": "60ms",
+          "--pd-stagger-loose": "100ms"
+        },
+        "light": {
+          "background": "oklch(0.991 0.004 92)",
+          "foreground": "oklch(0.216 0.012 68)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.216 0.012 68)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.216 0.012 68)",
+          "primary": "oklch(0.598 0.163 43)",
+          "primary-foreground": "oklch(0.988 0.008 85)",
+          "secondary": "oklch(0.955 0.011 88)",
+          "secondary-foreground": "oklch(0.278 0.014 68)",
+          "muted": "oklch(0.955 0.011 88)",
+          "muted-foreground": "oklch(0.532 0.017 72)",
+          "accent": "oklch(0.936 0.028 82)",
+          "accent-foreground": "oklch(0.278 0.014 68)",
+          "destructive": "oklch(0.554 0.196 27)",
+          "destructive-foreground": "oklch(0.985 0.006 85)",
+          "border": "oklch(0.905 0.012 84)",
+          "input": "oklch(0.905 0.012 84)",
+          "ring": "oklch(0.598 0.163 43)"
+        },
+        "dark": {
+          "background": "oklch(0.181 0.011 66)",
+          "foreground": "oklch(0.958 0.008 88)",
+          "card": "oklch(0.222 0.013 68)",
+          "card-foreground": "oklch(0.958 0.008 88)",
+          "popover": "oklch(0.222 0.013 68)",
+          "popover-foreground": "oklch(0.958 0.008 88)",
+          "primary": "oklch(0.724 0.158 52)",
+          "primary-foreground": "oklch(0.196 0.024 48)",
+          "secondary": "oklch(0.276 0.014 70)",
+          "secondary-foreground": "oklch(0.958 0.008 88)",
+          "muted": "oklch(0.276 0.014 70)",
+          "muted-foreground": "oklch(0.706 0.016 76)",
+          "accent": "oklch(0.318 0.026 62)",
+          "accent-foreground": "oklch(0.958 0.008 88)",
+          "destructive": "oklch(0.638 0.194 26)",
+          "destructive-foreground": "oklch(0.985 0.006 85)",
+          "border": "oklch(0.305 0.014 70)",
+          "input": "oklch(0.335 0.014 70)",
+          "ring": "oklch(0.724 0.158 52)"
+        }
+      },
+      "docs": "The cssVars in this item are generated from packages/tokens. Do not edit them here — change the token module and rebuild.",
+      "meta": {
+        "pillar": "core",
+        "engineeringNotes": "Shipped as a registry:theme item rather than baked into each component so that colour is a project-level decision made once, not a per-component import that would break the moment a consumer wants their own palette. Colours are OKLCH rather than HSL so the light and dark scales can be derived from matched perceptual lightness steps; the practical payoff is that a token pair like muted/muted-foreground holds its contrast ratio across both modes without per-mode hand-tuning. Motion values are emitted as CSS custom properties in addition to the TypeScript exports, so components that need only a CSS transition can honour the motion scale without pulling in a JS animation runtime.",
+        "motionNotes": "This item defines the motion scale rather than animating anything itself. Durations are exposed in milliseconds (CSS) and seconds (TypeScript/Motion) from one source, because emitting only one unit guarantees a conversion bug at the first component that needs the other."
+      }
+    }
+  ]
+}

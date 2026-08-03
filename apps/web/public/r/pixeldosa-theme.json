@@ -1,0 +1,76 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pixeldosa-theme",
+  "title": "PixelDosa Theme",
+  "description": "The PixelDosa design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every PixelDosa component animates against. Install this once per project before or alongside any other PixelDosa component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
+  "files": [],
+  "cssVars": {
+    "theme": {
+      "radius": "0.75rem",
+      "--pd-duration-instant": "100ms",
+      "--pd-duration-fast": "200ms",
+      "--pd-duration-base": "300ms",
+      "--pd-duration-slow": "500ms",
+      "--pd-duration-deliberate": "800ms",
+      "--pd-ease-standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "--pd-ease-decelerate": "cubic-bezier(0, 0, 0.2, 1)",
+      "--pd-ease-accelerate": "cubic-bezier(0.4, 0, 1, 1)",
+      "--pd-stagger-tight": "30ms",
+      "--pd-stagger-base": "60ms",
+      "--pd-stagger-loose": "100ms"
+    },
+    "light": {
+      "background": "oklch(0.991 0.004 92)",
+      "foreground": "oklch(0.216 0.012 68)",
+      "card": "oklch(1 0 0)",
+      "card-foreground": "oklch(0.216 0.012 68)",
+      "popover": "oklch(1 0 0)",
+      "popover-foreground": "oklch(0.216 0.012 68)",
+      "primary": "oklch(0.598 0.163 43)",
+      "primary-foreground": "oklch(0.988 0.008 85)",
+      "secondary": "oklch(0.955 0.011 88)",
+      "secondary-foreground": "oklch(0.278 0.014 68)",
+      "muted": "oklch(0.955 0.011 88)",
+      "muted-foreground": "oklch(0.532 0.017 72)",
+      "accent": "oklch(0.936 0.028 82)",
+      "accent-foreground": "oklch(0.278 0.014 68)",
+      "destructive": "oklch(0.554 0.196 27)",
+      "destructive-foreground": "oklch(0.985 0.006 85)",
+      "border": "oklch(0.905 0.012 84)",
+      "input": "oklch(0.905 0.012 84)",
+      "ring": "oklch(0.598 0.163 43)"
+    },
+    "dark": {
+      "background": "oklch(0.181 0.011 66)",
+      "foreground": "oklch(0.958 0.008 88)",
+      "card": "oklch(0.222 0.013 68)",
+      "card-foreground": "oklch(0.958 0.008 88)",
+      "popover": "oklch(0.222 0.013 68)",
+      "popover-foreground": "oklch(0.958 0.008 88)",
+      "primary": "oklch(0.724 0.158 52)",
+      "primary-foreground": "oklch(0.196 0.024 48)",
+      "secondary": "oklch(0.276 0.014 70)",
+      "secondary-foreground": "oklch(0.958 0.008 88)",
+      "muted": "oklch(0.276 0.014 70)",
+      "muted-foreground": "oklch(0.706 0.016 76)",
+      "accent": "oklch(0.318 0.026 62)",
+      "accent-foreground": "oklch(0.958 0.008 88)",
+      "destructive": "oklch(0.638 0.194 26)",
+      "destructive-foreground": "oklch(0.985 0.006 85)",
+      "border": "oklch(0.305 0.014 70)",
+      "input": "oklch(0.335 0.014 70)",
+      "ring": "oklch(0.724 0.158 52)"
+    }
+  },
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Shipped as a registry:theme item rather than baked into each component so that colour is a project-level decision made once, not a per-component import that would break the moment a consumer wants their own palette. Colours are OKLCH rather than HSL so the light and dark scales can be derived from matched perceptual lightness steps; the practical payoff is that a token pair like muted/muted-foreground holds its contrast ratio across both modes without per-mode hand-tuning. Motion values are emitted as CSS custom properties in addition to the TypeScript exports, so components that need only a CSS transition can honour the motion scale without pulling in a JS animation runtime.",
+    "motionNotes": "This item defines the motion scale rather than animating anything itself. Durations are exposed in milliseconds (CSS) and seconds (TypeScript/Motion) from one source, because emitting only one unit guarantees a conversion bug at the first component that needs the other."
+  },
+  "docs": "The cssVars in this item are generated from packages/tokens. Do not edit them here — change the token module and rebuild.",
+  "categories": [
+    "core",
+    "theme"
+  ],
+  "type": "registry:theme"
+}

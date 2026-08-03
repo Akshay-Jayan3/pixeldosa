@@ -1,0 +1,22 @@
+{
+  "name": "@pixeldosa/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./design": "./src/design-tokens.ts",
+    "./motion": "./src/motion-tokens.ts",
+    "./css": "./dist/tokens.css"
+  },
+  "files": ["src", "dist"],
+  "scripts": {
+    "build": "tsx scripts/build-css.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@pixeldosa/typescript-config": "workspace:*",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

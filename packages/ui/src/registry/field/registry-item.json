@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "field",
+  "title": "Field",
+  "description": "A composable form-field wrapper providing Field, FieldLabel, FieldControl, FieldDescription and FieldError parts that share one generated id set and automatically wire aria-describedby and aria-invalid onto whatever control is placed inside FieldControl. Has no opinion on form-state management — works with plain useState, react-hook-form, or any other library. Use it as the base every labeled input, textarea or custom control composes on top of; it is the primitive that GhostInput, SmartField and every other AI-in-product component in this system builds on.",
+  "type": "registry:ui",
+  "categories": ["core", "form"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/field/field.tsx",
+      "target": "components/ui/field.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "FieldControl clones its single child rather than rendering a wrapper element, so pass exactly one React element (an <input>, <textarea>, or a component that forwards id/aria-invalid/aria-describedby/ref to a real form control) as its child.",
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Built as a compound-component set sharing React context rather than a single Field component with many props, because form fields have a genuinely variable shape (some have descriptions, some don't; some controls are custom comboboxes, not <input>) and a large prop-driven API would force every consumer through the same limited combinations. FieldControl clones its child instead of rendering its own DOM node specifically so that input+icon or input+button compositions keep their existing layout — a wrapper div would break those. FieldDescription and FieldError register their presence into context via an effect so FieldControl's aria-describedby is always accurate even when a description or error mounts after the control, which happens constantly with async validation.",
+    "motionNotes": "No motion. This is a compound primitive other components render inside of, not a state that changes visibly on its own — anything Field itself animated would be inherited (and likely duplicated) by every component built on top of it. Error text appearing or disappearing is the one plausible candidate for a transition; it is left as a plain instantaneous swap here so that a consumer building a specific validation UX (e.g. GhostInput's inline error) chooses its own timing rather than inheriting one that might not fit."
+  }
+}

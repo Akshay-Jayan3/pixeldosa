@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pixeldosa-theme",
+  "title": "PixelDosa Theme",
+  "description": "The PixelDosa design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every PixelDosa component animates against. Install this once per project before or alongside any other PixelDosa component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
+  "type": "registry:theme",
+  "categories": ["core", "theme"],
+  "files": [],
+  "cssVars": {},
+  "docs": "The cssVars in this item are generated from packages/tokens. Do not edit them here — change the token module and rebuild.",
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Shipped as a registry:theme item rather than baked into each component so that colour is a project-level decision made once, not a per-component import that would break the moment a consumer wants their own palette. Colours are OKLCH rather than HSL so the light and dark scales can be derived from matched perceptual lightness steps; the practical payoff is that a token pair like muted/muted-foreground holds its contrast ratio across both modes without per-mode hand-tuning. Motion values are emitted as CSS custom properties in addition to the TypeScript exports, so components that need only a CSS transition can honour the motion scale without pulling in a JS animation runtime.",
+    "motionNotes": "This item defines the motion scale rather than animating anything itself. Durations are exposed in milliseconds (CSS) and seconds (TypeScript/Motion) from one source, because emitting only one unit guarantees a conversion bug at the first component that needs the other."
+  }
+}

@@ -1,0 +1,56 @@
+---
+title: Field
+description: A composable form-field wrapper — Field, FieldLabel, FieldControl, FieldDescription and FieldError — that wires ARIA automatically onto whatever control you place inside it.
+---
+
+## Usage
+
+```tsx
+import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+
+export function EmailField({ value, onChange, error }: Props) {
+  return (
+    <Field invalid={Boolean(error)}>
+      <FieldLabel>Email</FieldLabel>
+      <FieldControl>
+        <input type="email" value={value} onChange={onChange} className="…" />
+      </FieldControl>
+      <FieldDescription>We'll only use this to send order updates.</FieldDescription>
+      <FieldError>{error}</FieldError>
+    </Field>
+  );
+}
+```
+
+`FieldControl` clones its single child, so it accepts exactly one React element — a
+native `<input>`/`<textarea>`, or any component that forwards `id`, `aria-invalid`,
+`aria-describedby` and `ref` to a real form control.
+
+`FieldError` renders nothing when its children are falsy, so you can pass a validation
+message straight through without a conditional wrapper.
+
+## Props
+
+### Field
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | generated | Base id for the control. Descendants derive `-description` and `-error` ids from it. |
+| `invalid` | `boolean` | `false` | Marks the field invalid — flows into `aria-invalid` on the control. |
+
+### FieldControl
+
+Takes exactly one child element. No other props.
+
+### FieldLabel, FieldDescription, FieldError
+
+Standard `label` / `p` / `p` props. Must be rendered inside a `Field`.
+
+## Accessibility
+
+- The control receives `aria-describedby` combining the error and description ids
+  automatically — you never write that string by hand.
+- `FieldError` uses `role="alert"` so a message appearing after the field already has
+  focus (e.g. from async validation) is still announced.
+- `aria-invalid` is set on the control whenever `Field`'s `invalid` prop is true, which
+  most input styling (including this system's) hooks with `aria-invalid:` variants.

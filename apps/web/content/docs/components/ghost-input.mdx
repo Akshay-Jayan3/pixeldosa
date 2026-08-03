@@ -1,0 +1,78 @@
+---
+title: Ghost Input
+description: A single-line input with inline AI ghost-text completion — pause, see a dimmed continuation, accept with Tab or dismiss with Escape.
+---
+
+## Usage
+
+```tsx
+import { GhostInput } from "@/components/ui/ghost-input";
+
+async function fetchSuggestion(value: string, signal: AbortSignal) {
+  const res = await fetch("/api/complete", {
+    method: "POST",
+    body: JSON.stringify({ prompt: value }),
+    signal,
+  });
+  const { completion } = await res.json();
+  // Must return the FULL string — current value plus the completion.
+  return value + completion;
+}
+
+export function ReplyBox() {
+  const [value, setValue] = useState("");
+
+  return (
+    <GhostInput
+      value={value}
+      onValueChange={setValue}
+      fetchSuggestion={fetchSuggestion}
+      placeholder="Write a reply…"
+    />
+  );
+}
+```
+
+Inside a `Field`, drop it straight into `FieldControl` — id and ARIA wiring pass through:
+
+```tsx
+<Field>
+  <FieldLabel>Reply</FieldLabel>
+  <FieldControl>
+    <GhostInput value={value} onValueChange={setValue} fetchSuggestion={fetchSuggestion} />
+  </FieldControl>
+</Field>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | Required. This is a controlled component only. |
+| `onValueChange` | `(value: string) => void` | — | Required. |
+| `fetchSuggestion` | `(value: string, signal: AbortSignal) => Promise<string \| null \| undefined>` | — | Required. Must resolve to the full continued string, not just the tail. |
+| `debounceMs` | `number` | `300` | Delay after the user stops typing before requesting a suggestion. |
+| `minChars` | `number` | `1` | Minimum trimmed length before a suggestion is requested. |
+| `onAcceptSuggestion` | `(value: string) => void` | — | Fired with the full accepted value. |
+
+All other props forward to the underlying `<input>`.
+
+## Behaviour
+
+- Every keystroke cancels the in-flight request via `AbortSignal` before starting a new
+  debounce timer — there is no scenario where a stale response can land after a newer one.
+- A response that doesn't start with the value it was requested for is discarded, so a
+  slow response can't overwrite what the user is now looking at.
+- **Tab**, or **→** with the caret already at the end of the text, accepts. **Esc** dismisses
+  without touching the typed value. Any other key just continues typing normally.
+- The suggestion is never inserted automatically — there is no "auto-accept after N ms" mode.
+
+## Accessibility
+
+- Implemented as a real `<input>` with a visually-hidden mirror layer, not a
+  contentEditable — IME composition, autofill, undo and screen-reader field semantics all
+  behave exactly like a plain text input.
+- When a suggestion is available, an `aria-live="polite"` region announces it and the
+  accept/dismiss keys, since the ghost text itself is `aria-hidden`.
+- Right-arrow acceptance only triggers with the caret at the end of the text, so normal
+  in-text cursor navigation is never intercepted.

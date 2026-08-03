@@ -1,0 +1,60 @@
+---
+title: Overlay Motion Primitive
+description: The shared enter/exit animation layer for Dialog, Sheet, Popover and Drawer — a scrim plus a placement-aware content panel, both driven by motion tokens.
+---
+
+## Usage
+
+Compose it underneath a Radix primitive — Radix owns focus trapping, dismiss-on-outside-
+click and portalling; Overlay owns only the motion.
+
+```tsx
+import * as Dialog from "@radix-ui/react-dialog";
+import { AnimatePresence, OverlayContent, OverlayScrim } from "@/components/ui/overlay";
+
+export function ConfirmDialog({ open, onOpenChange, children }: Props) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <AnimatePresence>
+        {open ? (
+          <Dialog.Portal forceMount>
+            <Dialog.Overlay asChild>
+              <OverlayScrim />
+            </Dialog.Overlay>
+            <Dialog.Content asChild>
+              <OverlayContent placement="center" className="fixed left-1/2 top-1/2 w-96 -translate-x-1/2 -translate-y-1/2 p-6">
+                {children}
+              </OverlayContent>
+            </Dialog.Content>
+          </Dialog.Portal>
+        ) : null}
+      </AnimatePresence>
+    </Dialog.Root>
+  );
+}
+```
+
+For a Sheet or Drawer, swap `placement` to `"right"`, `"left"`, `"top"` or `"bottom"` and
+position `OverlayContent` against that edge instead of centering it — the translate
+distance and easing stay identical, only the axis changes.
+
+## Props
+
+### OverlayScrim
+
+Forwards all `motion.div` props. No component-specific props.
+
+### OverlayContent
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placement` | `"center" \| "top" \| "bottom" \| "left" \| "right"` | `"center"` | Which edge the panel translates in from. `center` also applies a slight scale-in. |
+
+All other props forward to `motion.div`.
+
+## Accessibility
+
+This primitive is motion-only and carries no accessibility semantics of its own — those
+come entirely from whichever Radix primitive (`Dialog`, `Popover`, custom `Sheet`) you
+render it inside of. Always use `forceMount` on the Radix portal/content so `AnimatePresence`
+can run the exit animation before the element actually unmounts.
