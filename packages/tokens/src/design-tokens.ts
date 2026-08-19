@@ -40,55 +40,77 @@ export type ColorToken =
 export type ColorScale = Record<ColorToken, string>;
 
 /**
- * The PixelDosa identity: warm stone neutrals (hue ~70, low chroma) against a
- * toasted-copper primary. Deliberately off the default shadcn zinc/blue axis —
- * Section 11 requires the system be distinguishable from a default theme at a glance.
+ * The PixelDosa identity, revision 3: pure monochrome. No brand hue anywhere in
+ * the neutral or primary roles — `primary` is just foreground-on-background
+ * inverted (near-black on white in light, near-white on near-black in dark), the
+ * same move Linear's own secondary/default UI and Vercel/Geist's whole system
+ * make: contrast carries the hierarchy, not a colour accent. `destructive` is the
+ * one token that keeps real chroma, because "this is dangerous" is a semantic
+ * signal a grayscale UI still needs to send.
+ *
+ * Dark neutrals are cool and near-black, referencing Linear and Framer — deep,
+ * low-chroma canvases (`background`/`popover` sit around L 0.14–0.17, hue ~243–248,
+ * chroma ~0.003, i.e. essentially achromatic with a faint cool cast) with
+ * high-contrast near-white text, depth communicated through `1px` borders rather
+ * than heavy shadows. The specific values were derived by converting a measured
+ * snapshot of linear.app's shipped CSS (background `#0f1011`/`#08090a`, text
+ * `#f7f8f8`/`#8a8f98`, border `#2a2e33`; see https://designmd.cc/benchmarks/linear)
+ * from sRGB to OKLCH — the hue/lightness relationships are sourced, not guessed,
+ * though the conversion was done by hand without a colour library, so treat these
+ * as a close approximation rather than a bit-exact match. Referenced as
+ * structural inspiration only, per this file's "never copy" research rule — no
+ * Linear brand asset is reproduced.
+ *
+ * Light neutrals reference shadcn/ui's own default "neutral" base-colour scale
+ * (this repo's `apps/web/components.json` already declares `baseColor: "neutral"`,
+ * so this brings the token values in line with the config that was already chosen)
+ * — true 0-chroma grays, the same axis Componentry's light theme uses.
  *
  * Values are OKLCH so that lightness steps are perceptually even, which keeps the
  * light and dark scales visually symmetrical without hand-tuning each pair.
  */
 export const colorsLight: ColorScale = {
-  background: "oklch(0.991 0.004 92)",
-  foreground: "oklch(0.216 0.012 68)",
+  background: "oklch(1 0 0)",
+  foreground: "oklch(0.145 0 0)",
   card: "oklch(1 0 0)",
-  "card-foreground": "oklch(0.216 0.012 68)",
+  "card-foreground": "oklch(0.145 0 0)",
   popover: "oklch(1 0 0)",
-  "popover-foreground": "oklch(0.216 0.012 68)",
-  primary: "oklch(0.598 0.163 43)",
-  "primary-foreground": "oklch(0.988 0.008 85)",
-  secondary: "oklch(0.955 0.011 88)",
-  "secondary-foreground": "oklch(0.278 0.014 68)",
-  muted: "oklch(0.955 0.011 88)",
-  "muted-foreground": "oklch(0.532 0.017 72)",
-  accent: "oklch(0.936 0.028 82)",
-  "accent-foreground": "oklch(0.278 0.014 68)",
-  destructive: "oklch(0.554 0.196 27)",
-  "destructive-foreground": "oklch(0.985 0.006 85)",
-  border: "oklch(0.905 0.012 84)",
-  input: "oklch(0.905 0.012 84)",
-  ring: "oklch(0.598 0.163 43)",
+  "popover-foreground": "oklch(0.145 0 0)",
+  primary: "oklch(0.145 0 0)",
+  "primary-foreground": "oklch(0.985 0 0)",
+  secondary: "oklch(0.97 0 0)",
+  "secondary-foreground": "oklch(0.205 0 0)",
+  muted: "oklch(0.97 0 0)",
+  "muted-foreground": "oklch(0.556 0 0)",
+  accent: "oklch(0.97 0 0)",
+  "accent-foreground": "oklch(0.205 0 0)",
+  destructive: "oklch(0.653 0.184 24)",
+  "destructive-foreground": "oklch(0.985 0.005 24)",
+  border: "oklch(0.922 0 0)",
+  input: "oklch(0.922 0 0)",
+  ring: "oklch(0.556 0 0)",
 };
 
 export const colorsDark: ColorScale = {
-  background: "oklch(0.181 0.011 66)",
-  foreground: "oklch(0.958 0.008 88)",
-  card: "oklch(0.222 0.013 68)",
-  "card-foreground": "oklch(0.958 0.008 88)",
-  popover: "oklch(0.222 0.013 68)",
-  "popover-foreground": "oklch(0.958 0.008 88)",
-  primary: "oklch(0.724 0.158 52)",
-  "primary-foreground": "oklch(0.196 0.024 48)",
-  secondary: "oklch(0.276 0.014 70)",
-  "secondary-foreground": "oklch(0.958 0.008 88)",
-  muted: "oklch(0.276 0.014 70)",
-  "muted-foreground": "oklch(0.706 0.016 76)",
-  accent: "oklch(0.318 0.026 62)",
-  "accent-foreground": "oklch(0.958 0.008 88)",
-  destructive: "oklch(0.638 0.194 26)",
-  "destructive-foreground": "oklch(0.985 0.006 85)",
-  border: "oklch(0.305 0.014 70)",
-  input: "oklch(0.335 0.014 70)",
-  ring: "oklch(0.724 0.158 52)",
+  background: "oklch(0.139 0.003 246)",
+  foreground: "oklch(0.978 0.003 240)",
+  card: "oklch(0.172 0.003 248)",
+  "card-foreground": "oklch(0.978 0.003 240)",
+  popover: "oklch(0.139 0.003 243)",
+  "popover-foreground": "oklch(0.978 0.003 240)",
+  primary: "oklch(0.978 0.003 240)",
+  "primary-foreground": "oklch(0.139 0.003 246)",
+  secondary: "oklch(0.24 0.006 250)",
+  "secondary-foreground": "oklch(0.978 0.003 240)",
+  muted: "oklch(0.24 0.006 250)",
+  "muted-foreground": "oklch(0.649 0.014 263)",
+  accent: "oklch(0.28 0.01 252)",
+  "accent-foreground": "oklch(0.978 0.003 240)",
+  destructive: "oklch(0.653 0.184 24)",
+  "destructive-foreground": "oklch(0.98 0.005 24)",
+  border: "oklch(0.299 0.011 254)",
+  input: "oklch(0.32 0.012 254)",
+  ring: "oklch(0.649 0.014 263)",
 };
 
 /**

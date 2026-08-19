@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "card",
+  "title": "Card",
+  "description": "A bordered content container exposed as composable sub-components — Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, CardImage — rather than a single prop-driven component. Supports a vertical (default) and horizontal orientation via the orientation prop; CardImage reads the parent's orientation to switch between a top-rounded banner and a left-rounded side panel. Depth comes from a 1px border token rather than a shadow. Use to group related content on a page, including image-led listing cards and pricing cards built by composing these parts with your own content; use Dialog instead when the content needs to interrupt the user or block interaction.",
+  "type": "registry:ui",
+  "categories": ["core", "application"],
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/card/card.tsx",
+      "target": "components/ui/card.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. CardTitle and CardDescription render `div` elements, not heading tags, matching the wider shadcn/ui convention — supply your own heading element as content if the card needs to participate in the page's document outline. In `orientation=\"horizontal\"`, Card does not auto-arrange its children into an image column and a content column — wrap the header/content/footer parts in your own flex column alongside CardImage.",
+  "meta": {
+    "pillar": "core",
+    "engineeringNotes": "Exposed as eight composable parts rather than a single component with header/footer/title/image props, so a Block composing Card can rearrange or omit regions without fighting a monolithic API. A pricing card, for example, needs zero new Card capability — it composes entirely from the existing header/content/footer parts plus its own feature-list content, which is the intended test of whether something belongs in Card at all versus being a Block built on top of it. CVA now carries exactly one real variant axis, orientation, added because CardImage's rounding genuinely differs between a top banner (vertical) and a side panel (horizontal) — not spending it on density or interactive treatments yet, since no Block currently needs those. Depth uses border-border rather than a shadow, matching the system's dark-mode-first 'borders over shadows' decision documented in the design tokens.",
+    "motionNotes": "None. Card is compositional infrastructure with no interaction state of its own — motion belongs on components built on top of it (a future SpotlightCard or an interactive card treatment), not baked into the base primitive, per the pillar rule that motion must earn its place."
+  }
+}

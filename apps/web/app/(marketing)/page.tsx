@@ -27,7 +27,7 @@ export default function HomePage() {
               <Link href="/docs">Read the docs</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/docs/components/button">Browse components</Link>
+              <Link href="/docs/components">Browse components</Link>
             </Button>
           </div>
           <p className="mt-6 font-mono text-sm text-muted-foreground">

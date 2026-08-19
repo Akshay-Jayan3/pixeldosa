@@ -83,6 +83,21 @@ export function getComponentsByPillar(pillar: Pillar): RegistryItem[] {
   return getComponents().filter((item) => item.meta?.pillar === pillar);
 }
 
+/** Neighbours in the same title-sorted order the sidebar renders, for prev/next paging. */
+export function getAdjacentComponents(name: string): {
+  prev: RegistryItem | null;
+  next: RegistryItem | null;
+} {
+  const items = getComponents();
+  const index = items.findIndex((item) => item.name === name);
+  if (index === -1) return { prev: null, next: null };
+
+  return {
+    prev: index > 0 ? (items[index - 1] ?? null) : null,
+    next: index < items.length - 1 ? (items[index + 1] ?? null) : null,
+  };
+}
+
 /** The literal source of the component's first file, for the docs source view. */
 export function getComponentSource(name: string): string | null {
   const file = getRegistryItem(name)?.files?.[0];
@@ -90,6 +105,19 @@ export function getComponentSource(name: string): string | null {
 
   const path = resolve(process.cwd(), file.path);
   return existsSync(path) ? readFileSync(path, "utf8") : null;
+}
+
+/**
+ * Source for one example: `examples/[slug].tsx` if the component has that
+ * directory (multi-example components like card), otherwise the component's
+ * single `[name].demo.tsx` (every other component's one and only example).
+ */
+export function getExampleSource(name: string, slug: string): string | null {
+  const examplePath = join(REGISTRY_SRC, name, "examples", `${slug}.tsx`);
+  if (existsSync(examplePath)) return readFileSync(examplePath, "utf8");
+
+  const demoPath = join(REGISTRY_SRC, name, `${name}.demo.tsx`);
+  return existsSync(demoPath) ? readFileSync(demoPath, "utf8") : null;
 }
 
 export function installCommand(name: string): string {

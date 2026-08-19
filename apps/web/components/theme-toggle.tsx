@@ -9,7 +9,7 @@ import { Button } from "@pixeldosa/ui";
  * the button label is correct on first paint rather than flipping after hydration.
  */
 export function ThemeToggle() {
-  const [dark, setDark] = React.useState(false);
+  const [dark, setDark] = React.useState(true);
 
   React.useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));

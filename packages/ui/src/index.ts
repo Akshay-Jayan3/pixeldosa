@@ -1,6 +1,18 @@
 export { cn } from "./lib/utils";
 export { Button, buttonVariants, type ButtonProps } from "./registry/button/button";
 export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardImage,
+  cardVariants,
+  type CardProps,
+} from "./registry/card/card";
+export {
   Field,
   FieldLabel,
   FieldControl,

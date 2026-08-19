@@ -16,23 +16,25 @@ export const metadata: Metadata = {
 /**
  * Applied before first paint so the correct theme is already on <html> when the
  * document renders. Doing this in an effect instead produces a light-mode flash
- * on every dark-mode load.
+ * on every dark-mode load. Dark is the default identity — an explicit stored
+ * preference is the only thing that overrides it, system preference is not
+ * consulted.
  */
 const themeScript = `
 try {
   var stored = localStorage.getItem('pd-theme');
-  var dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  var dark = stored ? stored === 'dark' : true;
   document.documentElement.classList.toggle('dark', dark);
 } catch (e) {}
 `;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="custom-scrollbar">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-svh font-sans antialiased">
+      <body className="min-h-svh font-sans antialiased ">
         <SiteHeader />
         {children}
         <footer className="border-t py-8">

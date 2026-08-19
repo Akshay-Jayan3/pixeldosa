@@ -1,0 +1,129 @@
+---
+title: Card
+description: A bordered content container with composable header, title, description, action, content, footer and image regions.
+---
+
+## Usage
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export function OrderSummary() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Plated dosa set</CardTitle>
+        <CardDescription>Serves two, ready in 12 minutes.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Crisp rice-and-lentil crepe, coconut chutney, and sambar on the side.
+        </p>
+      </CardContent>
+      <CardFooter className="border-t">
+        <Button className="w-full">Add to order</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+`CardAction` places a trailing element — a menu trigger, a badge — in the header's
+second column, aligned to the top-right regardless of how much title or description
+text wraps:
+
+```tsx
+<CardHeader>
+  <CardTitle>Plated dosa set</CardTitle>
+  <CardDescription>Serves two, ready in 12 minutes.</CardDescription>
+  <CardAction>
+    <Button variant="ghost" size="icon" aria-label="More options">
+      <MoreIcon />
+    </Button>
+  </CardAction>
+</CardHeader>
+```
+
+`CardImage` adds a full-bleed image region. In the default vertical orientation it
+sits first and renders as a top banner; give `Card` `orientation="horizontal"` and it
+becomes a fixed-width, left-rounded side panel instead — wrap the remaining parts in
+your own flex column so they sit beside it:
+
+```tsx
+<Card orientation="horizontal" className="max-w-lg">
+  <CardImage src="/cabin.jpg" alt="A wooden cabin overlooking a mountain valley" />
+  <div className="flex flex-1 flex-col justify-between">
+    <CardHeader>
+      <CardTitle>Ridgeline cabin</CardTitle>
+      <CardDescription>Alpine views, sleeps four.</CardDescription>
+    </CardHeader>
+    <CardFooter>
+      <Button size="sm">Reserve now</Button>
+    </CardFooter>
+  </div>
+</Card>
+```
+
+A pricing card needs none of the above — it's the same `Card` / `CardHeader` /
+`CardTitle` / `CardDescription` / `CardContent` / `CardFooter` parts from the first
+example, just with a feature list and a price as content. Highlight a tier with a
+plain `className` override (`border-2 border-primary`) rather than a prop, since
+"highlighted" is a one-off treatment, not a structural variant:
+
+```tsx
+<Card className="border-2 border-primary">
+  <CardHeader>
+    <CardTitle>Pro</CardTitle>
+    <CardDescription>For agencies</CardDescription>
+  </CardHeader>
+  <CardContent className="flex flex-col gap-4">
+    <span className="text-3xl font-semibold">$40</span>
+    <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
+      <li>Unlimited downloads</li>
+      <li>Fully editable files</li>
+    </ul>
+  </CardContent>
+  <CardFooter>
+    <Button className="w-full">Subscribe</Button>
+  </CardFooter>
+</Card>
+```
+
+## Props
+
+Every part forwards `className` and all native props of the element it renders.
+
+| Part | Renders | Notes |
+| --- | --- | --- |
+| `Card` | `div` | The bordered container. `bg-card` / `text-card-foreground`, 1px `border-border`, `rounded-xl`. Takes `orientation="vertical" \| "horizontal"` (default `vertical`). |
+| `CardHeader` | `div` | Grid layout; adds a second column automatically when a `CardAction` is present. |
+| `CardTitle` | `div` | Not a heading element — nest a real heading tag as its child if the card is part of the page outline. |
+| `CardDescription` | `div` | Muted, small text. |
+| `CardAction` | `div` | Self-aligns to the header's top-right. |
+| `CardContent` | `div` | Horizontal padding only; pairs with `Card`'s vertical `py-6`. |
+| `CardFooter` | `div` | Add the `border-t` class yourself when the footer should be visually separated. |
+| `CardImage` | `img` | Full-bleed banner (vertical) or side panel (horizontal) — see above. Requires `alt`. |
+
+## Accessibility
+
+- All parts are plain `div`s — Card has no interaction semantics of its own, so there
+  is nothing for Radix to manage here.
+- `CardTitle` deliberately does not render a heading element, matching the wider
+  shadcn/ui convention. If the card's title should appear in the page's heading
+  outline, render a heading element as its child rather than relying on `CardTitle`
+  itself for that.
+- Interactive cards (a whole card acting as a link or button) are not this
+  component's job — wrap the actionable content in a `Button asChild` or an anchor
+  instead of adding `onClick` to `Card` directly, so keyboard and screen-reader
+  semantics stay correct.
+- `CardImage` has no default `alt` — supply one that describes the image's content.
+  If the image is purely decorative (rare for a listing-style card), pass `alt=""`
+  explicitly rather than omitting the prop.
