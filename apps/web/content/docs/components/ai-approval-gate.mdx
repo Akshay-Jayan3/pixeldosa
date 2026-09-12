@@ -1,0 +1,180 @@
+---
+title: AI Approval Gate
+description: A checkpoint before a consequential agent action — what will happen, how much it touches, whether it can be undone, and three ways to answer.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AIApprovalGate } from "@/components/ui/ai-approval-gate";
+
+<AIApprovalGate
+  action="Send the Q3 reconciliation summary to 243 contacts"
+  risk="high"
+  reversible={false}
+  impact={[
+    { label: "Recipients", value: "243" },
+    { label: "Attachments", value: "2" },
+  ]}
+  confidence="medium"
+  explanation="Three invoices share a billing contact, which accounts for the warning."
+  onApprove={() => resume("approve")}
+  onReject={() => resume("reject")}
+  onEdit={() => openDraft()}
+/>
+```
+
+Phrase `action` as the **consequence**, not the tool call. "Send the Q3 summary to 243
+contacts" is reviewable; "Execute send_email" is not, and the whole component is
+worthless if the user can't evaluate what they're approving.
+
+## Features
+
+- **`reversible` is required, not optional.** Whether something can be taken back is
+  the single most decision-relevant fact on the surface, and almost nothing surfaces
+  it. It renders as a plain sentence — an icon is the wrong weight for the most
+  consequential thing present.
+- **The impact list is the scope.** An approval without one is a yes/no question with
+  the information removed. "243 recipients" is what makes it reviewable, in tabular
+  figures so numbers align.
+- **High risk changes the Approve button**, not just a badge. A dangerous action must
+  never look identical to a harmless confirmation.
+- **Composes the trust primitives** rather than re-deriving them — Confidence Meter,
+  AI Context Surface, and AI Action Toolbar. The decision strip inherits real ARIA
+  toolbar semantics, roving tabindex, and busy handling for free.
+- **It holds perfectly still.** Your turn. Pair with
+  `AgentPresence state="awaitingApproval"`.
+
+## Variants
+
+### High risk, irreversible
+
+Approve carries the destructive treatment. The border shifts. The consequence is
+stated without hedging.
+
+<PreviewStack>
+  <AIApprovalGate
+    action="Delete 1,284 archived records from the production ledger"
+    risk="high"
+    reversible={false}
+    impact={[
+      { label: "Records", value: "1,284" },
+      { label: "Table", value: "ledger_archive" },
+    ]}
+    confidence="high"
+  />
+</PreviewStack>
+
+### Needs review, reversible
+
+The default weight. Undo exists, so the surface doesn't shout.
+
+<PreviewStack>
+  <AIApprovalGate
+    action="Apply the suggested category to 18 uncategorised transactions"
+    risk="medium"
+    reversible
+    impact={[{ label: "Transactions", value: "18" }]}
+    confidence="medium"
+    provenance="12 similar records"
+  />
+</PreviewStack>
+
+### Low risk
+
+<PreviewStack>
+  <AIApprovalGate
+    action="Add a note to the reconciliation thread"
+    risk="low"
+    reversible
+  />
+</PreviewStack>
+
+### With reasoning
+
+Composed `AI Context Surface` — collapsed by default, because provenance should be
+available rather than forced into view.
+
+<PreviewStack>
+  <AIApprovalGate
+    action="Send the Q3 reconciliation summary to 243 contacts"
+    risk="high"
+    reversible={false}
+    impact={[
+      { label: "Recipients", value: "243" },
+      { label: "Attachments", value: "2" },
+    ]}
+    confidence="medium"
+    provenance="the 14 August import batch"
+    explanation="Three invoices share a billing contact, which accounts for the duplicate-payment warning."
+    sources={[{ label: "invoices/2026-q3.csv", snippet: "5 flagged rows, 3 sharing a contact." }]}
+  />
+</PreviewStack>
+
+## Examples
+
+Wiring to a LangGraph interrupt — the graph pauses on a checkpoint, you resume with the
+decision:
+
+```tsx
+{interrupt ? (
+  <AIApprovalGate
+    action={interrupt.value.description}
+    risk={interrupt.value.risk}
+    reversible={interrupt.value.reversible}
+    impact={interrupt.value.impact}
+    onApprove={() => resume({ type: "accept" })}
+    onReject={() => resume({ type: "reject" })}
+    onEdit={() => resume({ type: "edit" })}
+  />
+) : null}
+```
+
+Omit `onEdit` when the payload genuinely can't be changed before it runs — offering an
+edit that does nothing is worse than not offering one:
+
+```tsx
+<AIApprovalGate action="Rotate the API signing key" risk="high" reversible={false}
+  onApprove={rotate} onReject={cancel} />
+```
+
+Reflecting a request in flight — `busy` is caller-owned, as everywhere else here:
+
+```tsx
+<AIApprovalGate {...props} busy={pending} onApprove={approve} onReject={reject} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `action` | `string` | — | Required. The consequence, not the tool call. |
+| `reversible` | `boolean` | — | Required. Rendered as a plain statement. |
+| `risk` | `"low" \| "medium" \| "high"` | `"medium"` | `high` makes Approve destructive. |
+| `impact` | `{ label, value }[]` | — | The blast radius as countable facts. |
+| `confidence` | `"low" \| "medium" \| "high"` | — | Composed Confidence Meter. |
+| `provenance` | `string` | — | Source caption beside the confidence. |
+| `explanation`, `sources` | — | — | Composed AI Context Surface. |
+| `onApprove` / `onReject` | `() => void` | — | Required. |
+| `onEdit` | `() => void` | — | Only when the payload is genuinely editable. |
+| `busy` | `"approve" \| "reject" \| null` | — | Caller-owned in-flight state. |
+
+## Accessibility
+
+- A labelled `<section>`, with the action as its accessible name.
+- The decision strip is a real ARIA toolbar — one tab stop, arrow-key navigation,
+  disabled actions skipped — inherited from `AI Action Toolbar`.
+- Impact facts are a `<dl>`, so the label/value relationship survives without visual
+  layout.
+- Risk is carried by a text label as well as colour; irreversibility is a sentence, not
+  an icon alone.
+- "Waiting for your approval" is announced through an `aria-live` region.
+
+## When not to use
+
+Disambiguating between options the agent can't choose between is `Agent Ask` — that's
+"which did you mean?", where this is "may I do this?". Reviewing a text rewrite hunk by
+hunk is `Diff Accept`. And don't gate low-risk reversible actions; friction where it
+isn't warranted trains people to approve without reading.

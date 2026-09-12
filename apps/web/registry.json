@@ -1,8 +1,36 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "pixeldosa",
-  "homepage": "https://pixeldosa.dev",
+  "homepage": "https://pixeldosa.akshayjayan.com",
   "items": [
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-ask",
+      "title": "Agent Ask",
+      "description": "A structured question from an agent that needs input before it can continue — the UI surface for MCP elicitation. Takes a targeted `question`, a required `source` naming who is asking, a `fields` array describing what is needed (`text`, `number`, `confirm`, or `select` with concrete options and hints), an optional `explanation` giving the context that makes the question answerable, and three separate outcomes: `onRespond` with the collected values, `onDecline` to refuse this particular question and continue without the information, and `onCancel` to abandon the whole operation. Decline and cancel are deliberately distinct answers rather than one dismiss action, and both are rendered as visible first-class controls rather than hidden behind an overflow. `source` is required rather than optional because MCP's elicitation specification obliges a client to show which server is requesting input — 'some software wants your data' is not a question a user can safely answer without knowing the asker. The component prefers concrete options over free text: a select renders as labelled radio cards with optional hints, and a confirm renders as explicit Yes/No controls, because a question with buttons is answerable in a second where the same question in a text box is a small piece of homework. Submit stays disabled until every required field is answered. Holds perfectly still, since it is the user's turn under the system's turn-taking grammar — pair it with Agent Presence in the `asking` state. Purely presentational: it does not call a model and does not own the paused run. Use it for disambiguation between plausible matches and for missing parameters the agent cannot safely guess. Not for approving a consequential action the agent has already decided on (use AI Approval Gate), and not for a general chat input.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-ask/agent-ask.tsx",
+          "target": "components/ui/agent-ask.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. MCP's elicitation spec requires that a client show which server is asking and offer both decline and cancel — `source` is therefore a required prop, and you should wire `onDecline` and `onCancel` rather than omitting them, even though the component tolerates their absence for non-MCP uses.",
+      "meta": {
+        "engineeringNotes": "Three decisions separate this from a chat prompt asking the same question. First, provenance is a required prop rather than an optional nicety: MCP obliges a client to show which server is requesting input, and it is also the only basis a user has for judging whether the question is safe to answer at all. Second, refusal is modelled as two distinct outcomes instead of one dismissal — declining answers 'not this information' while cancelling answers 'not this operation', and collapsing them would silently convert a narrow refusal into an abort. Third, the field types deliberately bias toward concrete options: `select` renders as labelled radio cards carrying optional hints (the disambiguation case, which is what elicitation is mostly used for, is far better served by 'Q3 Revenue Final.xlsx — edited 3 days ago' than by a text box), and `confirm` renders explicit Yes/No buttons rather than a checkbox, since a checkbox's unchecked state is ambiguous between 'no' and 'not answered'. That ambiguity matters here because submit is gated on required fields actually being answered. The component deliberately does not compose AI Action Toolbar for its actions despite the system's compose-don't-reinvent rule: the primary control is a real form submit button, and wrapping form submission inside a `role=\"toolbar\"` would misreport the semantics to assistive technology for the sake of visual consistency. Text inputs are 16px on small viewports because anything smaller makes iOS Safari zoom the page on focus.",
+        "motionNotes": "Almost none, and that is the design. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a), which means it holds perfectly still — the absence of motion is precisely what signals that nothing proceeds until the user acts, and animating it would put it back in the same visual register as the machine's own busy states. The only motion present is the shared colour transition on hover, press and focus at `--pd-duration-instant`, matching every other control in the system, and it is dropped entirely under `prefers-reduced-motion` while the selected-state border and background still communicate which option is chosen. Entrance animation belongs to whatever surface reveals this component, not to the component itself — the same rule Confidence Meter and AI Action Toolbar hold."
+      }
+    },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "agent-presence",
@@ -59,6 +87,37 @@
       "meta": {
         "engineeringNotes": "An extraction, not new design: three already-shipped components had independently hand-rolled the same control strip. Smart Field renders Retry, Reject/Accept and an 'Value accepted. Undo' row; Diff Accept renders 'Changes applied. Undo' and a Regenerate-on-conflict button; Selection Actions renders Retry and Dismiss. Across those seven call sites exactly three button treatments recur verbatim — filled primary, bordered secondary, underline quiet — along with a character-for-character duplicated spinner SVG and a duplicated message+Undo confirmation row. Those three treatments became the CVA `intent` variants rather than being re-derived a fourth time. Two deliberate boundaries: (1) `busy` is a per-action prop rather than internal state, because every existing call site already holds the request and its AbortController, so owning a second copy here would let the toolbar's idea of 'in flight' drift from the caller's; (2) the undo *timer* stays with the consumer — Smart Field and Diff Accept both already run it inside their own status state machines, and absorbing it here would fight those machines rather than simplify them, so the toolbar renders the undo affordance while the consumer owns when it exists. The roving tabindex is kept as an action id rather than an index so the tab stop survives the actions array changing between renders, and it falls back to the first enabled action whenever the focused one becomes disabled — otherwise a toolbar whose focused action just disabled would have no tab stop at all and become unreachable by keyboard.",
         "motionNotes": "Deliberately minimal, and the restraint is the decision. Colour-only transitions on hover and focus at `--pd-duration-instant` (100ms) with `--pd-ease-standard`, matching every other control in the system. There is no entrance animation, on purpose: this toolbar is always revealed by a container that already animates — Smart Field's proposal panel owns a grid-template-rows expand, Selection Actions owns a fade-and-scale — so a second entrance here would double-animate the same appearance. That mirrors Confidence Meter's rule that motion belongs to what wraps a primitive, not the primitive itself. The one continuous animation is the busy spinner, which is honest: it maps to a real in-flight request and stops when that request settles. Under prefers-reduced-motion the colour transitions drop to instant via `motion-reduce:transition-none`, while the spinner deliberately keeps rotating — removing it would leave a busy state with no visible indication at all, and the reduced-motion contract is a fallback that preserves legibility, not a removal."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "ai-approval-gate",
+      "title": "AI Approval Gate",
+      "description": "A checkpoint before a consequential agent action — the human-in-the-loop surface for LangGraph's interrupt() and any equivalent pause. Takes an `action` phrased as a consequence the user can evaluate ('Send the Q3 summary to 243 contacts', never 'Execute send_email'), a `risk` level, a required `reversible` boolean, an optional `impact` list of countable facts describing the blast radius, optional `confidence` and `provenance`, optional `explanation` and `sources`, and three outcomes: `onApprove`, `onReject` and an optional `onEdit` for when the payload can genuinely be changed before it runs. `reversible` is required rather than optional because whether an action can be taken back is the single most decision-relevant fact on the surface and almost nothing surfaces it; it renders as a plain sentence rather than an icon. A `high` risk action renders its Approve control with the destructive treatment rather than the primary one, so a dangerous action never looks identical to a harmless confirmation. Composes this system's existing trust primitives rather than re-deriving them: Confidence Meter for certainty, AI Context Surface for the reasoning behind the proposal, and AI Action Toolbar for the decision strip — which means the decision controls inherit correct ARIA toolbar semantics, roving tabindex and busy handling for free. Holds perfectly still, since it is the user's turn under the turn-taking grammar; pair it with Agent Presence in the `awaitingApproval` state. Purely presentational: it does not execute the action or own the paused run. Use it before any external side effect — sending messages, spending money, publishing, deleting, or changing permissions. Not for disambiguating between options the agent cannot choose between (use Agent Ask), and not for reviewing a text rewrite hunk by hunk (use Diff Accept).",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "actions",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/ai-action-toolbar",
+        "@pixeldosa/ai-context-surface",
+        "@pixeldosa/confidence-meter"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/ai-approval-gate/ai-approval-gate.tsx",
+          "target": "components/ui/ai-approval-gate.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in AI Action Toolbar, AI Context Surface and Confidence Meter, which it composes. Phrase `action` as the consequence rather than the tool call — the whole component is worthless if the user cannot evaluate what they are approving.",
+      "meta": {
+        "engineeringNotes": "This is the payoff component for the system's trust thesis, and it is deliberately a composition rather than a new implementation: Confidence Meter, AI Context Surface and AI Action Toolbar are all consumed as-is, which is the 'compose existing trust primitives' rule (DESIGN.md §3.6) applied at the scale it was written for. Composing the toolbar rather than hand-rolling three buttons also means the decision strip inherits the real ARIA toolbar pattern — roving tabindex, arrow navigation, disabled-action skipping, busy handling — none of which a bespoke approval widget would have got right. Building it surfaced a genuine gap in that toolbar: it had no `destructive` intent, because nothing had needed one until an approval could be dangerous. Adding it there rather than special-casing here is the correct direction, since the house rule that a destructive action must never look identical to a harmless primary one applies system-wide. Two content decisions carry most of the value. `reversible` is a required prop rather than an optional flag: whether something can be undone determines how carefully the rest of the surface deserves to be read, and it renders as a plain sentence ('This cannot be undone') rather than an icon, because an icon is exactly the wrong weight for the most consequential fact present. The `impact` list exists because an approval without a scope is a yes/no question with the information removed — '243 recipients' is what makes the decision reviewable, and it uses tabular figures so the numbers align down the column.",
+        "motionNotes": "Deliberately still. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a): motion means the machine is busy, and animating an approval gate would put it in the same visual register as the agent's own working states — precisely backwards, since nothing here proceeds until the user acts. The only motion is inherited: the composed AI Action Toolbar's colour transitions on hover and focus at `--pd-duration-instant`, and its busy spinner while an approve or reject is in flight, which maps to a real request rather than decorating a wait. AI Context Surface brings its own grid-template-rows disclosure transition when expanded. Nothing animates on entrance — that belongs to whatever surface reveals this gate, the same rule Confidence Meter and AI Action Toolbar hold. Under prefers-reduced-motion every inherited transition drops to instant and the component loses nothing, because it never carried information in movement to begin with."
       }
     },
     {
@@ -330,6 +389,35 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "live-status-line",
+      "title": "Live Status Line",
+      "description": "A single line saying what an agent is doing right now — the status bar of an agent run. Takes a `state` from Agent Presence's vocabulary, a `status` describing the current micro-action, an optional `detail` naming what the action is acting on (a filename, a query, a table), an optional `startedAt` that drives a live elapsed counter, and an `onCancel` shown whenever the agent is active. It replaces rather than accumulates, which is the whole distinction from its neighbours: Reasoning Stream keeps a scrollable trace, Chain-of-Thought Timeline keeps the entire turn's history, and this keeps exactly one thing — which is what makes it cheap enough to leave in permanent product chrome like a toolbar, sidebar footer, or table row. Composes Agent Presence in its `line` form for the indicator rather than reimplementing one, so the turn-taking grammar (motion means the machine is busy, stillness means it's your turn) holds here automatically. The status text is keyed so React's reconciliation runs its swap animation exactly once per real change; a re-render with unchanged text never re-animates. Layout is deliberately stable: the row holds a minimum height so changing text length cannot reflow its container, and the detail truncates before the verb does so 'Reading' stays legible even when the filename cannot. Unlike most components in this system the elapsed counter ticks internally rather than being caller-owned, because forcing a re-render once a second for a display detail would be a poor API. Use it wherever an agent's current activity should be visible without dedicating a panel to it. Not for the reasoning text itself (use Reasoning Stream), not for a per-artifact generation progress surface (use Generation Placeholder), and not as a general toast or notification.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/agent-presence"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/live-status-line/live-status-line.tsx",
+          "target": "components/ui/live-status-line.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`, the `pd-status-swap` keyframe from @pixeldosa/pixeldosa-theme, and @pixeldosa/agent-presence, which it composes for the indicator. Installing this pulls Agent Presence in automatically.",
+      "meta": {
+        "engineeringNotes": "The defining constraint is that this component replaces rather than accumulates. Accumulation is what makes agent activity surfaces expensive — a growing list needs scroll management, virtualisation at length, and a decision about when to collapse. Holding exactly one line keeps it cheap enough to live permanently in product chrome, and pushes the history question to Reasoning Stream and Chain-of-Thought Timeline where it belongs. It composes Agent Presence's `line` form rather than drawing its own dots, which is the system's compose-don't-reinvent rule applied where it genuinely fits: the turn-taking grammar then holds here for free, including the fact that a `suggesting` or `awaitingApproval` status stops moving. Two layout decisions prevent the jitter this pattern usually has: a minimum row height, so text of varying length cannot reflow the container around it, and truncation applied to the detail rather than the verb, so 'Reading' remains legible when a long filename cannot be. The elapsed counter is the one place this system deliberately breaks its own 'the caller owns async state' convention — every other component takes progress, busy and duration as props — because a live counter would otherwise force the consumer to re-render once a second purely for a display detail. The interval is only started while the agent is actually active, and never when no `startedAt` was supplied.",
+        "motionNotes": "One animation, and it maps to one state change: when the status text is replaced, the new text fades up three pixels over `--pd-duration-fast` with `--pd-ease-decelerate`. Short deliberately — micro-actions can change every second or two, and anything longer would read as churn rather than as replacement. It is keyed on the status string so React's reconciliation fires it exactly once per genuine change; an unchanged status that re-renders does not re-animate, which is the same mechanism Progressive Reveal and Reasoning Stream use. The indicator's own motion is inherited from Agent Presence and is not duplicated here. Under `prefers-reduced-motion` the swap is dropped entirely: text simply changes, which loses nothing, because the information was always the words rather than the transition between them."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "overlay",
       "title": "Overlay Motion Primitive",
       "description": "The shared enter/exit animation layer for every overlay surface in the system — Dialog, Sheet, Popover and Drawer. Exports OverlayScrim (the backdrop) and OverlayContent (the panel, with a placement prop of center, top, bottom, left or right that controls which axis it translates from) plus a re-exported AnimatePresence. Not a standalone component: it has no dismiss behaviour, focus trapping or portal logic of its own. Compose it underneath a Radix primitive (Dialog.Overlay/Content, Sheet, Popover) so that primitive owns interaction semantics while this owns motion.",
@@ -465,6 +553,16 @@
             "transform": "translateX(100%)"
           }
         },
+        "@keyframes pd-status-swap": {
+          "from": {
+            "opacity": "0",
+            "transform": "translateY(3px)"
+          },
+          "to": {
+            "opacity": "1",
+            "transform": "translateY(0)"
+          }
+        },
         "@keyframes pd-orb-spin": {
           "from": {
             "transform": "rotateY(0deg)"
@@ -506,6 +604,34 @@
       "meta": {
         "engineeringNotes": "Enforces 'animate a new item in exactly once' by relying on React's own keyed reconciliation instead of hand-rolled 'already seen' tracking: each item is wrapped in a small RevealItem component keyed by keyExtractor (or index), which mounts fresh — and therefore plays its entrance transition — only the first time its key appears in the list; on every subsequent render where that key was already present, React reuses the existing DOM node and the component is not remounted, so the animation structurally cannot replay. This is simpler and more reliable than maintaining a Set of seen keys by hand, which is easy to get subtly wrong around React's own re-render timing. Scoped deliberately to structured collections (rows, cards), not prose — an append-only list of discrete items is inherently more layout-stable than a single growing text block, since new rows appear below existing content without reflowing it, which is also why this differs from and does not compete with Vercel AI Elements' prose-streaming components (see the roadmap's North Star Reconciliation table).",
         "motionNotes": "Per-item entrance is a plain opacity + small upward translate (translate-y-1 to 0) using the same two-phase-mount pattern (mount closed, flip to open on the next animation frame) Command Menu and Selection Actions already use, on --pd-duration-fast/--pd-ease-standard. No item's own content is ever revealed character-by-character — the full item value already exists at arrival time, so a typewriter effect would misrepresent it as being generated live, the same reasoning every other AI-tier component in this system has already established independently. The trailing streaming indicator uses Tailwind's built-in animate-pulse (core Tailwind, no plugin required) gated by motion-safe:, falling back to a static reduced-opacity dot under motion-reduce: — the 'more is coming' text itself is unaffected either way, so the signal survives motion removal."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "reasoning-stream",
+      "title": "Reasoning Stream",
+      "description": "An agent's reasoning shown as it arrives — a two-line ticker while it streams, folding to a single 'Thought for 12s' line once the answer exists, expandable on demand to the full trace. Takes `steps` (reasoning summary lines, oldest first, appended as they arrive), `isStreaming`, an optional measured `durationMs` shown on completion, and `defaultExpanded`. The default is collapsed, deliberately: reasoning is scaffolding that is useful while a thing is being built and noise once it stands, and a reasoning panel left expanded after the answer lands makes every answer look like it needs justifying. Handles scroll anchoring correctly — it follows new content only while the reader is at the bottom, and the moment they scroll up it holds their position and offers a 'Jump to latest' affordance instead of yanking them back. Steps fade in whole and exactly once, enforced by React's keyed reconciliation rather than a timer; text that has already arrived is never revealed character-by-character, since that would misrepresent content the model already finished producing. `steps` is an array rather than a raw string because providers emit reasoning summaries as discrete parts and deciding where one thought ends belongs to the caller. Maps to OpenAI Responses reasoning-summary deltas and the AI SDK's `reasoning` part type, with no AI dependency of its own. Use it wherever a model exposes reasoning and seeing the work builds warranted trust. Not for the agent's activity state (use Agent Presence), not for the full historical record across a whole turn (use Chain-of-Thought Timeline), and not for a collapsed 'why this?' over an already-finished value (use AI Context Surface).",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/reasoning-stream/reasoning-stream.tsx",
+          "target": "components/ui/reasoning-stream.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils` and the `pd-fade-in` keyframe supplied by @pixeldosa/pixeldosa-theme's css block. Show reasoning *summaries* where the provider exposes them; raw private chain-of-thought should not be presented to end users as fact.",
+      "meta": {
+        "engineeringNotes": "The component's thesis is the fold-away on completion, not the ticker. Reasoning text is long, low-value-per-token, and usually not what the user wants to read, which creates a bind: showing all of it buries the answer, showing none of it is the black box that destroys trust. Collapsing to a measured 'Thought for 12s' resolves both — the duration answers 'was this worth waiting for' better than any amount of reasoning text, and the disclosure keeps the trace available for anyone who actually wants it. Scroll anchoring is implemented as a correctness requirement rather than a nicety: the component tracks distance-from-end on scroll and only follows new content while the reader is within 24px of the bottom, because auto-scrolling someone who has deliberately scrolled up to read something is the most hostile thing a streaming surface can do. That behaviour came from a competitive scan of a peer library's Message Scroller and now applies as a standing requirement to every streaming surface in this system, not as a component of its own. Each step is its own keyed child component so React's reconciliation owns the entrance animation — a step already on screen keeps its DOM node and can never replay its fade however often the parent re-renders, which is the same mechanism Progressive Reveal uses and which a timer-based approach gets wrong on the first re-render. `steps` is an array rather than a raw accumulating string so the component never has to guess where one thought ends.",
+        "motionNotes": "Steps fade in whole over `--pd-duration-base` with `--pd-ease-decelerate`, exactly once each. They are never typed out character-by-character: the text has already been produced by the time it reaches this component, and animating it as though it were being composed live would misrepresent what actually happened — the same non-negotiable rule Ghost Input, Smart Field, Diff Accept and Progressive Reveal all hold. The expand/collapse uses the house `grid-template-rows` 0fr→1fr transition at `--pd-duration-fast`, so no height measurement or ResizeObserver is needed and the panel animates correctly at any content length. The ticker's top edge is a CSS mask rather than an animated fade, so older lines dissolve out without anything moving. Under `prefers-reduced-motion` the step fades and the expand transition are both dropped; steps appear instantly and the disclosure snaps, and since the information was never carried by the motion, nothing is lost."
       }
     },
     {
@@ -566,6 +692,39 @@
       "meta": {
         "engineeringNotes": "Mirrors ghost-input's contract shape (value/onValueChange controlled-only, a fetchX behaviour injected by the consumer, an AbortSignal for cancellation) deliberately, so the AI tier reads as one consistent family rather than each component inventing its own pattern — the two differ only in what they return: a plain continuation string for ghost-input versus a structured { value, confidence, provenance } proposal here, because a complete replacement value needs that context attached and a continuation tail does not. Confidence rendering composes the shared `confidence-meter` primitive (extracted after Selection Actions needed the identical tiered indicator) rather than hand-rolling its own bars a second time — a three-tier enum (low/medium/high), not a raw number, because a fabricated percentage would claim precision the underlying model doesn't actually have, and because the system has no colour scale to spend on a red/yellow/green treatment anyway. autoPropose is opt-in and gated to empty fields only, adopted directly from CRM-enrichment research (Clay/HubSpot/Attio): confidence gates whether a proposal is allowed to overwrite existing data, so the safest default auto-behaviour is 'only ever fill a blank,' never 'silently reconsider what's already there.' Manual typing at any point cancels an in-flight fetch or dismisses a shown-but-unaccepted proposal, reusing ghost-input's staleness philosophy: a suggestion answering a question the field no longer asks is worse than no suggestion. The proposal panel animates open/closed via a CSS grid-template-rows trick (0fr to 1fr) rather than measuring and animating an explicit pixel height, which is the standard token-free way to animate a height that depends on variable content without a ResizeObserver.",
         "motionNotes": "The proposal panel's height expansion and the field's colour tint both use --pd-duration-fast/--pd-ease-standard; the trigger's busy spinner and accept/reject colour changes use --pd-duration-instant, matching Button's press-feedback timing, because those are immediate state confirmations rather than content arriving. The proposed value itself never animates in character-by-character — the full value already exists the moment it's returned, so a typewriter reveal would misrepresent it as being generated live, the same reasoning ghost-input's plan already established. Confidence Meter (composed, not reimplemented here) has no motion of its own — under prefers-reduced-motion, the panel's grid-template-rows transition and the colour transitions are dropped via motion-reduce:transition-none, leaving the underlying state (panel present/absent, tint present/absent) fully legible without animation."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "thinking-experience",
+      "title": "Thinking Experience",
+      "description": "A complete agent run, orchestrated — the first Level 2 Block in this system, and the composed surface the AI-tier components exist to be assembled into. Takes one `state` from the agent vocabulary plus a `status` line, optional `reasoning` steps, an optional `ask` request, an optional `approval` request, and a terminal `result` with its action strip, then decides which of those surfaces belongs on screen at each moment. The value over rendering the same components yourself is entirely the orchestration: a consumer wiring Live Status Line, Reasoning Stream, Agent Ask and AI Approval Gate together has to re-derive when each appears, when reasoning should stop streaming, when the elapsed counter should freeze, and what happens to the machine's own surfaces while a human is being asked something — and that last question is the one most implementations get wrong. This block applies the turn-taking grammar at the level of the whole panel rather than a single indicator: when control passes back to the user, the machine's status and reasoning visibly step down in emphasis and whatever needs an answer takes a ring, while remaining fully interactive so a run can always be stopped even while it waits on you. Composes Live Status Line, Reasoning Stream, Agent Ask, AI Approval Gate and AI Action Toolbar, which transitively pulls in Agent Presence, Confidence Meter and AI Context Surface. Use it as the agent panel in a product — a sidebar, a drawer, an inline run surface. Not a chat thread and not a transcript: it shows one run in progress, not a history of turns.",
+      "type": "registry:block",
+      "categories": [
+        "ai-assisted",
+        "application",
+        "block"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/live-status-line",
+        "@pixeldosa/reasoning-stream",
+        "@pixeldosa/agent-ask",
+        "@pixeldosa/ai-approval-gate",
+        "@pixeldosa/ai-action-toolbar"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/thinking-experience/thinking-experience.tsx",
+          "target": "components/blocks/thinking-experience.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in the whole AI-tier stack it composes — Live Status Line, Reasoning Stream, Agent Ask, AI Approval Gate and AI Action Toolbar, plus Agent Presence, Confidence Meter and AI Context Surface transitively. Drive it from a single agent state; passing `ask` and `approval` alongside is harmless, since only the one matching the current state renders.",
+      "meta": {
+        "engineeringNotes": "The first Block in this system, and it is deliberately an orchestration rather than new UI: every visible element comes from an already-shipped component. What it contributes is the set of decisions a consumer would otherwise have to re-derive — which surface belongs on screen at which state, that reasoning stops streaming the moment control passes to a human rather than continuing to tick behind a question, that the elapsed counter freezes on terminal states instead of counting forever, and that a pending question or approval is what the eye should land on. The interesting decision is how the turn-taking grammar scales: at component level it is one indicator moving or holding still, but at panel level it becomes relative emphasis, so the machine's status and reasoning drop to 55% opacity while an interrupt takes a ring. They are dimmed but deliberately never disabled — a run must remain stoppable even while it is waiting on the person, and `pointer-events-none` on that region would have silently removed the Stop control at exactly the moment someone might want it. Emphasis is carried by a ring rather than by animation because this is the user's turn and stillness is the signal; animating the thing that wants attention would contradict the grammar the rest of the system holds. Ask and approval are passed as plain data objects rather than as slots so the block owns the decision of when each appears — a slot-based API would hand the orchestration question straight back to the consumer, which is the one thing this component exists to answer.",
+        "motionNotes": "Two transitions, both mapped to a real state change. The machine region cross-fades its opacity over `--pd-duration-base` with `--pd-ease-standard` as control passes between the agent and the user, which is the panel-level expression of the turn-taking grammar and the only motion that belongs to this block itself. The result fades in once over `--pd-duration-base` with `--pd-ease-decelerate` when the run reaches a terminal state. Everything else is inherited: Live Status Line's status swap, Agent Presence's rotation, Reasoning Stream's step fades and disclosure, AI Action Toolbar's colour transitions and busy spinner. Nothing is duplicated at this level, which is the point of composing rather than reimplementing — one rhythm, set once in the tokens, applied consistently by every part. Under `prefers-reduced-motion` the block's own two transitions drop to instant and each child handles its own fallback, leaving the layout, the ring emphasis and the opacity difference fully legible without any movement."
       }
     }
   ]

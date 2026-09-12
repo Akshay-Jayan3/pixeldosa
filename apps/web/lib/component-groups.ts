@@ -8,11 +8,17 @@
  * to consumers and shouldn't carry our navigation opinions.
  */
 
-export type ComponentGroupId = "ai" | "product";
+export type ComponentGroupId = "blocks" | "ai" | "product";
 
-export const GROUP_ORDER: ComponentGroupId[] = ["ai", "product"];
+/**
+ * Blocks lead, deliberately. They are the composed experiences the component tier
+ * exists to produce — the thing someone should meet first, not a footnote under
+ * twelve primitives.
+ */
+export const GROUP_ORDER: ComponentGroupId[] = ["blocks", "ai", "product"];
 
 export const GROUP_LABELS: Record<ComponentGroupId, string> = {
+  blocks: "Blocks",
   ai: "AI",
   product: "Product",
 };
@@ -36,11 +42,19 @@ const GROUP_BY_NAME: Record<string, ComponentGroupId> = {
  * site's navigation, which is focused on the AI story. Their pages remain reachable
  * by URL and through "Browse all".
  */
-export function isFoundation(item: { name: string; categories?: string[] }): boolean {
+export function isFoundation(item: { name: string; type?: string; categories?: string[] }): boolean {
+  if (item.type === "registry:block") return false;
   if (GROUP_BY_NAME[item.name]) return false;
   return item.categories?.[0] !== "ai-assisted";
 }
 
-export function groupFor(item: { name: string; categories?: string[] }): ComponentGroupId {
+export function groupFor(item: {
+  name: string;
+  type?: string;
+  categories?: string[];
+}): ComponentGroupId {
+  // Tier comes from the registry type, not a name list — a new Block can never be
+  // filed as a component by omission.
+  if (item.type === "registry:block") return "blocks";
   return GROUP_BY_NAME[item.name] ?? "ai";
 }

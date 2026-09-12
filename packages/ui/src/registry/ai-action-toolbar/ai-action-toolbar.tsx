@@ -5,7 +5,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-export type AIActionIntent = "primary" | "secondary" | "quiet";
+/**
+ * `destructive` exists because the house rule is that a dangerous action must never
+ * look identical to a harmless primary one. It is the single intent allowed real
+ * chroma, matching the token set's one coloured role.
+ */
+export type AIActionIntent = "primary" | "secondary" | "quiet" | "destructive";
 
 export type AIAction = {
   id: string;
@@ -45,6 +50,8 @@ const actionVariants = cva(
         secondary:
           "rounded-md border border-input text-foreground hover:bg-accent hover:text-accent-foreground",
         quiet: "rounded-md text-foreground underline-offset-2 hover:underline",
+        destructive:
+          "rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
       size: {
         sm: "px-2 py-0.5 text-xs",

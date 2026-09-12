@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const registryConfig = `{
   "$schema": "https://ui.shadcn.com/schema.json",
   "registries": {
-    "@pixeldosa": "https://pixeldosa.dev/r/{name}.json"
+    "@pixeldosa": "https://pixeldosa.akshayjayan.com/r/{name}.json"
   }
 }`;
 

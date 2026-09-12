@@ -90,6 +90,32 @@ export {
   type AgentPresenceForm,
 } from "./registry/agent-presence/agent-presence";
 export {
+  ThinkingExperience,
+  type ThinkingExperienceProps,
+  type AskRequest,
+  type ApprovalRequest,
+} from "./registry/thinking-experience/thinking-experience";
+export {
+  AIApprovalGate,
+  type AIApprovalGateProps,
+  type ApprovalRisk,
+  type ApprovalImpact,
+} from "./registry/ai-approval-gate/ai-approval-gate";
+export {
+  LiveStatusLine,
+  type LiveStatusLineProps,
+} from "./registry/live-status-line/live-status-line";
+export {
+  AgentAsk,
+  type AgentAskProps,
+  type AskField,
+  type AskFieldOption,
+} from "./registry/agent-ask/agent-ask";
+export {
+  ReasoningStream,
+  type ReasoningStreamProps,
+} from "./registry/reasoning-stream/reasoning-stream";
+export {
   GenerationPlaceholder,
   type GenerationPlaceholderProps,
   type GenerationStatus,

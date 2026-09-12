@@ -13,6 +13,7 @@ import { TableOfContents } from "@/components/table-of-contents";
 import { demoExamples } from "@/components/registry-demos";
 import { buildComponentMarkdown, getComponentDoc } from "@/lib/docs";
 import {
+  DOCUMENTED_TYPES,
   getAdjacentComponents,
   getComponentSource,
   getComponents,
@@ -78,7 +79,7 @@ export default async function ComponentDocPage({ params }: Params) {
   const item = getRegistryItem(name);
   const doc = getComponentDoc(name);
 
-  if (!item || item.type !== "registry:ui") notFound();
+  if (!item || !DOCUMENTED_TYPES.includes(item.type)) notFound();
 
   const source = getComponentSource(name);
   const { prev, next } = getAdjacentComponents(name);

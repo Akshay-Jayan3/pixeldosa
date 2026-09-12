@@ -1,0 +1,156 @@
+---
+title: Thinking Experience
+description: A complete agent run, orchestrated — status, reasoning, questions, approvals and the result, with one state deciding what belongs on screen.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ThinkingExperience } from "@/components/blocks/thinking-experience";
+
+<ThinkingExperience
+  state={run.state}
+  status={run.status}
+  detail={run.target}
+  startedAt={run.startedAt}
+  reasoning={run.reasoningSummaries}
+  ask={pendingQuestion}
+  approval={pendingApproval}
+  result={<Summary data={run.result} />}
+  resultActions={[{ id: "apply", label: "Apply", intent: "primary" }]}
+  onCancel={run.abort}
+/>
+```
+
+**This is a Block, not a component.** Every visible element comes from an
+already-shipped component — what this adds is the orchestration.
+
+## What it actually contributes
+
+Wiring Live Status Line, Reasoning Stream, Agent Ask and AI Approval Gate together
+yourself means re-deriving four decisions:
+
+- **Which surface belongs on screen** at each state.
+- **When reasoning stops streaming** — the moment control passes to a human, not
+  whenever the text runs out.
+- **When the elapsed counter freezes** — on terminal states, rather than counting
+  forever.
+- **What happens to the machine's surfaces while a person is being asked something.**
+
+That last one is where most implementations go wrong, and it's the interesting part.
+
+## The grammar, scaled up
+
+At component level the turn-taking rule is one indicator moving or holding still. At
+panel level it becomes **relative emphasis**: when control passes back, the agent's
+status and reasoning drop to 55% opacity and whatever needs an answer takes a ring.
+
+Two deliberate choices there:
+
+- **Dimmed, never disabled.** A run must stay stoppable even while it waits on you.
+  `pointer-events-none` on that region would have silently removed the Stop control at
+  exactly the moment someone might want it.
+- **Emphasis by ring, not motion.** This is the user's turn, so stillness is the
+  signal. Animating the thing that wants attention would contradict the rule the rest
+  of the system holds.
+
+## Variants
+
+### Working
+
+<PreviewStack>
+  <ThinkingExperience
+    state="working"
+    status="Reading"
+    detail="ledger/august-import.json"
+    reasoning={[
+      "Checking the invoice table for duplicate payment warnings.",
+      "Found five flagged invoices across the last quarter.",
+    ]}
+  />
+</PreviewStack>
+
+### Waiting for approval
+
+Note the status and reasoning above the gate — still legible, still stoppable, visibly
+no longer the point.
+
+<PreviewStack>
+  <ThinkingExperience
+    state="awaitingApproval"
+    status="Waiting for your approval"
+    reasoning={["Three invoices share the same billing contact."]}
+    approval={{
+      action: "Send the reconciliation summary to 243 contacts",
+      risk: "high",
+      reversible: false,
+      impact: [{ label: "Recipients", value: "243" }],
+      confidence: "medium",
+    }}
+  />
+</PreviewStack>
+
+### Complete
+
+<PreviewStack>
+  <ThinkingExperience
+    state="done"
+    status="Reconciled 5 invoices"
+    reasoning={["Three invoices share the same billing contact."]}
+    reasoningMs={6400}
+    result={<p className="text-sm text-foreground">The duplicate-payment warning had one root cause.</p>}
+    resultActions={[{ id: "apply", label: "Apply", intent: "primary" }, { id: "explain", label: "Explain", intent: "quiet" }]}
+  />
+</PreviewStack>
+
+## Examples
+
+Driving it from one state — passing `ask` and `approval` alongside is harmless, since
+only the one matching the current state renders:
+
+```tsx
+<ThinkingExperience
+  state={toAgentState(run)}
+  status={run.status}
+  ask={run.elicitation ? { ...toAsk(run.elicitation), onRespond: resume } : undefined}
+  approval={run.interrupt ? { ...toApproval(run.interrupt), onApprove, onReject } : undefined}
+/>
+```
+
+As a sidebar panel, where it's permanent chrome rather than a moment:
+
+```tsx
+<aside className="w-96 border-l p-3">
+  <ThinkingExperience {...run} className="border-0 p-0" />
+</aside>
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `state` | `AgentState` | Required. Decides which surface renders. |
+| `status` | `string` | Required. The current micro-action. |
+| `detail` | `string` | What the action is acting on. |
+| `startedAt` | `number \| Date` | Elapsed counter; freezes on terminal states. |
+| `reasoning` | `string[]` | Reasoning summaries. |
+| `reasoningMs` | `number` | Measured duration, shown once complete. |
+| `ask` | `AskRequest` | Rendered when `state` is `asking`. |
+| `approval` | `ApprovalRequest` | Rendered when `state` is `awaitingApproval`. |
+| `result` | `ReactNode` | Rendered on terminal states. |
+| `resultActions` | `AIAction[]` | Action strip beneath the result. |
+| `onCancel` | `() => void` | Always available while active. |
+
+## Composes
+
+`Live Status Line` · `Reasoning Stream` · `Agent Ask` · `AI Approval Gate` ·
+`AI Action Toolbar` — and transitively `Agent Presence`, `Confidence Meter`,
+`AI Context Surface`. Installing this pulls the whole stack.
+
+## When not to use
+
+This shows **one run in progress**, not a history of turns — it isn't a chat thread or
+a transcript. For a single agent status in existing chrome without the surrounding
+panel, use `Live Status Line` directly.

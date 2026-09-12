@@ -6,7 +6,13 @@ import { Button } from "@pixeldosa/ui";
 
 import { CodeBlock } from "@/components/code-block";
 import { demoExamples } from "@/components/registry-demos";
-import { getComponents, getExampleSource, getRegistryItem, installCommand } from "@/lib/registry";
+import {
+  DOCUMENTED_TYPES,
+  getComponents,
+  getExampleSource,
+  getRegistryItem,
+  installCommand,
+} from "@/lib/registry";
 
 type Params = { params: Promise<{ name: string; example: string }> };
 
@@ -45,7 +51,7 @@ export default async function ExampleDocPage({ params }: Params) {
   const examples = demoExamples[name] ?? [];
   const index = examples.findIndex((candidate) => candidate.slug === slug);
 
-  if (!item || item.type !== "registry:ui" || index === -1) notFound();
+  if (!item || !DOCUMENTED_TYPES.includes(item.type) || index === -1) notFound();
 
   const example = examples[index]!;
   const source = getExampleSource(name, slug);

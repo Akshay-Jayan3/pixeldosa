@@ -483,15 +483,19 @@ rather than a second AI Elements.
   4s, `awaitingApproval` at `animation: none`. Ships with a mapping table from AG-UI,
   OpenAI Responses, AI SDK, LangGraph and MCP — zero AI dependencies.
   Plan: `plans/agent-expression-system-plan.md`.
-- [ ] Reasoning Stream — **added 2026-09-09, un-folded from the reconciliation table
-  above.** The *content* half of thinking, where `Agent Presence` is the *indicator*
-  half: the reasoning text itself as it arrives, collapsed to the latest line or two by
-  default and expandable to the full trace. Maps to OpenAI's separate reasoning stream
-  and AI SDK's `reasoning` part — which are distinct from output text precisely because
-  they are not the answer. Distinct from `Chain-of-Thought Timeline` (B2), which is the
-  full *historical* record across a whole turn; this is the live ticker. Policy line
-  stays where it was: reasoning *summaries* where the provider exposes them, never
-  raw private chain-of-thought presented as fact.
+- [x] Reasoning Stream — **shipped 2026-09-12.** The *content* half of thinking, where
+  `Agent Presence` is the *indicator* half. A two-line ticker while streaming, folding
+  to a measured "Thought for 12s" once the answer exists — the fold-away is the thesis,
+  since reasoning is scaffolding and a panel left expanded makes every answer look like
+  it needs justifying. **First implementation of the scroll-anchoring requirement**
+  added from the 2026-09-12 scan: verified that a reader who scrolls up keeps their
+  position while new content arrives, and gets a "Jump to latest" affordance instead of
+  being yanked back. Maps to OpenAI reasoning-summary deltas and the AI SDK `reasoning`
+  part, zero AI dependencies. Policy unchanged: summaries where the provider exposes
+  them, never raw private chain-of-thought as fact.
+  Plan: `plans/reasoning-stream-plan.md`.
+- [ ] Retrofit scroll anchoring onto `Progressive Reveal` — the behaviour is now proven
+  in `Reasoning Stream`; Progressive Reveal still auto-follows unconditionally.
 - [ ] Inline Citations — **added 2026-09-12 from the competitive scan.** Claim-level
   provenance: a superscript marker inside a sentence that resolves to its source on
   hover/focus, with the cited span highlighted. Distinct from `AI Context Surface`,
@@ -505,17 +509,42 @@ rather than a second AI Elements.
   format) plus attachment context, so the interface carries the specification instead
   of making users learn prompt engineering. Explicitly not a chat input: no thread, no
   message history, no send-and-scroll.
-- [ ] Agent Ask — the gap nobody fills: the agent needs structured input to continue.
-  MCP-elicitation shaped — shows who is asking, renders a typed input, always offers
-  decline and cancel. No competitor surveyed covers this, and nothing else in this
-  registry does either.
-- [ ] Live Status Line — *moved up from B2.* Composes Agent Presence in `line` form
-  with current step, elapsed time and cancel. Proves the grammar survives in ordinary
-  product chrome, not just a hero moment.
-- [ ] AI Approval Gate — *moved up from B2.* The `awaitingApproval` state made real:
-  what will happen, risk, confidence, and LangGraph's four decisions
-  (approve/edit/reject/respond). Composes Confidence Meter, AI Context Surface, Diff
-  Accept and AI Action Toolbar — the payoff for everything already shipped.
+- [x] Agent Ask — **shipped 2026-09-12.** The gap nothing surveyed covers: an agent
+  needs structured input before it can continue. MCP-elicitation shaped — `source` is a
+  *required* prop because the spec obliges a client to show which server is asking, and
+  refusal is modelled as two distinct outcomes (decline this question vs cancel the
+  operation) rather than one dismissal. Biases toward concrete options over free text:
+  `select` renders labelled cards with hints, `confirm` renders explicit Yes/No rather
+  than a checkbox, since an unchecked box can't distinguish "no" from "unanswered" —
+  verified that answering *No* correctly satisfies a required field. Holds perfectly
+  still, per the turn-taking grammar. Plan: covered by
+  `plans/agent-expression-system-plan.md`.
+- [x] Live Status Line — **shipped 2026-09-12.** One line for the agent's current
+  micro-action, **replaced** rather than accumulated — which is the whole distinction
+  from Reasoning Stream (scrollable trace) and Chain-of-Thought Timeline (whole-turn
+  history), and what makes it cheap enough to live permanently in product chrome. The
+  first component to genuinely compose `Agent Presence` rather than reimplement an
+  indicator, so the turn-taking grammar holds here for free. Layout can't jitter:
+  minimum row height, and the detail truncates before the verb. Deliberately breaks the
+  system's caller-owns-async-state convention for the elapsed counter, which ticks
+  internally rather than forcing a re-render per second for a display detail.
+  **QA caught a real bug:** the composed indicator was announcing its own generic state
+  name ("Choosing an action") through `aria-live` while the visible text said something
+  else ("Comparing billing contacts") — two channels disagreeing. Fixed by handing the
+  status down as the label; verified announced and visible text now match exactly.
+- [x] AI Approval Gate — **shipped 2026-09-12.** The `awaitingApproval` state made
+  real, and the payoff for everything already shipped: composes Confidence Meter,
+  AI Context Surface and AI Action Toolbar rather than re-deriving any of them, so the
+  decision strip inherits the real ARIA toolbar pattern (roving tabindex verified) for
+  free. Two content decisions carry the value: `reversible` is a **required** prop
+  rendered as a plain sentence, because whether something can be undone is the most
+  decision-relevant fact on the surface and almost nothing surfaces it; and the
+  `impact` list gives the blast radius as countable facts, since an approval without a
+  scope is a yes/no question with the information removed. A `high` risk action renders
+  Approve with the **destructive** treatment, never the primary one.
+  **Surfaced a genuine gap in AI Action Toolbar** — it had no `destructive` intent,
+  because nothing had needed one until an approval could be dangerous. Added there
+  rather than special-cased here, since the rule is system-wide.
 - [ ] Retrofit `stale` onto Diff Accept and `uncertain` onto Confidence Meter — both
   states already exist as local behaviour (Diff Accept's conflict guard is `stale`,
   invented here before anyone else had it); this promotes them to system-wide states.
@@ -532,10 +561,7 @@ rather than a second AI Elements.
   to a generic Tool Call component — branded ops console, not a chat bubble)
 - [ ] Chain-of-Thought Timeline — reasoning summaries only where product policy
   permits it; status events, never raw private chain-of-thought
-- → *Live Status Line — **moved to B1.5**. A single, low-weight, constantly-replacing
-  line for an agent's current micro-action ("Reading file…", "Searching…"), distinct
-  from the full-history Chain-of-Thought Timeline; validated against Claude Code's own
-  interface as real prior art. Now composes Agent Presence's `line` form.*
+- → *Live Status Line — **shipped 2026-09-12**, see B1.5.*
 - [ ] Change Summary List — **new, 2026-09-05, agent-interface gap**: Diff Accept at
   the scale of a whole agent turn — a collapsed, one-line-per-change list with a
   `+N/-N` diff-stat, expanding on demand into the full Diff Accept view, for when an
@@ -575,6 +601,24 @@ Marketing Blocks (12) and Business Blocks (10) removed entirely per the 2026-09-
 niche lock-in (AI startups only) — see North Star. Not paused, cut.
 
 ### AI Blocks (12)
+
+- [x] Thinking Experience — **shipped 2026-09-12. The first Block in the system.**
+  A complete agent run, orchestrated: one `state` decides which surface belongs on
+  screen, from status and reasoning through a pending question or approval to the
+  result and its action strip. Every visible element comes from an already-shipped
+  component — what the Block contributes is the orchestration a consumer would
+  otherwise re-derive: which surface appears when, that reasoning stops streaming the
+  moment control passes to a human, that the elapsed counter freezes on terminal
+  states, and what happens to the machine's own surfaces while a person is being asked
+  something. **The turn-taking grammar scaled from a component to a layout:** at panel
+  level it becomes relative emphasis — the agent's status and reasoning drop to 55%
+  opacity while the interrupt takes a ring. Dimmed but deliberately never disabled
+  (verified `pointer-events: auto`), because a run must stay stoppable even while it
+  waits on you. Emphasis by ring rather than motion, since stillness is the signal on
+  the user's turn. Composes Live Status Line, Reasoning Stream, Agent Ask, AI Approval
+  Gate and AI Action Toolbar, transitively pulling Agent Presence, Confidence Meter and
+  AI Context Surface. Shipped as the registry's first `registry:block`; the docs site
+  gained a Blocks tier that leads the navigation.
 - [ ] AI Chat Experience
 - [ ] Artifact Generation
 - [ ] Prompt → Result

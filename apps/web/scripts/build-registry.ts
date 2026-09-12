@@ -95,7 +95,7 @@ if (problems.length > 0) {
 const registry = {
   $schema: "https://ui.shadcn.com/schema/registry.json",
   name: "pixeldosa",
-  homepage: "https://pixeldosa.dev",
+  homepage: "https://pixeldosa.akshayjayan.com",
   items,
 };
 

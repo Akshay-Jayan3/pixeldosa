@@ -1,0 +1,159 @@
+---
+title: Agent Ask
+description: A structured question from an agent that needs input before it can continue — the UI surface for MCP elicitation, with the asker named and refusal made first-class.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentAsk } from "@/components/ui/agent-ask";
+
+<AgentAsk
+  source="finance-db"
+  question="Which quarter should I reconcile?"
+  explanation="Two datasets match “Q3 revenue” and they disagree by $4,200."
+  fields={[
+    {
+      name: "dataset",
+      type: "select",
+      label: "Dataset",
+      required: true,
+      options: [
+        { value: "final", label: "Q3 Revenue Final.xlsx", hint: "Edited 3 days ago" },
+        { value: "draft", label: "Q3 Revenue.xlsx", hint: "Edited 6 weeks ago" },
+      ],
+    },
+  ]}
+  onRespond={(values) => resume(values)}
+  onDecline={() => resume(null)}
+  onCancel={() => abort()}
+/>
+```
+
+## Features
+
+- **The asker is named, and it's required.** MCP's elicitation spec obliges a client to
+  show which server is requesting input. It's also the only basis a user has for judging
+  whether the question is safe to answer — "some software wants your data" isn't
+  answerable.
+- **Refusal is two answers, not one.** *Don't answer* continues without the
+  information; *Cancel* abandons the operation. Collapsing them would silently turn a
+  narrow refusal into an abort.
+- **Options over prose.** A select renders as labelled cards with hints; a confirm
+  renders explicit Yes/No. A question with buttons is answerable in a second — the same
+  question in a text box is homework.
+- **It holds perfectly still.** This is the user's turn, so nothing moves. Pair it with
+  `AgentPresence state="asking"`.
+- **Submit is gated** until every required field is genuinely answered.
+
+## Variants
+
+### Disambiguation
+
+The case elicitation is mostly used for — two plausible matches, no safe guess. The
+hints are what make it answerable without opening either file.
+
+<PreviewStack>
+  <AgentAsk
+    source="finance-db"
+    question="Which quarter should I reconcile?"
+    explanation="Two datasets match “Q3 revenue” and they disagree by $4,200."
+    fields={[
+      {
+        name: "dataset",
+        type: "select",
+        label: "Dataset",
+        required: true,
+        options: [
+          { value: "final", label: "Q3 Revenue Final.xlsx", hint: "Edited 3 days ago" },
+          { value: "draft", label: "Q3 Revenue.xlsx", hint: "Edited 6 weeks ago" },
+        ],
+      },
+    ]}
+  />
+</PreviewStack>
+
+### Missing parameter
+
+<PreviewStack>
+  <AgentAsk
+    source="calendar"
+    question="What date range should I summarise?"
+    fields={[
+      { name: "from", type: "text", label: "From", placeholder: "2026-09-01", required: true },
+      { name: "to", type: "text", label: "To", placeholder: "2026-09-30", required: true },
+    ]}
+  />
+</PreviewStack>
+
+### Confirm
+
+Explicit Yes/No rather than a checkbox — an unchecked box is ambiguous between "no"
+and "not answered", which matters when submit is gated on being answered.
+
+<PreviewStack>
+  <AgentAsk
+    source="mail-server"
+    question="Should I include archived threads?"
+    fields={[{ name: "archived", type: "confirm", label: "Include archived", required: true }]}
+    submitLabel="Continue"
+  />
+</PreviewStack>
+
+## Examples
+
+Wiring to MCP elicitation — the server pauses, you collect, you resume with the
+echoed state:
+
+```tsx
+const [request, setRequest] = React.useState<InputRequiredResult | null>(null);
+
+{request ? (
+  <AgentAsk
+    source={request.serverName}
+    question={request.prompt}
+    fields={toFields(request.inputRequests)}
+    onRespond={(values) => resumeCall({ inputResponses: values, requestState: request.requestState })}
+    onDecline={() => resumeCall({ inputResponses: null, requestState: request.requestState })}
+    onCancel={() => abortCall()}
+  />
+) : null}
+```
+
+Pairing with the presence indicator, so the ambient state and the question agree:
+
+```tsx
+<AgentPresence state="asking" form="line" size="sm" />
+<AgentAsk source={server} question={prompt} fields={fields} onRespond={resume} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `question` | `string` | — | Required. Targeted and answerable. |
+| `source` | `string` | — | Required. Who is asking. |
+| `fields` | `AskField[]` | — | Required. `text`, `number`, `confirm`, or `select`. |
+| `explanation` | `string` | — | Context that makes the question answerable. |
+| `onRespond` | `(values) => void` | — | Required. |
+| `onDecline` | `() => void` | — | Refuse this question, continue without it. |
+| `onCancel` | `() => void` | — | Abandon the operation. |
+| `submitLabel` | `string` | `"Send"` | |
+
+## Accessibility
+
+- A real `<form>` labelled by the question, with real labels on every control and a
+  `<fieldset>`/`<legend>` around each option group.
+- Yes/No use `aria-pressed` so the chosen answer is exposed, and the tri-state
+  (yes / no / unanswered) stays distinguishable.
+- Every control's hit area reaches ~44px while staying visually compact.
+- Text inputs are 16px on small viewports, so iOS Safari doesn't zoom the page on focus.
+- Selection is shown by border *and* background, never colour alone.
+
+## When not to use
+
+Approving a consequential action the agent has already decided on is `AI Approval Gate`
+— that's "may I do this?", where this is "which one did you mean?". The agent's ambient
+activity is `Agent Presence`. And this is not a chat input: no thread, no history.

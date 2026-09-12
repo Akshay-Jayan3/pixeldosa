@@ -17,6 +17,6 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@pixeldosa": "https://pixeldosa.dev/r/{name}.json"
+    "@pixeldosa": "https://pixeldosa.akshayjayan.com/r/{name}.json"
   }
 }

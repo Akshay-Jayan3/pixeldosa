@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ai-approval-gate",
+  "title": "AI Approval Gate",
+  "description": "A checkpoint before a consequential agent action — the human-in-the-loop surface for LangGraph's interrupt() and any equivalent pause. Takes an `action` phrased as a consequence the user can evaluate ('Send the Q3 summary to 243 contacts', never 'Execute send_email'), a `risk` level, a required `reversible` boolean, an optional `impact` list of countable facts describing the blast radius, optional `confidence` and `provenance`, optional `explanation` and `sources`, and three outcomes: `onApprove`, `onReject` and an optional `onEdit` for when the payload can genuinely be changed before it runs. `reversible` is required rather than optional because whether an action can be taken back is the single most decision-relevant fact on the surface and almost nothing surfaces it; it renders as a plain sentence rather than an icon. A `high` risk action renders its Approve control with the destructive treatment rather than the primary one, so a dangerous action never looks identical to a harmless confirmation. Composes this system's existing trust primitives rather than re-deriving them: Confidence Meter for certainty, AI Context Surface for the reasoning behind the proposal, and AI Action Toolbar for the decision strip — which means the decision controls inherit correct ARIA toolbar semantics, roving tabindex and busy handling for free. Holds perfectly still, since it is the user's turn under the turn-taking grammar; pair it with Agent Presence in the `awaitingApproval` state. Purely presentational: it does not execute the action or own the paused run. Use it before any external side effect — sending messages, spending money, publishing, deleting, or changing permissions. Not for disambiguating between options the agent cannot choose between (use Agent Ask), and not for reviewing a text rewrite hunk by hunk (use Diff Accept).",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "actions", "application"],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme",
+    "@pixeldosa/ai-action-toolbar",
+    "@pixeldosa/ai-context-surface",
+    "@pixeldosa/confidence-meter"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/ai-approval-gate/ai-approval-gate.tsx",
+      "target": "components/ui/ai-approval-gate.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in AI Action Toolbar, AI Context Surface and Confidence Meter, which it composes. Phrase `action` as the consequence rather than the tool call — the whole component is worthless if the user cannot evaluate what they are approving.",
+  "meta": {
+    "engineeringNotes": "This is the payoff component for the system's trust thesis, and it is deliberately a composition rather than a new implementation: Confidence Meter, AI Context Surface and AI Action Toolbar are all consumed as-is, which is the 'compose existing trust primitives' rule (DESIGN.md §3.6) applied at the scale it was written for. Composing the toolbar rather than hand-rolling three buttons also means the decision strip inherits the real ARIA toolbar pattern — roving tabindex, arrow navigation, disabled-action skipping, busy handling — none of which a bespoke approval widget would have got right. Building it surfaced a genuine gap in that toolbar: it had no `destructive` intent, because nothing had needed one until an approval could be dangerous. Adding it there rather than special-casing here is the correct direction, since the house rule that a destructive action must never look identical to a harmless primary one applies system-wide. Two content decisions carry most of the value. `reversible` is a required prop rather than an optional flag: whether something can be undone determines how carefully the rest of the surface deserves to be read, and it renders as a plain sentence ('This cannot be undone') rather than an icon, because an icon is exactly the wrong weight for the most consequential fact present. The `impact` list exists because an approval without a scope is a yes/no question with the information removed — '243 recipients' is what makes the decision reviewable, and it uses tabular figures so the numbers align down the column.",
+    "motionNotes": "Deliberately still. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a): motion means the machine is busy, and animating an approval gate would put it in the same visual register as the agent's own working states — precisely backwards, since nothing here proceeds until the user acts. The only motion is inherited: the composed AI Action Toolbar's colour transitions on hover and focus at `--pd-duration-instant`, and its busy spinner while an approve or reject is in flight, which maps to a real request rather than decorating a wait. AI Context Surface brings its own grid-template-rows disclosure transition when expanded. Nothing animates on entrance — that belongs to whatever surface reveals this gate, the same rule Confidence Meter and AI Action Toolbar hold. Under prefers-reduced-motion every inherited transition drops to instant and the component loses nothing, because it never carried information in movement to begin with."
+  }
+}

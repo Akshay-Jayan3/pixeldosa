@@ -1,0 +1,122 @@
+---
+title: Live Status Line
+description: One line saying what an agent is doing right now — replaced as work moves on, cheap enough to live in permanent product chrome.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { LiveStatusLine } from "@/components/ui/live-status-line";
+
+<LiveStatusLine
+  state={run.state}
+  status="Reading"
+  detail="invoices/2026-q3.csv"
+  startedAt={run.startedAt}
+  onCancel={run.abort}
+/>
+```
+
+## Features
+
+- **It replaces, it doesn't accumulate.** That's the whole distinction from its
+  neighbours — and it's why this is cheap enough to leave in a toolbar or sidebar
+  footer permanently. History belongs to `Reasoning Stream` and
+  `Chain-of-Thought Timeline`.
+- **Composes `Agent Presence`** for the indicator rather than drawing its own dots, so
+  the turn-taking grammar holds here for free — a `suggesting` or `awaitingApproval`
+  status stops moving without this component knowing anything about it.
+- **Layout can't jitter.** A minimum row height means changing text length never
+  reflows the container, and the *detail* truncates before the verb does — so "Reading"
+  stays legible when a long path can't.
+- **The elapsed counter ticks itself**, rather than making you re-render once a second
+  for a display detail.
+- **Swaps once per real change** — keyed on the status text, so a re-render with
+  unchanged text never re-animates.
+
+## Variants
+
+### Working, with an object
+
+<PreviewStack>
+  <LiveStatusLine state="working" status="Reading" detail="invoices/2026-q3.csv" />
+</PreviewStack>
+
+### Thinking
+
+<PreviewStack>
+  <LiveStatusLine state="thinking" status="Planning the reconciliation" />
+</PreviewStack>
+
+### Your turn — it stops
+
+Inherited from `Agent Presence`: the indicator holds still because nothing proceeds
+until you act.
+
+<PreviewStack>
+  <LiveStatusLine state="awaitingApproval" status="Waiting for your approval" />
+</PreviewStack>
+
+### Complete
+
+<PreviewStack>
+  <LiveStatusLine state="done" status="Reconciled 5 invoices" />
+</PreviewStack>
+
+## Examples
+
+In permanent chrome — a sidebar footer or toolbar, where it costs one row:
+
+```tsx
+<footer className="border-t px-3">
+  <LiveStatusLine state={run.state} status={run.status} startedAt={run.startedAt} onCancel={run.abort} />
+</footer>
+```
+
+Per row in a table, where each row has its own agent job:
+
+```tsx
+{rows.map((row) => (
+  <td key={row.id}>
+    <LiveStatusLine state={row.state} status={row.status} detail={row.target} />
+  </td>
+))}
+```
+
+Omit `startedAt` where elapsed time isn't meaningful — a sub-second action doesn't need
+a stopwatch:
+
+```tsx
+<LiveStatusLine state="working" status="Saving" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `state` | `AgentState` | — | Required. Agent Presence's vocabulary. |
+| `status` | `string` | — | Required. The current micro-action. |
+| `detail` | `string` | — | What it's acting on. Truncates before the verb. |
+| `startedAt` | `number \| Date` | — | Drives the live elapsed counter. |
+| `onCancel` | `() => void` | — | Shown while the agent is active. |
+
+All other props forward to the wrapping `<div>`.
+
+## Accessibility
+
+- The status text is announced through `Agent Presence`'s `aria-live` region — one
+  announcement channel, not two competing ones.
+- The elapsed counter uses `tabular-nums`, so the line doesn't shift as seconds tick.
+- Stop is a real keyboard-reachable `<button>` with its hit area extended to ~44px
+  while staying visually compact.
+- Under `prefers-reduced-motion` the swap is dropped; the text simply changes, which
+  loses nothing since the information was always the words.
+
+## When not to use
+
+The reasoning text itself is `Reasoning Stream`. A per-artifact generation surface is
+`Generation Placeholder`. The whole turn's history is `Chain-of-Thought Timeline`. And
+this isn't a toast — it describes ongoing work, it doesn't announce a completed event
+and disappear.

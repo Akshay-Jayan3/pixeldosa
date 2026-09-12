@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
+import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
+import AgentAskDemo from "@pixeldosa/ui/registry/agent-ask/agent-ask.demo";
 import AgentPresenceDemo from "@pixeldosa/ui/registry/agent-presence/agent-presence.demo";
 import AIContextSurfaceDemo from "@pixeldosa/ui/registry/ai-context-surface/ai-context-surface.demo";
 import ButtonDemo from "@pixeldosa/ui/registry/button/button.demo";
@@ -9,14 +11,17 @@ import ConfidenceMeterDemo from "@pixeldosa/ui/registry/confidence-meter/confide
 import ContentCardExample from "@pixeldosa/ui/registry/card/examples/content-card";
 import DiffAcceptDemo from "@pixeldosa/ui/registry/diff-accept/diff-accept.demo";
 import ListingCardExample from "@pixeldosa/ui/registry/card/examples/listing-card";
+import LiveStatusLineDemo from "@pixeldosa/ui/registry/live-status-line/live-status-line.demo";
 import PricingPairExample from "@pixeldosa/ui/registry/card/examples/pricing-pair";
 import FieldDemo from "@pixeldosa/ui/registry/field/field.demo";
 import GenerationPlaceholderDemo from "@pixeldosa/ui/registry/generation-placeholder/generation-placeholder.demo";
 import GhostInputDemo from "@pixeldosa/ui/registry/ghost-input/ghost-input.demo";
 import OverlayDemo from "@pixeldosa/ui/registry/overlay/overlay.demo";
 import ProgressiveRevealDemo from "@pixeldosa/ui/registry/progressive-reveal/progressive-reveal.demo";
+import ReasoningStreamDemo from "@pixeldosa/ui/registry/reasoning-stream/reasoning-stream.demo";
 import SelectionActionsDemo from "@pixeldosa/ui/registry/selection-actions/selection-actions.demo";
 import SmartFieldDemo from "@pixeldosa/ui/registry/smart-field/smart-field.demo";
+import ThinkingExperienceDemo from "@pixeldosa/ui/registry/thinking-experience/thinking-experience.demo";
 
 export type DemoExample = {
   slug: string;
@@ -157,6 +162,46 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A full agent run — the machine states move, then it stops and waits for you.",
       render: AgentPresenceDemo,
+    },
+  ],
+  "thinking-experience": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A full agent run — work, a question, an approval, a result — driven by one state.",
+      render: ThinkingExperienceDemo,
+    },
+  ],
+  "ai-approval-gate": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A high-risk, irreversible send held for approval — scope, confidence and reasoning.",
+      render: AIApprovalGateDemo,
+    },
+  ],
+  "live-status-line": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "An agent run narrated one replaced line at a time, with a live elapsed counter.",
+      render: LiveStatusLineDemo,
+    },
+  ],
+  "agent-ask": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "An agent stuck between two plausible files, asking rather than guessing.",
+      render: AgentAskDemo,
+    },
+  ],
+  "reasoning-stream": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A reasoning trace streaming in, then folding away once the answer lands.",
+      render: ReasoningStreamDemo,
     },
   ],
   "generation-placeholder": [

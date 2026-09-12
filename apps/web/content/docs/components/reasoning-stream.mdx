@@ -1,0 +1,155 @@
+---
+title: Reasoning Stream
+description: An agent's reasoning as it arrives — a two-line ticker while it streams, folding to "Thought for 12s" once the answer exists.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ReasoningStream } from "@/components/ui/reasoning-stream";
+
+export function Answer({ run }: { run: AgentRun }) {
+  return (
+    <>
+      <ReasoningStream
+        steps={run.reasoningSummaries}
+        isStreaming={run.status === "reasoning"}
+        durationMs={run.reasoningMs}
+      />
+      <p>{run.answer}</p>
+    </>
+  );
+}
+```
+
+`steps` is an array rather than a raw string because providers emit reasoning
+*summaries* as discrete parts — deciding where one thought ends is your business, not
+the component's.
+
+## Features
+
+- **It folds away when the answer arrives.** This is the whole thesis, not a
+  convenience. Reasoning is scaffolding: useful while the thing is being built, noise
+  once it stands. A panel left expanded after the answer lands makes every answer look
+  like it needs justifying.
+- **The duration is the useful part.** "Thought for 12s" answers *was this worth
+  waiting for* better than any quantity of reasoning text. It's measured, never
+  estimated.
+- **Scroll anchoring done properly.** It follows new content only while you're at the
+  bottom. The moment you scroll up to read something, it holds your position and offers
+  "Jump to latest" instead of yanking you back.
+- **Never fake typing.** Steps fade in whole. Text that already arrived is never
+  revealed character-by-character, because that misrepresents content the model had
+  already finished producing.
+- **Animate once, never replay** — enforced by React's keyed reconciliation, not a
+  timer.
+
+## Variants
+
+### Streaming
+
+A ticker, newest at the bottom, older lines masked out above. It reads as a process,
+which is what it still is.
+
+<PreviewStack>
+  <ReasoningStream
+    isStreaming
+    steps={[
+      "Checking the invoice table for duplicate payment warnings.",
+      "Found five flagged invoices across the last quarter.",
+      "Three share the same billing contact — that's the strongest signal so far.",
+    ]}
+  />
+</PreviewStack>
+
+### Complete
+
+Collapsed by default. The trace is one click away for anyone who wants it, and out of
+the way for everyone who doesn't.
+
+<PreviewStack>
+  <ReasoningStream
+    durationMs={5400}
+    steps={[
+      "Checking the invoice table for duplicate payment warnings.",
+      "Found five flagged invoices across the last quarter.",
+      "Three share the same billing contact.",
+      "They all came from the 14 August import batch.",
+    ]}
+  />
+</PreviewStack>
+
+### Expanded
+
+<PreviewStack>
+  <ReasoningStream
+    defaultExpanded
+    durationMs={5400}
+    steps={[
+      "Checking the invoice table for duplicate payment warnings.",
+      "Found five flagged invoices across the last quarter.",
+      "Three share the same billing contact.",
+      "They all came from the 14 August import batch.",
+      "The other two are unrelated, so this is one root cause, not five.",
+    ]}
+  />
+</PreviewStack>
+
+## Examples
+
+Mapping from the AI SDK, where reasoning is a distinct part type:
+
+```tsx
+const reasoning = message.parts
+  .filter((part) => part.type === "reasoning")
+  .map((part) => part.text);
+
+<ReasoningStream steps={reasoning} isStreaming={status === "streaming"} />
+```
+
+Pairing with `Agent Presence` — the indicator says *that* it's thinking, this says
+*what* it's thinking:
+
+```tsx
+<AgentPresence state="thinking" form="line" size="sm" />
+<ReasoningStream steps={reasoning} isStreaming />
+```
+
+Opening by default for a debugging or evaluation surface, where the trace *is* the
+content rather than the scaffolding:
+
+```tsx
+<ReasoningStream steps={trace} durationMs={elapsed} defaultExpanded />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `steps` | `string[]` | — | Required. Oldest first; append as they arrive. |
+| `isStreaming` | `boolean` | `false` | Shows the ticker and the "Jump to latest" affordance. |
+| `durationMs` | `number` | — | Measured elapsed time, shown on completion. |
+| `label` | `string` | `"Thinking"` | Verb shown while streaming. |
+| `defaultExpanded` | `boolean` | `false` | |
+
+All other props forward to the wrapping `<div>`.
+
+## Accessibility
+
+- A real disclosure: `aria-expanded` and `aria-controls` wired to the panel, not a
+  custom widget that looks like one.
+- The trigger's hit area is extended to ~44px while staying visually compact.
+- The full trace is reachable by keyboard, and the collapsed summary carries the same
+  duration a sighted user sees.
+- Under `prefers-reduced-motion` the step fades and the expand transition are both
+  dropped. Nothing is lost — the information was never carried by the motion.
+
+## When not to use
+
+The agent's *activity state* is `Agent Presence`. The full historical record across a
+whole turn is `Chain-of-Thought Timeline`. A collapsed "why this?" over an
+already-finished value is `AI Context Surface`. And show reasoning **summaries** where
+the provider exposes them — raw private chain-of-thought shouldn't be presented to end
+users as fact.

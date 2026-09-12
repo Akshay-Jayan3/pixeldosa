@@ -71,6 +71,19 @@
   }
 }
 
+/* A replaced status line. Short and small — the swap says "this changed", and at this
+   frequency anything longer would read as churn. */
+@keyframes pd-status-swap {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Agent Presence orb rotation. Only ever applied while it is the machine's turn —
    a user-turn orb holds perfectly still, which is the grammar's whole point. */
 @keyframes pd-orb-spin {

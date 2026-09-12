@@ -63,9 +63,18 @@ export function getRegistryItem(name: string): RegistryItem | undefined {
   return getRegistryItems().find((item) => item.name === name);
 }
 
-/** Items that represent an installable component (excludes theme/lib items). */
+/**
+ * Items with a docs page — Level 1 components and Level 2 Blocks. Excludes theme and
+ * lib items, which install but have nothing to preview.
+ */
+export const DOCUMENTED_TYPES = ["registry:ui", "registry:block"];
+
 export function getComponents(): RegistryItem[] {
-  return getRegistryItems().filter((item) => item.type === "registry:ui");
+  return getRegistryItems().filter((item) => DOCUMENTED_TYPES.includes(item.type));
+}
+
+export function isBlock(item: { type: string }): boolean {
+  return item.type === "registry:block";
 }
 
 export function getComponentsByCategory(category: string): RegistryItem[] {
