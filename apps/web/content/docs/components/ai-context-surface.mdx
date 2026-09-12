@@ -1,0 +1,108 @@
+---
+title: AI Context / Provenance Surface
+description: A collapsed-by-default "Why this?" disclosure for an AI-produced value's explanation, sources, and model metadata — works with no chat thread required.
+---
+
+## Usage
+
+```tsx
+import { AIContextSurface } from "@/components/ui/ai-context-surface";
+
+<AIContextSurface
+  explanation="Matched based on similar historical records with the same domain."
+  sources={[{ label: "acme-robotics.com", url: "https://acme-robotics.com" }]}
+  model="claude-opus"
+  generatedAt={new Date()}
+/>
+```
+
+Every prop is optional. If none are supplied, the component renders nothing — a
+trigger with an empty panel behind it would be worse than no component at all.
+
+### Sources with a snippet, no link
+
+```tsx
+<AIContextSurface
+  sources={[
+    { label: "Similar record: Acme Manufacturing", snippet: "Same domain root, added 3 weeks ago." },
+  ]}
+/>
+```
+
+A source only needs a `label`; `url` and `snippet` are both optional and independent —
+a source can have a link, a snippet, both, or neither.
+
+## Features
+
+- **Quiet until asked for.** Collapsed by default, so provenance never competes with
+  the value it explains — this is the reference implementation of DESIGN.md §4's
+  "quiet until asked for" instinct.
+- **Renders nothing when it has nothing.** Every prop is optional; with none supplied
+  the component returns `null` rather than offering a trigger with an empty panel.
+- **Evidence over decoration** — sources carry an optional link *and* an optional
+  snippet, independently, so you can show the actual retrieved text rather than just
+  asserting a source exists.
+- **A real disclosure**, with `aria-expanded`/`aria-controls` wired correctly, not a
+  custom widget that merely looks like one.
+- **No chat thread required** — it attaches to a single value anywhere in ordinary
+  product UI.
+
+## Variants
+
+Explanation only — the minimum useful surface:
+
+<PreviewStack>
+  <AIContextSurface explanation="Matched on the same domain root as three existing records, added within the last month." />
+</PreviewStack>
+
+### With sources and model metadata
+
+<PreviewStack>
+  <AIContextSurface
+    explanation="Matched based on similar historical records with the same domain."
+    sources={[
+      { label: "acme-robotics.com", url: "https://acme-robotics.com" },
+      { label: "Similar record: Acme Manufacturing", snippet: "Same domain root, added 3 weeks ago." },
+    ]}
+    model="claude-opus"
+    generatedAt="2026-08-14T09:30:00.000Z"
+  />
+</PreviewStack>
+
+### A custom trigger label
+
+`triggerLabel` is both the visible and the accessible label, so it should read as a
+question the user actually has.
+
+<PreviewStack>
+  <AIContextSurface
+    triggerLabel="Where did this come from?"
+    sources={[{ label: "Q3 pipeline export", snippet: "Row 148, imported 2 weeks ago." }]}
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `explanation` | `string` | — | Plain-language reasoning, shown first. |
+| `sources` | `{ label: string; url?: string; snippet?: string }[]` | — | Rendered as a numbered list. |
+| `model` | `string` | — | Shown in the metadata footer line. |
+| `generatedAt` | `string \| Date` | — | Formatted internally (relative within 24h, absolute otherwise). |
+| `triggerLabel` | `string` | `"Why this?"` | Visible and accessible label for the collapsed trigger. |
+
+## Accessibility
+
+- A real disclosure: `aria-expanded` and `aria-controls` wired correctly, not a
+  custom widget that only looks like one.
+- Panel content is normal reading-order text, not a floating overlay, so it reflows
+  naturally at any width.
+- Under `prefers-reduced-motion`, the expand/collapse becomes instant; `aria-expanded`
+  communicates the state to assistive technology regardless of any icon animation.
+
+## When not to use
+
+A full chat/conversation transcript is out of this system's scope entirely. A single
+short provenance caption for one value already has a home — `Smart Field`'s own
+inline `provenance` prop — use that instead of this heavier disclosure for a one-line
+`via {source}` caption.

@@ -31,6 +31,57 @@ button stays mounted, keeps focus, and is announced as busy:
 </Button>
 ```
 
+## Features
+
+- **Six variants, four sizes**, all resolved from the same semantic tokens — restyling
+  the system restyles every button without touching this file.
+- **`asChild` polymorphism**: renders a `Link`, an `<a>`, or any element with the
+  button's full styling and behaviour, so a navigating trigger never has to fake it.
+- **A real loading state** that keeps the button mounted and focused rather than
+  swapping it for a spinner, and announces itself with `aria-busy`.
+- **Press feedback that degrades honestly** — the transform drops under
+  `prefers-reduced-motion` while colour and ring changes still communicate the state.
+
+## Variants
+
+`default` is the single primary action in a view. Everything else steps down from it —
+contrast carries the hierarchy, not colour.
+
+<Preview>
+  <Button>Default</Button>
+  <Button variant="secondary">Secondary</Button>
+  <Button variant="outline">Outline</Button>
+  <Button variant="ghost">Ghost</Button>
+  <Button variant="destructive">Destructive</Button>
+  <Button variant="link">Link</Button>
+</Preview>
+
+### Sizes
+
+`icon` renders a square target for icon-only triggers — always pair it with an
+`aria-label`.
+
+<Preview>
+  <Button size="sm">Small</Button>
+  <Button size="default">Default</Button>
+  <Button size="lg">Large</Button>
+</Preview>
+
+### Loading
+
+<Preview>
+  <Button loading loadingLabel="Saving changes">Save</Button>
+  <Button variant="outline" loading>Processing</Button>
+</Preview>
+
+### Disabled
+
+<Preview>
+  <Button disabled>Default</Button>
+  <Button variant="outline" disabled>Outline</Button>
+  <Button variant="destructive" disabled>Destructive</Button>
+</Preview>
+
 ## Props
 
 | Prop | Type | Default | Description |

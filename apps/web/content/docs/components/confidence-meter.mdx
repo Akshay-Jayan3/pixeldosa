@@ -1,0 +1,82 @@
+---
+title: Confidence Meter
+description: A tiered (low/medium/high) confidence indicator with an optional provenance caption, shared by every AI-tier component that needs to communicate uncertainty honestly.
+---
+
+## Usage
+
+```tsx
+import { ConfidenceMeter } from "@/components/ui/confidence-meter";
+
+<ConfidenceMeter confidence="medium" provenance="acme-robotics.com" />
+```
+
+`confidence` is a three-tier enum, never a raw percentage — a fabricated number would
+claim precision the underlying model doesn't actually have, and the system's token set
+has no "success"/"warning" hue to spend on a red/yellow/green scale anyway (only
+`destructive` keeps real chroma). `provenance` is optional free text, rendered as
+`via {provenance}` alongside the tier.
+
+### Composed by other AI-tier components
+
+This isn't usually installed on its own — `Smart Field` and `Selection Actions` both
+compose it directly for their proposal/classification results, and `AI Approval Gate`
+(planned) will too. Install it standalone only if you're building a new AI-assisted
+component that needs the same indicator.
+
+## Features
+
+- **Three tiers, never a percentage.** A raw number would claim precision the
+  underlying model doesn't have; the enum is the honest resolution.
+- **Decoration, not colour.** The token set has no success/warning hue to spend on a
+  red/yellow/green scale, so the tier is carried by filled bars plus a text label —
+  which is also more accessible than a colour-only signal (DESIGN.md §3.2).
+- **The text label is the real signal**; the bars are `aria-hidden` and supplementary,
+  never the only way the level is communicated.
+- **Optional provenance** rendered inline as `via {source}`, so a score can be shown
+  next to its evidence rather than floating free.
+- **Nothing to get wrong under reduced motion** — it's presentational, with no
+  animation and no keyboard interaction of its own.
+
+## Variants
+
+The three tiers, side by side:
+
+<PreviewStack>
+  <ConfidenceMeter confidence="low" />
+  <ConfidenceMeter confidence="medium" />
+  <ConfidenceMeter confidence="high" />
+</PreviewStack>
+
+### With provenance
+
+Prefer this whenever you actually have a source. A score with evidence behind it is
+worth more than a score on its own — and if you can't show real evidence, say less,
+not more.
+
+<PreviewStack>
+  <ConfidenceMeter confidence="high" provenance="acme-robotics.com" />
+  <ConfidenceMeter confidence="medium" provenance="12 similar records" />
+  <ConfidenceMeter confidence="low" provenance="a single unverified mention" />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `confidence` | `"low" \| "medium" \| "high"` | — | Required. |
+| `provenance` | `string` | — | Optional source caption, shown as `via {provenance}`. |
+| `className` | `string` | — | |
+
+## Accessibility
+
+- The tier's text label is the real signal — the bar indicator is `aria-hidden` and
+  supplementary, never the only way the confidence level is communicated.
+- Purely presentational: no keyboard interaction of its own, no motion, nothing to get
+  wrong under `prefers-reduced-motion`.
+
+## When not to use
+
+A full sources/context/explanation surface is `AI Context / Provenance Surface`
+(planned) — a richer, separate component. This one is a compact inline rating, not an
+explanation panel.

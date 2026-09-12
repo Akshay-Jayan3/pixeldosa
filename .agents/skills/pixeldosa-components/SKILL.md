@@ -13,22 +13,31 @@ documentation polish.
 Follow this file exactly. If a request conflicts with it, say so rather than
 silently deviating.
 
-## The three pillars
+**A component is not an island.** Nothing in `packages/ui/src/registry` is built to
+stand alone forever — every Level 1 component exists to be composed into a Level 2
+Block, and Blocks exist to be composed into Templates (which live outside this repo).
+If a proposed component can't name at least one Block it will plug into, that's a
+signal to check the roadmap before building it, not a reason to skip composability. In
+practice this means: favour a composed sub-component API (see `field`, `overlay`) over
+a single monolithic prop-driven one wherever the component has real internal
+structure, since monolithic APIs are the ones that end up forked instead of reused
+inside a Block.
 
-Every component belongs to exactly one, declared as `meta.pillar`:
+## Practical categories
 
-- **`core`** — primitives: buttons, dialogs, tabs, form fields. These earn trust.
-  Consistency beats novelty here.
-- **`ai`** — chat surfaces, streaming responses, prompt inputs, agent-pattern UI.
-  Design for streaming, tool calls and uncertainty states as first-class — not a
-  chat bubble with a spinner bolted on.
-- **`motion`** — cursor-reactive effects, scroll-driven animation, generated
-  backgrounds. Novelty is earned here, and nowhere else.
+Components are grouped by the job a developer is trying to do, not by internal
+engineering pillars. Every registry item begins its `categories` array with one
+primary navigation category:
 
-**Motion must earn its place.** A component gets animation because the interaction
-benefits — state change, feedback, orientation. Before shipping any animation, you
-must be able to state in one sentence what interaction problem it solves. If you
-cannot, remove it.
+- **`actions`** — buttons and controls that trigger work.
+- **`content`** — cards, lists, data and content presentation.
+- **`forms`** — fields, inputs and form composition.
+- **`ai-assisted`** — AI embedded inside conventional product UI.
+- **`overlays`** — dialogs, sheets, popovers and overlay infrastructure.
+
+Additional tags such as `application`, `marketing`, `business`, or `motion` may be
+used for filtering, but they do not create separate navigation pillars. Motion still
+needs a user-facing purpose: state change, feedback, or orientation.
 
 ## Where things live
 
@@ -44,6 +53,94 @@ cannot, remove it.
 
 Templates and starter kits do **not** live in this repo. They are separate
 `pixeldosa-template-*` repositories that consume the published registry.
+
+## Planning phase — before any code
+
+A component is not a UI request until it has been thought through as a product decision.
+Do not open an editor until this section is done. Skipping straight to Step "Adding a
+component" for anything beyond a trivial variant tweak is itself a review failure.
+
+**Never start from UI.** Start from the workflow: who is using this, what are they trying
+to accomplish, what problem does it solve, when does it appear, what happens immediately
+before and after it.
+
+Work through the plan wearing each of these hats in turn — Product Designer, Design
+Engineer, Frontend Architect, OSS Maintainer, Developer Advocate, Motion Designer, UX
+Researcher, and (only when the component is AI-surface-facing) AI Product Designer:
+
+1. **Research** — two tracks, both required.
+   - *Pattern research*: why developers reach for this pattern, how products like
+     Linear, Vercel, Cursor, Framer, Notion, Perplexity, Stripe, GitHub, Raycast and Arc
+     handle it, the accessibility guidance that applies, the mistakes teams commonly
+     make with it, and where there's real room to improve on the state of the art.
+   - *Visual research*: study premium execution specifically for layout, typography,
+     white space, motion, visual hierarchy, storytelling, CTA placement, grid systems,
+     animation, and product-demo craft. Primary references: Framer, Vercel, Linear,
+     Stripe, Cursor, Perplexity, Notion, Arc, Raycast, Apple. When the component is
+     visually led — marketing surfaces, empty states, onboarding, hero moments — also
+     pull from design galleries: Framer Marketplace, Awwwards, Landbook, Godly, Mobbin,
+     Cosmos, Lapa Ninja, SaaSFrame, One Page Love.
+   - Never copy. For every reference pulled in, write down *why* it works — which of the
+     study dimensions above it nails and what problem that solves for the user — not
+     just that it looks good. A reference with no stated reason isn't usable later to
+     justify a decision.
+2. **Product context** — which products or pages would use this, what user action
+   triggers it, what business workflow depends on it, what information should be visible
+   versus hidden, and what decision it should make faster.
+3. **Component strategy** — decide whether this is a primitive, pattern, experience,
+   workflow, system, registry block, or template section, and state why. Most Pixeldosa
+   components should resolve to primitive or pattern; reach for something larger only
+   when the workflow genuinely demands it.
+4. **UX architecture** — entry, primary action, secondary actions, loading/empty/error/
+   success states, edge cases, responsive behaviour, accessibility, keyboard shortcuts,
+   touch interactions.
+5. **Visual direction** — layout, spacing, typography, colour usage, hierarchy, icons,
+   depth, borders, radius, density, interaction feedback. Premium and timeless over
+   trendy; avoid visual noise.
+6. **Motion plan** — entrance, exit, hover, focus, loading, progress, micro-interactions.
+   Motion communicates state, not decoration — the same bar `meta.motionNotes` enforces
+   below, just decided earlier.
+7. **AI opportunities** — only for `ai`-pillar components: streaming, thinking,
+   suggestions, context, memory, tool execution, approvals, agent collaboration. If AI
+   adds no value here, say so explicitly and move on; forcing it is worse than skipping it.
+8. **Variants** — compact, comfortable, dense, minimal, enterprise, marketing, dashboard,
+   touch/mobile — whichever are actually useful for this component, not an exhaustive
+   list for its own sake.
+9. **Public API** — props, slots, composition, variants, hooks, events, theming, dark
+   mode. Design this before writing implementation; it becomes the CVA variant matrix
+   and exported prop types in the steps below.
+10. **Registry planning** — category, collection, dependencies, install story, docs,
+    example pages, related components, and any future template this unlocks.
+11. **Content** — one-line description, problem solved, when to use, when not to use,
+    key differentiators. This is the seed for `registry-item.json`'s `description` and
+    the docs page intro — write it here first rather than backfilling it later.
+12. **Pixeldosa Score** — rate Design Value, Developer Value, Business Value, Marketing
+    Value, Reusability, Originality, and Learning Value out of 10 each, with a one-line
+    justification per score. If more than one or two land below 6, the plan isn't ready —
+    refine it, don't ship it.
+
+Write the plan up in this order before touching code:
+
+```
+# Research
+# User Workflow
+# Product Context
+# Component Strategy
+# UX Flow
+# Visual Direction
+# Motion Plan
+# AI Opportunities
+# Variants
+# Public API
+# Registry Structure
+# Documentation Notes
+# Pixeldosa Score
+# Next Steps
+```
+
+Before moving on, ask: would this be proudly showcased on the Pixeldosa homepage? If not,
+keep refining the plan — do not compensate with polish in the code. Only once the plan
+holds up does "Adding a component: the exact steps" begin.
 
 ## Adding a component: the exact steps
 
@@ -131,7 +228,7 @@ remain legible without the movement.
   "title": "[Title Case]",
   "description": "...",
   "type": "registry:ui",
-  "categories": ["<pillar>", "..."],
+  "categories": ["<primary practical category>", "..."],
   "dependencies": ["npm packages the file imports"],
   "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
   "files": [
@@ -143,7 +240,6 @@ remain legible without the movement.
   ],
   "docs": "Install-time caveats a consumer needs before the component works.",
   "meta": {
-    "pillar": "core | ai | motion",
     "engineeringNotes": "...",
     "motionNotes": "..."
   }
@@ -152,6 +248,9 @@ remain legible without the movement.
 
 - `name` must equal the directory name. `files[].path` is relative to
   `apps/web/registry.json`, which is why it starts with `../../`.
+- **`categories`** must begin with one practical navigation category. Additional
+  free-text tags such as `application`, `marketing`, `business`, or `motion` are
+  welcome for docs-site filtering.
 - **`description`** is written for an LLM reading it cold with no other context: what
   the component is, what it renders, what its options are, and when to use it versus
   a neighbouring component. Not marketing copy. The build enforces a minimum length

@@ -38,6 +38,57 @@ For a Sheet or Drawer, swap `placement` to `"right"`, `"left"`, `"top"` or `"bot
 position `OverlayContent` against that edge instead of centering it — the translate
 distance and easing stay identical, only the axis changes.
 
+## Features
+
+- **One motion layer for four patterns.** Dialog, Sheet, Popover and Drawer share the
+  same scrim and panel transition — only `placement` changes, so they can't drift apart
+  into four slightly different fades.
+- **A strict division of labour**: Radix owns focus trapping, dismissal and portalling;
+  Overlay owns motion and nothing else. It adds no accessibility semantics of its own
+  precisely so it can't contradict the primitive it wraps.
+- **Exit animations that actually run**, via `AnimatePresence` plus `forceMount` — the
+  element stays mounted long enough to animate out instead of vanishing.
+- **Token-driven throughout** — duration and easing come from the motion tokens, so
+  retuning the system's rhythm retunes every overlay at once.
+
+## Examples
+
+Five placements, one component. `center` adds a slight scale-in; the edge placements
+translate in from their edge with identical distance and easing:
+
+```tsx
+<OverlayContent placement="center" className="fixed left-1/2 top-1/2 w-96 -translate-x-1/2 -translate-y-1/2 p-6" />
+```
+
+A right-hand sheet — position it against the edge and switch `placement`; nothing else
+changes:
+
+```tsx
+<OverlayContent placement="right" className="fixed inset-y-0 right-0 w-80 p-6">
+  {children}
+</OverlayContent>
+```
+
+A bottom drawer, which is usually the right mobile counterpart to a centered dialog:
+
+```tsx
+<OverlayContent placement="bottom" className="fixed inset-x-0 bottom-0 rounded-b-none p-6">
+  {children}
+</OverlayContent>
+```
+
+`forceMount` is not optional — without it Radix unmounts the content immediately and
+`AnimatePresence` never gets to run the exit:
+
+```tsx
+<Dialog.Portal forceMount>
+  <Dialog.Overlay asChild>
+    <OverlayScrim />
+  </Dialog.Overlay>
+  {/* … */}
+</Dialog.Portal>
+```
+
 ## Props
 
 ### OverlayScrim

@@ -1,0 +1,165 @@
+---
+title: Selection Actions
+description: A floating, selection-triggered toolbar for AI actions — explain, rewrite (reviewed via Diff Accept), translate, classify, extract.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import * as React from "react";
+import {
+  SelectionActions,
+  type SelectionAction,
+  type SelectionActionResult,
+} from "@/components/ui/selection-actions";
+
+const actions: SelectionAction[] = [
+  { id: "explain", label: "Explain", icon: <ExplainIcon /> },
+  { id: "rewrite", label: "Rewrite", icon: <RewriteIcon /> },
+];
+
+async function handleAction(
+  actionId: string,
+  selectedText: string,
+  signal: AbortSignal
+): Promise<SelectionActionResult> {
+  const response = await callYourModel(actionId, selectedText, signal);
+  return response; // shaped as one of the SelectionActionResult kinds below
+}
+
+export function Article({ text }: { text: string }) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [content, setContent] = React.useState(text);
+
+  return (
+    <>
+      <div ref={containerRef}>{content}</div>
+      <SelectionActions
+        containerRef={containerRef}
+        actions={actions}
+        onAction={handleAction}
+        onReplace={(merged, original) => setContent((c) => c.replace(original, merged))}
+      />
+    </>
+  );
+}
+```
+
+Only text selected inside `containerRef` triggers the toolbar — selections elsewhere
+on the page are ignored, so multiple independent text regions don't fight over which
+selection is active.
+
+### Result shapes
+
+`onAction` must resolve to one of four shapes, each rendered differently:
+
+```ts
+type SelectionActionResult =
+  | { kind: "replacement"; value: string }   // rendered via Diff Accept
+  | { kind: "text"; value: string }          // prose, e.g. Explain/Translate
+  | { kind: "classification"; label: string; confidence?: "low" | "medium" | "high" }
+  | { kind: "list"; items: string[] };        // e.g. Extract
+```
+
+`replacement` is the only kind that can call `onReplace` — it renders through `Diff
+Accept` internally, so the user reviews and explicitly accepts before anything
+changes. The other three kinds only display information; they never touch the
+consumer's content.
+
+## Features
+
+- **Scoped to one container.** Only selections inside `containerRef` raise the toolbar,
+  so independent text regions never fight over which selection is active.
+- **Four result shapes, one component** — `replacement`, `text`, `classification` and
+  `list` each render appropriately, so Explain, Rewrite, Translate, Classify and Extract
+  all share a single surface.
+- **Only `replacement` can change your content**, and it does so through `Diff Accept`
+  rather than a second accept/reject implementation — composing an existing trust
+  primitive instead of reinventing it (DESIGN.md §3.6).
+- **The other three kinds are read-only** by construction: they display and never call
+  `onReplace`.
+- **Aborts on demand** — `onAction` receives an `AbortSignal`, so a superseded or
+  dismissed action cancels the model call rather than leaking it.
+- **Honest about a platform limit** it can't fix — see Accessibility.
+
+## Examples
+
+A read-only action set, where nothing the model returns can modify the document —
+useful for reference material that must stay verbatim:
+
+```tsx
+const actions: SelectionAction[] = [
+  { id: "explain", label: "Explain", icon: <ExplainIcon /> },
+  { id: "translate", label: "Translate", icon: <TranslateIcon /> },
+];
+
+<SelectionActions containerRef={containerRef} actions={actions} onAction={handleAction} />
+```
+
+Omitting `onReplace` entirely is the enforcement: with no handler, an accepted
+`replacement` has nowhere to land.
+
+Returning a classification rather than prose — the confidence tier flows straight into
+`Confidence Meter`'s presentation:
+
+```ts
+async function handleAction(actionId, selectedText, signal) {
+  if (actionId === "classify") {
+    const { label, tier } = await classify(selectedText, signal);
+    return { kind: "classification", label, confidence: tier };
+  }
+  return { kind: "text", value: await explain(selectedText, signal) };
+}
+```
+
+Extraction, rendered as a list:
+
+```ts
+return { kind: "list", items: ["hello@acme.com", "+1 555 0123"] };
+```
+
+Making the toolbar less eager on long selections by waiting longer after the selection
+settles:
+
+```tsx
+<SelectionActions
+  containerRef={containerRef}
+  actions={actions}
+  onAction={handleAction}
+  settleMs={400}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `containerRef` | `React.RefObject<HTMLElement \| null>` | — | Required. Scopes selection detection to this element. |
+| `actions` | `SelectionAction[]` | — | Required. `{ id, label, icon }` per action. |
+| `onAction` | `(actionId, selectedText, signal) => Promise<SelectionActionResult>` | — | Required. |
+| `onReplace` | `(mergedValue: string, originalSelectedText: string) => void` | — | Fires only for an accepted `replacement` result. |
+| `settleMs` | `number` | `200` | Debounce after the selection stops changing before the toolbar appears. |
+
+## Accessibility
+
+- The toolbar is a real `role="toolbar"` of `<button>` elements in natural tab order.
+- Result state changes are announced; confidence is always shown as text, never colour
+  alone.
+- **A real limit, not glossed over:** keyboard-only users generally cannot create an
+  arbitrary text selection in static, non-editable content at all — this is a
+  platform-level gap, not something a floating toolbar can fix. What this component
+  does guarantee: once any selection exists (mouse, platform accessibility tooling, or
+  keyboard inside an editable context where keyboard selection works), the toolbar
+  itself is fully keyboard-operable.
+- Escape dismisses the toolbar or result from anywhere within it; clicking outside
+  does the same.
+- Under `prefers-reduced-motion`, the toolbar's entrance is instant rather than
+  animated, with no loss of legibility.
+
+## When not to use
+
+A whole-field or whole-document action, with no selection involved, is `Smart Field`
+(one field) or `Diff Accept` directly (a rewrite already proposed elsewhere) — not
+this component.

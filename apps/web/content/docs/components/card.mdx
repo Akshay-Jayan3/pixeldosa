@@ -97,6 +97,84 @@ plain `className` override (`border-2 border-primary`) rather than a prop, since
 </Card>
 ```
 
+## Features
+
+- **Eight composable parts** rather than a props-driven mega-component, so a card can
+  be a summary, a listing, or a pricing tier without any of them being a special case.
+- **A self-arranging header**: `CardHeader` grows a second column automatically when a
+  `CardAction` is present, keeping the trailing control top-aligned however much the
+  title and description wrap.
+- **Two orientations**: `vertical` renders `CardImage` as a top banner, `horizontal`
+  as a fixed-width, left-rounded side panel.
+- **No invented interaction semantics** — every part is a plain `div`, so making a
+  card actionable stays an explicit decision (see Accessibility).
+
+## Variants
+
+The default vertical composition — header, content, and a separated footer:
+
+<Preview>
+  <Card className="w-full max-w-sm">
+    <CardHeader>
+      <CardTitle>Plated dosa set</CardTitle>
+      <CardDescription>Serves two, ready in 12 minutes.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-muted-foreground">
+        Crisp rice-and-lentil crepe, coconut chutney, and sambar on the side.
+      </p>
+    </CardContent>
+    <CardFooter className="border-t">
+      <Button className="w-full">Add to order</Button>
+    </CardFooter>
+  </Card>
+</Preview>
+
+### With a header action
+
+`CardAction` takes the header's second column, so the trigger stays pinned top-right
+no matter how long the title runs.
+
+<Preview>
+  <Card className="w-full max-w-sm">
+    <CardHeader>
+      <CardTitle>Weekly digest</CardTitle>
+      <CardDescription>Sent every Monday at 9am.</CardDescription>
+      <CardAction>
+        <Button variant="ghost" size="sm">Edit</Button>
+      </CardAction>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-muted-foreground">
+        Delivered to 1,284 subscribers.
+      </p>
+    </CardContent>
+  </Card>
+</Preview>
+
+### Highlighted
+
+A highlighted tier is a `className` override, not a prop — "highlighted" is a one-off
+treatment, not a structural variant worth encoding in the API.
+
+<Preview>
+  <Card className="w-full max-w-sm border-2 border-primary">
+    <CardHeader>
+      <CardTitle>Pro</CardTitle>
+      <CardDescription>For agencies</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <span className="text-3xl font-semibold">$40</span>
+    </CardContent>
+    <CardFooter>
+      <Button className="w-full">Subscribe</Button>
+    </CardFooter>
+  </Card>
+</Preview>
+
+For the horizontal orientation and the full listing/pricing compositions, see the
+examples at the top of this page.
+
 ## Props
 
 Every part forwards `className` and all native props of the element it renders.

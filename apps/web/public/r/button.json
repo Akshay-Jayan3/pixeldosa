@@ -27,15 +27,13 @@
     }
   },
   "meta": {
-    "pillar": "core",
     "engineeringNotes": "Variants are declared with CVA rather than conditional className strings so that the full variant matrix is a single serialisable object: it can be type-derived (VariantProps), documented from source, and extended by consumers via buttonVariants() without forking the component. The loading state disables the button but deliberately keeps it mounted and in the tab order — swapping a button for a spinner element moves focus to the document body mid-interaction, which is the most common accessibility regression in loading buttons. asChild uses Radix Slot instead of a render-prop so that ref forwarding and event composition are handled by the primitive rather than reimplemented here.",
     "motionNotes": "The only motion is a 2% active-state scale, driven by CSS transition rather than Motion — a button appears dozens of times per page and forcing a JS animation runtime into it would be a bundle cost with no interaction benefit. Duration (instant, 100ms) and easing come from CSS custom properties generated from the motion tokens, so the press feedback stays in step with the rest of the system. The motion solves one problem: confirming that a press registered before the resulting state change lands. Under prefers-reduced-motion the transform is dropped entirely and the state remains legible through the background and focus-ring changes, which is a fallback rather than a silent removal."
   },
   "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. The press-feedback transition reads --pd-duration-instant and --pd-ease-standard; these are installed with this component, and the full token set arrives with the pixeldosa-theme item. When using asChild the rendered child receives aria-disabled rather than the disabled attribute, since non-button elements do not support it — handle click suppression in your own handler if the child is interactive.",
   "categories": [
-    "core",
-    "form",
-    "action"
+    "actions",
+    "forms"
   ],
   "type": "registry:ui"
 }

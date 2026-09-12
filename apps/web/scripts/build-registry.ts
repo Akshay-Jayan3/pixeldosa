@@ -61,10 +61,7 @@ for (const dir of dirs) {
     problems.push(`${dir}: item name "${item.name}" does not match its directory`);
   }
 
-  // Section 4: these are the differentiation layer, so their absence is a build
-  // failure rather than a lint warning.
   const meta = (item.meta ?? {}) as Record<string, string>;
-  if (!meta.pillar) problems.push(`${item.name}: meta.pillar is missing`);
   if (!meta.engineeringNotes || meta.engineeringNotes.length < 80) {
     problems.push(`${item.name}: meta.engineeringNotes is missing or too thin`);
   }

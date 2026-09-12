@@ -15,6 +15,20 @@ type OverlayPlacement = "center" | "top" | "bottom" | "left" | "right";
 
 const distance = 12;
 
+/**
+ * Where the panel appears to grow from. A surface that scales out of the middle of the
+ * screen reads as unanchored — an edge-anchored sheet should expand from its own edge,
+ * and a popover from the side facing its trigger. Set here rather than left to the
+ * consumer so every overlay in the system is spatially connected by default.
+ */
+const transformOrigin: Record<OverlayPlacement, string> = {
+  center: "center",
+  top: "top center",
+  bottom: "bottom center",
+  left: "left center",
+  right: "right center",
+};
+
 function placementVariants(placement: OverlayPlacement): Variants {
   const offset: Record<OverlayPlacement, { x?: number; y?: number }> = {
     center: {},
@@ -101,7 +115,7 @@ export interface OverlayContentProps extends React.ComponentPropsWithoutRef<type
 }
 
 const OverlayContent = React.forwardRef<HTMLDivElement, OverlayContentProps>(function OverlayContent(
-  { placement = "center", className, ...props },
+  { placement = "center", className, style, ...props },
   ref
 ) {
   const reduced = usePrefersReducedMotion();
@@ -115,6 +129,7 @@ const OverlayContent = React.forwardRef<HTMLDivElement, OverlayContentProps>(fun
       animate="visible"
       exit="exit"
       transition={reduced ? reducedMotion : undefined}
+      style={{ transformOrigin: transformOrigin[placement], ...style }}
       className={cn(
         "z-50 rounded-lg border bg-popover text-popover-foreground shadow-lg",
         className

@@ -1,0 +1,117 @@
+---
+title: Progressive Reveal
+description: Reveals a growing collection of items one at a time as they arrive, with a stable layout and no per-character typewriter effect.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import * as React from "react";
+import { ProgressiveReveal } from "@/components/ui/progressive-reveal";
+
+export function SearchResults() {
+  const [items, setItems] = React.useState<Result[]>([]);
+  const [streaming, setStreaming] = React.useState(false);
+
+  // ...append to `items` as results arrive from your stream...
+
+  return (
+    <ProgressiveReveal
+      items={items}
+      keyExtractor={(item) => item.id}
+      isStreaming={streaming}
+      renderItem={(item) => <ResultCard result={item} />}
+    />
+  );
+}
+```
+
+Each item is given its entrance transition exactly once — an item already present on a
+prior render keeps its existing DOM node and is never remounted, so its animation can
+never replay, no matter how often the parent re-renders.
+
+### Why not a typewriter effect
+
+The full value of each item already exists the moment it arrives — revealing it
+character-by-character would misrepresent something already fully generated as being
+"typed live." This component only ever fades a whole item in, never streams its
+content.
+
+### Grid layout
+
+```tsx
+<ProgressiveReveal items={cards} layout="grid" renderItem={(card) => <Card {...card} />} />
+```
+
+## Features
+
+- **Animate once, never replay.** Entrance is enforced by React's own keyed
+  reconciliation, not a timer — an item present on a prior render keeps its DOM node,
+  so no amount of parent re-rendering can restart its transition.
+- **No fabricated typing.** Items fade in whole. Content that already exists in full is
+  never revealed character-by-character (DESIGN.md §3.3).
+- **Stable layout while streaming** — items append without shifting what's already
+  been read.
+- **Announced as a running count**, once, through a single `aria-live` region rather
+  than one announcement per arrival, so a fast stream doesn't flood a screen reader.
+- **Two layouts** — `stack` and `grid` — sharing one entrance behaviour.
+
+## Examples
+
+A grid of results rather than a vertical stack:
+
+```tsx
+<ProgressiveReveal
+  items={cards}
+  layout="grid"
+  keyExtractor={(card) => card.id}
+  renderItem={(card) => <ResultCard result={card} />}
+/>
+```
+
+Showing the trailing "More loading…" indicator while the stream is still open — flip
+`isStreaming` to `false` the moment it closes, so the indicator never outlives the work
+it represents:
+
+```tsx
+<ProgressiveReveal
+  items={results}
+  keyExtractor={(result) => result.id}
+  isStreaming={status === "streaming"}
+  renderItem={(result) => <ResultRow result={result} />}
+/>
+```
+
+Pass a real `keyExtractor` whenever the array might be spliced rather than purely
+appended — the array index is only a safe key while items are append-only:
+
+```tsx
+<ProgressiveReveal items={items} keyExtractor={(item) => item.id} renderItem={renderItem} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `items` | `T[]` | — | Required. The current known items; append to it as more arrive. |
+| `renderItem` | `(item: T, index: number) => React.ReactNode` | — | Required. |
+| `keyExtractor` | `(item: T, index: number) => React.Key` | array index | Use a real key whenever the array might be spliced, not purely appended. |
+| `isStreaming` | `boolean` | `false` | Shows a trailing "More loading…" indicator. |
+| `layout` | `"stack" \| "grid"` | `"stack"` | |
+
+## Accessibility
+
+- Item arrivals are announced through a single `aria-live="polite"` region reporting
+  the running count, not one announcement per item, so a fast stream doesn't spam a
+  screen reader.
+- The streaming indicator's text is the real signal; its pulsing dot is decorative.
+- Under `prefers-reduced-motion`, per-item entrance becomes instant and the pulse stops
+  oscillating, but the "More loading…" text stays exactly as informative.
+
+## When not to use
+
+Streaming prose is a different problem — reach for an existing chat/response
+component (e.g. Vercel AI Elements) instead. A single value that changes over time is
+`Smart Field` or `Diff Accept`, not a collection.

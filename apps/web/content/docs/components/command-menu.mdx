@@ -1,0 +1,198 @@
+---
+title: Command Menu
+description: A global, keyboard-first overlay for finding resources and running actions across an app — ⌘K/Ctrl+K, fuzzy search, grouped results, and keybind hints.
+---
+
+## Usage
+
+`CommandMenu` is controlled-only: your app owns the `open` boolean and the global
+`⌘K`/`Ctrl+K` listener, since that listener has to exist in your app regardless of this
+component.
+
+```tsx
+"use client";
+
+import * as React from "react";
+import {
+  CommandMenu,
+  CommandMenuEmpty,
+  CommandMenuGroup,
+  CommandMenuInput,
+  CommandMenuItem,
+  CommandMenuList,
+} from "@/components/ui/command-menu";
+
+export function AppCommandMenu() {
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        setOpen((value) => !value);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  return (
+    <CommandMenu open={open} onOpenChange={setOpen} label="Command Menu">
+      <CommandMenuInput placeholder="Type a command or search…" />
+      <CommandMenuList>
+        <CommandMenuEmpty>No results found.</CommandMenuEmpty>
+        <CommandMenuGroup heading="Actions">
+          <CommandMenuItem onSelect={() => createIssue()} keybind="C">
+            Create new issue
+          </CommandMenuItem>
+        </CommandMenuGroup>
+      </CommandMenuList>
+    </CommandMenu>
+  );
+}
+```
+
+Triggering the shortcut while the menu is already open should close it — that's why the
+handler above toggles rather than always setting `true`. Pair the global listener with a
+visible trigger button (with a `⌘K` hint badge) for mouse users and for anyone who
+doesn't know the shortcut yet.
+
+### Empty state and default content
+
+Never show a blank panel before the user has typed anything — populate the first group
+with recent items or sensible defaults. `CommandMenuEmpty` only renders once a query has
+no matches; it does not need a manual `query.length > 0` check.
+
+### Icons and keybinds
+
+```tsx
+<CommandMenuItem onSelect={() => save()} icon={<SaveIcon />} keybind="⌘S">
+  Save changes
+</CommandMenuItem>
+```
+
+`icon` is optional and muted by default so it recedes behind the label. `keybind` renders
+as a single visible badge and, because it stays in the item's text content rather than an
+`aria-hidden` decoration, is announced as part of the option's accessible name.
+
+## Features
+
+- **The ARIA combobox pattern, done properly** — the input keeps DOM focus while
+  `aria-activedescendant` tracks the highlighted row, so fast typing and arrow keys both
+  behave for screen reader users. Handled by `cmdk`, not reimplemented.
+- **Grouped, fuzzy-filtered results** out of the box, with `shouldFilter={false}` as the
+  escape hatch when you're filtering server-side.
+- **Keybind hints that are actually announced** — the badge stays in the item's text
+  content rather than being an `aria-hidden` decoration, so it's part of the accessible
+  name.
+- **A live result count** announced on every keystroke, so a silent change in what's
+  matching is never missed.
+- **Responsive to 375px**: the centered floating panel becomes a full-width bottom sheet
+  under the `sm` breakpoint.
+- **Controlled-only, on purpose.** Your app owns `open` and the `⌘K` listener, because
+  that listener has to exist in your app regardless of this component.
+
+## Examples
+
+Server-side filtering — turn off the built-in matcher and render whatever your search
+already returned:
+
+```tsx
+<CommandMenu open={open} onOpenChange={setOpen} shouldFilter={false}>
+  <CommandMenuInput value={query} onValueChange={setQuery} placeholder="Search…" />
+  <CommandMenuList>
+    <CommandMenuEmpty>No results found.</CommandMenuEmpty>
+    {results.map((result) => (
+      <CommandMenuItem key={result.id} onSelect={() => go(result.href)}>
+        {result.title}
+      </CommandMenuItem>
+    ))}
+  </CommandMenuList>
+</CommandMenu>
+```
+
+Icons and keybind hints on an action row:
+
+```tsx
+<CommandMenuItem onSelect={() => save()} icon={<SaveIcon />} keybind="⌘S">
+  Save changes
+</CommandMenuItem>
+```
+
+Making an item findable by terms that aren't in its visible label — set `value`
+explicitly rather than padding the label with keywords:
+
+```tsx
+<CommandMenuItem value="billing invoice payment receipt" onSelect={() => go("/billing")}>
+  Billing
+</CommandMenuItem>
+```
+
+Default content before anything is typed. Never show a blank panel — lead with recents:
+
+```tsx
+<CommandMenuList>
+  <CommandMenuEmpty>No results found.</CommandMenuEmpty>
+  <CommandMenuGroup heading="Recent">
+    {recents.map((item) => (
+      <CommandMenuItem key={item.id} onSelect={() => go(item.href)}>{item.title}</CommandMenuItem>
+    ))}
+  </CommandMenuGroup>
+  <CommandMenuSeparator />
+  <CommandMenuGroup heading="Actions">{/* … */}</CommandMenuGroup>
+</CommandMenuList>
+```
+
+The example at the top of this page is live — open it and try typing, then use the
+arrow keys.
+
+## Props
+
+### CommandMenu
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — | Required. Controlled open state. |
+| `onOpenChange` | `(open: boolean) => void` | — | Required. |
+| `label` | `string` | `"Command Menu"` | Visually hidden accessible name for the dialog. |
+| `filter` | `(value, search, keywords) => number` | cmdk's default fuzzy matcher | Override to plug in structured or remote filtering. |
+| `shouldFilter` | `boolean` | `true` | Set `false` if you filter results yourself (e.g. server-side search) before rendering items. |
+| `loop` | `boolean` | `true` | Whether arrow-key navigation wraps from the last item back to the first. |
+
+### CommandMenuItem
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `onSelect` | `(value: string) => void` | — | Required. Fires on click or Enter while highlighted. |
+| `icon` | `React.ReactNode` | — | Leading icon, `size-4` recommended. |
+| `keybind` | `string` | — | Visible hint badge, e.g. `"⌘S"`. Announced as part of the item's label. |
+| `disabled` | `boolean` | `false` | Excluded from keyboard navigation and selection. |
+| `value` | `string` | item text content | What the built-in fuzzy filter matches against; set explicitly if the visible label isn't a good search string. |
+
+`CommandMenuInput`, `CommandMenuList`, `CommandMenuEmpty`, `CommandMenuGroup` (with a
+`heading` prop) and `CommandMenuSeparator` forward all other props to their underlying
+`cmdk` element.
+
+## Accessibility
+
+- Structurally the ARIA combobox pattern: the input keeps DOM focus at all times while
+  `aria-activedescendant` points at the highlighted row, so fast typing and arrow-key
+  navigation both work correctly for screen reader users — handled by `cmdk`, not
+  reimplemented here.
+- Focus is trapped in the dialog while open and restored to whatever had focus before it
+  opened, via Radix `Dialog`.
+- Escape closes the menu; clicking the scrim closes it; triggering your own shortcut
+  again while it's open should also close it (wire this in your handler, as shown above).
+- `CommandMenuList` automatically renders an `aria-live="polite"` region announcing the
+  filtered result count on every keystroke, so a silent count change is never missed.
+- Responsive down to 375px: a full-width sheet near the bottom of the viewport under the
+  `sm` breakpoint, replacing the centered floating panel.
+- Under `prefers-reduced-motion`, the panel/scrim transition and the row-highlight
+  colour transition both lose their animation but not the underlying state change —
+  opacity and colour still update, just without motion.
+
+## When not to use
+
+A menu triggered from one visible button or row is a `Menu`, not a `CommandMenu`; a
+right-click menu is a `ContextMenu`. Reserve `CommandMenu` for global, app-wide search
+and actions reachable from anywhere.

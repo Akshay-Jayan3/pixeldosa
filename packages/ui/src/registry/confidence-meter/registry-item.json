@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "confidence-meter",
+  "title": "Confidence Meter",
+  "description": "A tiered (low/medium/high) confidence indicator with an optional provenance caption, shared by every AI-tier component that needs to communicate uncertainty about a proposed value, classification, or decision. Renders a three-bar filled/unfilled indicator (1/2/3 bars for low/medium/high) immediately followed by a text label ('Low confidence', 'Medium confidence', 'High confidence') — never a raw percentage, since that would claim precision the underlying model doesn't actually have. An optional provenance string renders as a second 'via {provenance}' caption alongside the tier. Purely presentational: no state, no async behaviour, a pure function of its props. Use anywhere an AI-proposed value or decision carries a confidence signal (Smart Field, Diff Accept, Selection Actions, and the future AI Approval Gate all compose this rather than each re-deriving their own indicator). Not for a full sources/context/explanation surface — use AI Context / Provenance Surface for that instead.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/confidence-meter/confidence-meter.tsx",
+      "target": "components/ui/confidence-meter.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Has no client-side behaviour (no state, effects, or event handlers), so it carries no `\"use client\"` directive and can render on the server.",
+  "meta": {
+    "engineeringNotes": "Extracted from two already-shipped components (Smart Field, Selection Actions) that had independently hand-rolled the identical tiered indicator — the concrete signal per the system's own 'a component is not an island' rule that this belongs as its own primitive rather than being re-derived a third time. Confidence is a three-tier enum, not a raw number, by deliberate and unchanged decision from Smart Field's original plan: a fabricated percentage would claim precision the model doesn't actually have, and the system's token set has no 'success'/'warning' hue to spend on a red/yellow/green scale anyway — only `destructive` keeps real chroma. A numeric-score-to-tier bucketing input was considered and deferred: no current consumer has a raw calibrated score to map, and adding that path now would solve a hypothetical need rather than an observed one. Provenance is folded into this component as an optional prop rather than left as a sibling element every consumer composes separately, since the two already-shipped call sites both rendered them side by side anyway — one import now covers both.",
+    "motionNotes": "None, deliberately. This is a static presentational primitive with no state transitions of its own — any entrance/exit motion belongs to whatever container shows it (e.g. Smart Field's proposal panel), the same way Card's motion belongs to whatever wraps it, not to the primitive itself. Nothing here required a component-specific motion or reduced-motion branch, which is itself a signal the component is doing exactly what it needs to and no more."
+  }
+}

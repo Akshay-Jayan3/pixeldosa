@@ -29,6 +29,58 @@ native `<input>`/`<textarea>`, or any component that forwards `id`, `aria-invali
 `FieldError` renders nothing when its children are falsy, so you can pass a validation
 message straight through without a conditional wrapper.
 
+## Features
+
+- **ARIA wiring you never write by hand**: the control receives `id`,
+  `aria-invalid` and a composed `aria-describedby` pointing at whichever of the
+  description and error are actually present.
+- **Bring your own control** — `FieldControl` clones its single child, so it works
+  with a native `<input>`/`<textarea>` or any component that forwards `id`, `ref`
+  and the ARIA attributes to a real form control.
+- **`FieldError` renders nothing when falsy**, so a validation message can be passed
+  straight through without a conditional wrapper around it.
+- **Announced late errors**: `role="alert"` means an async validation message is read
+  out even when the field already has focus.
+
+## Variants
+
+The default state — label, control, and a supporting description.
+
+<PreviewStack>
+  <Field className="w-full max-w-sm">
+    <FieldLabel>Email</FieldLabel>
+    <FieldControl>
+      <input
+        type="email"
+        defaultValue="hello@pixeldosa.dev"
+        className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+      />
+    </FieldControl>
+    <FieldDescription>We'll only use this to send order updates.</FieldDescription>
+  </Field>
+</PreviewStack>
+
+### Invalid
+
+`invalid` flows into `aria-invalid` on the control, which the input styling hooks with
+`aria-invalid:` variants — the ring is a consequence of the ARIA state, not a parallel
+visual flag that can drift out of sync with it.
+
+<PreviewStack>
+  <Field invalid className="w-full max-w-sm">
+    <FieldLabel>Email</FieldLabel>
+    <FieldControl>
+      <input
+        type="email"
+        defaultValue="hello@"
+        aria-invalid
+        className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm aria-invalid:border-destructive"
+      />
+    </FieldControl>
+    <FieldError>Enter a complete email address.</FieldError>
+  </Field>
+</PreviewStack>
+
 ## Props
 
 ### Field

@@ -5,14 +5,99 @@
   "items": [
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-presence",
+      "title": "Agent Presence",
+      "description": "An agent's live state, expressed visually rather than described in text. Takes a `state` from an eleven-value vocabulary grounded in real protocol events — eight machine states (`queued`, `thinking`, `deciding`, `working`, `streaming`, `done`, `failed`, `cancelled`) and three hand-off states (`suggesting`, `asking`, `awaitingApproval`) — plus an optional `label` that overrides the state's default text, and an `onCancel` shown throughout the machine's turn. The organising rule is a turn-taking grammar: motion means the machine is busy, stillness means it is the user's turn. Machine states animate; hand-off states stop completely and sit brighter and heavier, so a user learns to read 'am I needed?' without reading a word. Three forms share the one vocabulary: `field` renders a cell matrix (the system's signature), `orb` renders a true Fibonacci-distributed sphere in CSS 3D for hero surfaces, and `line` renders three inline dots for status bars and table rows. The text label is the real signal and is announced through an `aria-live` region; the indicator itself is `aria-hidden` and supplementary. Purely presentational: it does not fetch, does not own the agent run, and does not interpret protocol events for you — map your stream's events to a state and pass it in. Use it anywhere an agent's activity needs to be visible in ordinary product UI. Not for showing the reasoning text itself (that is Reasoning Stream), not for a per-artifact generation progress bar (that is Generation Placeholder), and not for the post-result action strip (that is AI Action Toolbar).",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-presence/agent-presence.tsx",
+          "target": "components/ui/agent-presence.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils` and the `pd-orb-spin` / `pd-cell-pulse` keyframes supplied by @pixeldosa/pixeldosa-theme's css block. The state vocabulary maps directly onto AG-UI events, OpenAI Responses lifecycle events, AI SDK stream parts, LangGraph interrupts and MCP elicitation — see the docs page for the mapping table.",
+      "meta": {
+        "engineeringNotes": "The load-bearing decision is that the eleven states split into two classes with opposite visual treatments rather than into eleven variations of one treatment. Every surveyed implementation renders 'thinking' and 'waiting for your approval' in the same register — something moving plus a line of text — but those are opposites: one means relax, the other means nothing proceeds until you act. Encoding that as motion-versus-stillness makes the most important question on the surface ('is it my turn?') answerable pre-attentively. The vocabulary itself is taken from protocol events rather than invented: `deciding` exists because AG-UI streams TOOL_CALL_ARGS before execution, so choosing an action is distinguishable from performing it; `queued` exists because OpenAI Responses emits it and accepted-but-not-started is not the same as working; `asking` maps to MCP elicitation and `awaitingApproval` to LangGraph's interrupt(). The orb uses a Fibonacci spiral distribution rather than the flat ring of dots most AI orbs use, which is what makes it read as a volume rather than a circle, and it is rendered with CSS 3D transforms inside a preserve-3d container so perspective supplies depth scaling for free — no per-frame JavaScript and no canvas. All three forms animate via CSS keyframes with per-element negative delays rather than a requestAnimationFrame loop; an earlier component in this system was rebuilt for exactly this reason, since re-rendering hundreds of React nodes per frame to nudge a transform is what makes these indicators stutter.",
+        "motionNotes": "Rotation speed is the state: 24s per revolution when queued, 12s thinking, 7s deciding, 4s working — so the same object communicates urgency through tempo rather than through a different animation per state, which is what lets states morph rather than cut. Terminal machine states (`done`, `failed`, `cancelled`) drop rotation entirely and settle to a smaller resting scale. Hand-off states stop dead: no keyframe is applied at all, and the dots transition to full scale and full opacity over `--pd-duration-slow`, so the arrival of the user's turn is a settling rather than a switch. Only `transform` and `opacity` animate, so every form composites on the GPU regardless of point count. Under `prefers-reduced-motion` every keyframe is disabled and each state still holds a visually distinct static configuration — differing scale and opacity per state — so the grammar survives with zero movement; the reduced-motion state is the same information without the motion, not a removal of the signal."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "ai-action-toolbar",
+      "title": "AI Action Toolbar",
+      "description": "A keyboard-navigable toolbar of the standard post-generation actions on an AI-produced result — apply, explain, retry, regenerate, undo, report. Takes an `actions` array of `{ id, label, icon?, intent?, disabled?, busy? }` plus a single `onAction(actionId)` callback, and renders them as a row of real buttons with three levels of visual weight: `intent=\"primary\"` is filled (the recommended action, e.g. Apply), `secondary` is bordered (reversible alternatives, e.g. Regenerate), and `quiet` is underline-only (meta actions that don't change the result, e.g. Explain, Report, Undo). An optional `message` renders leading status text before the actions, which is how confirmation rows like 'Changes applied. Undo' are expressed. Implements the ARIA toolbar pattern properly — the whole strip is one tab stop with arrow keys, Home and End moving within it and skipping disabled actions — rather than the natural-tab-order approximation most implementations use. Busy state is a per-action prop owned by the caller, not internal state, so it reflects the caller's real in-flight request; while any action is busy the others disable, since two concurrent actions on one result is never a coherent request. Purely presentational otherwise: it does not fetch, does not own an undo timer, and does not own the result it acts on. Use it attached to any AI output the user must now decide about. Not for a selection-triggered floating toolbar (use Selection Actions), a text diff needing per-hunk accept/reject (use Diff Accept), or a single whole-field proposal (use Smart Field) — this is the shared control strip those patterns compose, not a replacement for them.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "actions",
+        "application"
+      ],
+      "dependencies": [
+        "class-variance-authority"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/ai-action-toolbar/ai-action-toolbar.tsx",
+          "target": "components/ui/ai-action-toolbar.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils` and `class-variance-authority`. No icon set is bundled — pass your own `size-4` icons via each action's optional `icon` prop, matching how Smart Field and Selection Actions already take icons. Exactly one action should carry `intent=\"primary\"`; the component does not enforce this, because a confirmation-only row (a lone quiet Undo) legitimately has none.",
+      "meta": {
+        "engineeringNotes": "An extraction, not new design: three already-shipped components had independently hand-rolled the same control strip. Smart Field renders Retry, Reject/Accept and an 'Value accepted. Undo' row; Diff Accept renders 'Changes applied. Undo' and a Regenerate-on-conflict button; Selection Actions renders Retry and Dismiss. Across those seven call sites exactly three button treatments recur verbatim — filled primary, bordered secondary, underline quiet — along with a character-for-character duplicated spinner SVG and a duplicated message+Undo confirmation row. Those three treatments became the CVA `intent` variants rather than being re-derived a fourth time. Two deliberate boundaries: (1) `busy` is a per-action prop rather than internal state, because every existing call site already holds the request and its AbortController, so owning a second copy here would let the toolbar's idea of 'in flight' drift from the caller's; (2) the undo *timer* stays with the consumer — Smart Field and Diff Accept both already run it inside their own status state machines, and absorbing it here would fight those machines rather than simplify them, so the toolbar renders the undo affordance while the consumer owns when it exists. The roving tabindex is kept as an action id rather than an index so the tab stop survives the actions array changing between renders, and it falls back to the first enabled action whenever the focused one becomes disabled — otherwise a toolbar whose focused action just disabled would have no tab stop at all and become unreachable by keyboard.",
+        "motionNotes": "Deliberately minimal, and the restraint is the decision. Colour-only transitions on hover and focus at `--pd-duration-instant` (100ms) with `--pd-ease-standard`, matching every other control in the system. There is no entrance animation, on purpose: this toolbar is always revealed by a container that already animates — Smart Field's proposal panel owns a grid-template-rows expand, Selection Actions owns a fade-and-scale — so a second entrance here would double-animate the same appearance. That mirrors Confidence Meter's rule that motion belongs to what wraps a primitive, not the primitive itself. The one continuous animation is the busy spinner, which is honest: it maps to a real in-flight request and stops when that request settles. Under prefers-reduced-motion the colour transitions drop to instant via `motion-reduce:transition-none`, while the spinner deliberately keeps rotating — removing it would leave a busy state with no visible indication at all, and the reduced-motion contract is a fallback that preserves legibility, not a removal."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "ai-context-surface",
+      "title": "AI Context / Provenance Surface",
+      "description": "A collapsed-by-default 'Why this?' disclosure showing an AI-produced value's explanation, sources, and model metadata — the folded-together answer to Citation Card, Source Viewer, and Thinking Indicator, none of which make sense without a chat thread. Takes optional explanation (plain-language reasoning text), sources (an array of { label, url?, snippet? }, rendered as a numbered list, each a link when a url is supplied), model (a string name), and generatedAt (a string or Date, formatted as a relative time within 24 hours or an absolute date otherwise). Renders nothing if none of these props are supplied. The trigger is a small, muted button; expanding it reveals a quiet bg-muted panel with the explanation first, sources second, and a model/timestamp footer line last. Use anywhere an AI-influenced value needs transparency available on demand without competing with the content it explains — a Smart Field proposal, a table cell, a classification result from Selection Actions. Not for a full chat/conversation transcript, and not for a single short provenance caption (Smart Field already has its own inline provenance prop for that).",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/ai-context-surface/ai-context-surface.tsx",
+          "target": "components/ui/ai-context-surface.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. `generatedAt` is formatted internally (relative within 24 hours via Intl.RelativeTimeFormat, an absolute locale date otherwise) rather than left to the consumer, since every consumer would otherwise reimplement the same relative-or-absolute decision. Renders `null` entirely when none of `explanation`/`sources`/`model`/`generatedAt` are supplied — a trigger with nothing behind it is worse than no component.",
+      "meta": {
+        "engineeringNotes": "Deliberately a disclosure (collapsed by default), not an always-visible panel: provenance detail is important to have available but wrong to force onto every view, since it would compete with the actual content for attention the moment it's always open — the same restraint Smart Field's inline `via {provenance}` caption already established, applied here at a larger, richer scale. Folds three previously-separate roadmap ideas (Citation Card, Source Viewer, Thinking Indicator) into one component because all three share the same real constraint this system cares about: working with zero chat thread present, unlike Vercel AI Elements' `Reasoning`/citation components, which are chat-message-scoped and excellent at that job specifically — competing with them there would be a bad trade, per the roadmap's own Reconciliation table. Timestamp formatting uses native `Intl.RelativeTimeFormat` rather than a date-formatting dependency, keeping this primitive dependency-free like every other component in the registry.",
+        "motionNotes": "Expand/collapse reuses the same CSS grid-template-rows (0fr to 1fr) technique Smart Field's proposal panel and Diff Accept's conflict banner already use — a proven, token-free way to animate a height that depends on variable content, on --pd-duration-fast/--pd-ease-standard. The trigger's chevron rotates 90 degrees on open using --pd-duration-instant, matching Button's press-feedback timing, since it's an immediate state confirmation rather than content arriving. Under prefers-reduced-motion, both the panel's height transition and the chevron rotation drop via motion-reduce:transition-none, leaving the open/closed state instant but fully legible — aria-expanded already communicates the state to assistive technology regardless of the icon's rotation."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "button",
       "title": "Button",
       "description": "A clickable control that triggers an action. Renders a native button element, or any element via the asChild prop when the trigger must be a link. Supports six visual variants (default, secondary, outline, ghost, destructive, link), four sizes including a square icon size, and a loading state that blocks interaction while announcing itself as busy to assistive technology. Use for actions such as submitting, saving or opening a dialog; use a plain anchor for navigation that changes the URL.",
       "type": "registry:ui",
       "categories": [
-        "core",
-        "form",
-        "action"
+        "actions",
+        "forms"
       ],
       "dependencies": [
         "@radix-ui/react-slot",
@@ -38,7 +123,6 @@
       },
       "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. The press-feedback transition reads --pd-duration-instant and --pd-ease-standard; these are installed with this component, and the full token set arrives with the pixeldosa-theme item. When using asChild the rendered child receives aria-disabled rather than the disabled attribute, since non-button elements do not support it — handle click suppression in your own handler if the child is interactive.",
       "meta": {
-        "pillar": "core",
         "engineeringNotes": "Variants are declared with CVA rather than conditional className strings so that the full variant matrix is a single serialisable object: it can be type-derived (VariantProps), documented from source, and extended by consumers via buttonVariants() without forking the component. The loading state disables the button but deliberately keeps it mounted and in the tab order — swapping a button for a spinner element moves focus to the document body mid-interaction, which is the most common accessibility regression in loading buttons. asChild uses Radix Slot instead of a render-prop so that ref forwarding and event composition are handled by the primitive rather than reimplemented here.",
         "motionNotes": "The only motion is a 2% active-state scale, driven by CSS transition rather than Motion — a button appears dozens of times per page and forcing a JS animation runtime into it would be a bundle cost with no interaction benefit. Duration (instant, 100ms) and easing come from CSS custom properties generated from the motion tokens, so the press feedback stays in step with the rest of the system. The motion solves one problem: confirming that a press registered before the resulting state change lands. Under prefers-reduced-motion the transform is dropped entirely and the state remains legible through the background and focus-ring changes, which is a fallback rather than a silent removal."
       }
@@ -50,7 +134,7 @@
       "description": "A bordered content container exposed as composable sub-components — Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, CardImage — rather than a single prop-driven component. Supports a vertical (default) and horizontal orientation via the orientation prop; CardImage reads the parent's orientation to switch between a top-rounded banner and a left-rounded side panel. Depth comes from a 1px border token rather than a shadow. Use to group related content on a page, including image-led listing cards and pricing cards built by composing these parts with your own content; use Dialog instead when the content needs to interrupt the user or block interaction.",
       "type": "registry:ui",
       "categories": [
-        "core",
+        "content",
         "application"
       ],
       "dependencies": [
@@ -68,9 +152,96 @@
       ],
       "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. CardTitle and CardDescription render `div` elements, not heading tags, matching the wider shadcn/ui convention — supply your own heading element as content if the card needs to participate in the page's document outline. In `orientation=\"horizontal\"`, Card does not auto-arrange its children into an image column and a content column — wrap the header/content/footer parts in your own flex column alongside CardImage.",
       "meta": {
-        "pillar": "core",
         "engineeringNotes": "Exposed as eight composable parts rather than a single component with header/footer/title/image props, so a Block composing Card can rearrange or omit regions without fighting a monolithic API. A pricing card, for example, needs zero new Card capability — it composes entirely from the existing header/content/footer parts plus its own feature-list content, which is the intended test of whether something belongs in Card at all versus being a Block built on top of it. CVA now carries exactly one real variant axis, orientation, added because CardImage's rounding genuinely differs between a top banner (vertical) and a side panel (horizontal) — not spending it on density or interactive treatments yet, since no Block currently needs those. Depth uses border-border rather than a shadow, matching the system's dark-mode-first 'borders over shadows' decision documented in the design tokens.",
         "motionNotes": "None. Card is compositional infrastructure with no interaction state of its own — motion belongs on components built on top of it (a future SpotlightCard or an interactive card treatment), not baked into the base primitive, per the pillar rule that motion must earn its place."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "command-menu",
+      "title": "Command Menu",
+      "description": "A global, keyboard-first overlay (⌘K/Ctrl+K) for finding resources and running actions across an app. Renders as a centered floating panel on desktop and a full-width sheet under the sm breakpoint. Exports CommandMenu (the controlled root), CommandMenuInput, CommandMenuList (which auto-renders a live result-count announcer), CommandMenuEmpty, CommandMenuGroup, CommandMenuSeparator, and CommandMenuItem (accepts onSelect, an optional leading icon, and an optional keybind hint rendered as a kbd badge). Composes cmdk for the ARIA combobox/filter engine under a Radix Dialog for focus trapping, portalling and dismiss-on-escape/outside-click, with a token-driven CSS fade+scale for entrance/exit. Controlled-only: there is no internal open state, because the global shortcut listener has to live in the host app regardless. Use for apps with enough destinations or repeat actions that menu-hunting has real cost — dashboards, admin panels, developer tools; do not use it for a menu triggered from one visible button or row, use a Menu or ContextMenu instead.",
+      "type": "registry:ui",
+      "categories": [
+        "actions",
+        "overlays"
+      ],
+      "dependencies": [
+        "cmdk",
+        "@radix-ui/react-dialog"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/command-menu/command-menu.tsx",
+          "target": "components/ui/command-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. The host app owns the global ⌘K/Ctrl+K keydown listener and the `open` boolean — this component has no built-in trigger or shortcut binding, matching its controlled-only API. `CommandMenuItem`'s `keybind` prop is a single visible string (e.g. \"⌘S\"), not per-key badges; split it yourself if you need individually boxed keys.",
+      "meta": {
+        "engineeringNotes": "Uses cmdk for the input/list/filter engine rather than hand-rolling the ARIA combobox contract (input keeps DOM focus while aria-activedescendant points at the highlighted listbox option) — that contract is easy to get subtly wrong and cmdk is the same engine Vercel's own Geist command menu and shadcn/ui's command component build on. Radix Dialog wraps the whole thing rather than cmdk's own Command.Dialog variant, so PixelDosa keeps ownership of the visual contract instead of inheriting cmdk's default dialog chrome. Deliberately does NOT compose the shared `overlay` primitive (Motion-driven), despite that being the original plan: `overlay`'s AnimatePresence usage has a confirmed upstream bug (motiondivision/motion#3243) where the exiting panel and its full-viewport scrim sometimes never unmount, permanently blocking further page interaction after the first close — reproduced independently in Overlay's own existing demo, in both dev and production builds, so it is a primitive-level defect, not a composition mistake here. This component instead drives its fade+scale with a plain two-phase (mount in the closed state, flip to open on the next animation frame) CSS transition gated by a deterministic `setTimeout`-based delayed-unmount hook, reading the same `--pd-duration-fast`/`--pd-ease-standard` tokens `overlay` uses, so the visual result is identical while sidestepping the bug entirely. Recommend re-composing `overlay` here once its exit-completion issue is fixed upstream or worked around at the primitive level. Controlled-only open state (no internal fallback) because the consumer's global keydown listener already has to own the boolean. Also works around a second, unrelated composition gotcha: cmdk's own keydown handling on the Command root prevents Escape from reaching Radix's document-level dismissable-layer listener when cmdk is composed manually instead of via its own Command.Dialog, so Escape-to-close is handled explicitly rather than left to Radix alone. The result-count aria-live announcer is rendered automatically inside CommandMenuList via cmdk's useCommandState hook rather than left for every consumer to wire up. A separate kbd primitive was considered (per the component plan) and deliberately deferred: the keybind badge is a few lines of markup used only inside CommandMenuItem for v1, and extracting it into its own registry item before a second consumer needs it would be speculative.",
+        "motionNotes": "Fade (opacity) plus a slight scale-in (0.98 → 1) on both the scrim and panel, matching the shared overlay primitive's visual signature even though it isn't composed directly here (see engineeringNotes). Mounts in the closed state, then flips to the open data-state on the next animation frame so the browser actually has a 'from' value to transition from — setting both in the same commit would skip the transition entirely. Duration and easing come from --pd-duration-fast/--pd-ease-standard, the same tokens Overlay uses, so the timing stays in step with the rest of the system. Exit is handled by a matching deterministic delay (150ms, comfortably above the fast token) before the panel actually leaves the DOM, so the fade-out is never cut short. The mobile sheet layout (full-width, pinned near the viewport bottom under the sm breakpoint) intentionally keeps the same fade+scale rather than a directional slide-from-bottom, per the component plan's call to reuse one motion signature rather than add a second pattern for one breakpoint. Highlighted-row background change on CommandMenuItem uses --pd-duration-instant with --pd-ease-standard, matching Button's press-feedback timing, because it is state feedback rather than decoration. Under prefers-reduced-motion, both the panel/scrim transition and the row-highlight transition are removed via motion-reduce:transition-none (scale pinned to 100% via motion-reduce:scale-100), leaving the opacity and background-colour changes themselves intact so every state change stays legible without motion."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "confidence-meter",
+      "title": "Confidence Meter",
+      "description": "A tiered (low/medium/high) confidence indicator with an optional provenance caption, shared by every AI-tier component that needs to communicate uncertainty about a proposed value, classification, or decision. Renders a three-bar filled/unfilled indicator (1/2/3 bars for low/medium/high) immediately followed by a text label ('Low confidence', 'Medium confidence', 'High confidence') — never a raw percentage, since that would claim precision the underlying model doesn't actually have. An optional provenance string renders as a second 'via {provenance}' caption alongside the tier. Purely presentational: no state, no async behaviour, a pure function of its props. Use anywhere an AI-proposed value or decision carries a confidence signal (Smart Field, Diff Accept, Selection Actions, and the future AI Approval Gate all compose this rather than each re-deriving their own indicator). Not for a full sources/context/explanation surface — use AI Context / Provenance Surface for that instead.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/confidence-meter/confidence-meter.tsx",
+          "target": "components/ui/confidence-meter.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Has no client-side behaviour (no state, effects, or event handlers), so it carries no `\"use client\"` directive and can render on the server.",
+      "meta": {
+        "engineeringNotes": "Extracted from two already-shipped components (Smart Field, Selection Actions) that had independently hand-rolled the identical tiered indicator — the concrete signal per the system's own 'a component is not an island' rule that this belongs as its own primitive rather than being re-derived a third time. Confidence is a three-tier enum, not a raw number, by deliberate and unchanged decision from Smart Field's original plan: a fabricated percentage would claim precision the model doesn't actually have, and the system's token set has no 'success'/'warning' hue to spend on a red/yellow/green scale anyway — only `destructive` keeps real chroma. A numeric-score-to-tier bucketing input was considered and deferred: no current consumer has a raw calibrated score to map, and adding that path now would solve a hypothetical need rather than an observed one. Provenance is folded into this component as an optional prop rather than left as a sibling element every consumer composes separately, since the two already-shipped call sites both rendered them side by side anyway — one import now covers both.",
+        "motionNotes": "None, deliberately. This is a static presentational primitive with no state transitions of its own — any entrance/exit motion belongs to whatever container shows it (e.g. Smart Field's proposal panel), the same way Card's motion belongs to whatever wraps it, not to the primitive itself. Nothing here required a component-specific motion or reduced-motion branch, which is itself a signal the component is doing exactly what it needs to and no more."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "diff-accept",
+      "title": "Diff Accept",
+      "description": "Reviews an AI-proposed text change as an inline word-level diff, resolved hunk by hunk rather than all-or-nothing. Takes baseValue (the text the proposal was generated against), value (the current live value), and proposedValue (the AI's suggested replacement), and computes the diff between baseValue and proposedValue using the diff (jsdiff) library. Each contiguous run of changed words becomes one hunk with its own Accept/Reject controls, shown inline as struck-through removed text and underlined/tinted added text. If value no longer matches baseValue — the underlying text changed since the proposal was generated — the diff is not shown; a conflict banner renders instead with an optional onRegenerate callback. Apply commits the current resolution (accepted hunks use the proposed text, pending or rejected hunks keep the original) via onApply, with a brief Undo affordance after. Use for reviewing AI rewrites of existing text — a bio, a description, any content field — where accepting some proposed changes and rejecting others is a real, expected outcome. Not for a single atomic value with no internal structure to partially accept — use smart-field for that.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [
+        "diff"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/diff-accept/diff-accept.tsx",
+          "target": "components/ui/diff-accept.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Uses diffWords from the diff package for word-level diffing — not a line-level diff, since this targets prose fields, not code. Unlike smart-field/ghost-input, this component does not call an AI provider itself; the consumer supplies an already-generated proposedValue (which may itself come from a smart-field-style fetch). baseValue must be exactly the text the proposal was generated against, not the current value, or the conflict guard will trigger on every render.",
+      "meta": {
+        "engineeringNotes": "Uses diff (jsdiff) for the actual word-level diff computation rather than hand-rolling a diff algorithm — the same relationship command-menu has with cmdk: a solved problem with real edge cases (Unicode, whitespace runs, word-boundary detection) not worth re-solving here. Hunks are grouped from the raw diff parts by merging consecutive added/removed runs into one reviewable unit, so a 'replace X with Y' shows as a single hunk with both the removal and the replacement, not two separate uncoordinated changes. Unresolved (pending) hunks default to the original text when merging, never the proposed one — an AI change only lands in the final result if a hunk is explicitly accepted, matching the system-wide 'never silently commit' rule. The status model is a three-state machine (reviewing/applied/done) rather than a single boolean: collapsing 'applied' and 'done' into one flag caused a real bug during development, where the conflict check (value !== baseValue, which becomes true immediately after Apply changes the live value) would incorrectly override the Undo affordance and show a conflict banner instead — the fix was ordering status checks so 'applied'/'done' short-circuit before the conflict check ever runs, since conflict is only a meaningful question while still reviewing.",
+        "motionNotes": "The system has no 'success'/'added' hue — destructive is the only token keeping real chroma — so additions and removals are distinguished primarily by text decoration (strikethrough for removed, underline plus a bg-accent/40 tint for added), not a red/green colour scheme, with destructive reserved for the removed text only since deletion is the one case that's legitimately danger-adjacent. This is also more accessible than colour alone, not just a token-budget workaround. Colour and background transitions on hunk resolution use --pd-duration-instant/--pd-ease-standard, matching Button's press-feedback timing, since resolving a hunk is an immediate state confirmation. Apply's brief settle state mirrors Smart Field's accept feedback for the same component family consistency. Under prefers-reduced-motion, all colour and background transitions drop via motion-reduce:transition-none, leaving the underlying decoration (strikethrough/underline) and resolved text fully legible without animation."
       }
     },
     {
@@ -80,8 +251,8 @@
       "description": "A composable form-field wrapper providing Field, FieldLabel, FieldControl, FieldDescription and FieldError parts that share one generated id set and automatically wire aria-describedby and aria-invalid onto whatever control is placed inside FieldControl. Has no opinion on form-state management — works with plain useState, react-hook-form, or any other library. Use it as the base every labeled input, textarea or custom control composes on top of; it is the primitive that GhostInput, SmartField and every other AI-in-product component in this system builds on.",
       "type": "registry:ui",
       "categories": [
-        "core",
-        "form"
+        "forms",
+        "application"
       ],
       "dependencies": [],
       "registryDependencies": [
@@ -96,9 +267,36 @@
       ],
       "docs": "FieldControl clones its single child rather than rendering a wrapper element, so pass exactly one React element (an <input>, <textarea>, or a component that forwards id/aria-invalid/aria-describedby/ref to a real form control) as its child.",
       "meta": {
-        "pillar": "core",
         "engineeringNotes": "Built as a compound-component set sharing React context rather than a single Field component with many props, because form fields have a genuinely variable shape (some have descriptions, some don't; some controls are custom comboboxes, not <input>) and a large prop-driven API would force every consumer through the same limited combinations. FieldControl clones its child instead of rendering its own DOM node specifically so that input+icon or input+button compositions keep their existing layout — a wrapper div would break those. FieldDescription and FieldError register their presence into context via an effect so FieldControl's aria-describedby is always accurate even when a description or error mounts after the control, which happens constantly with async validation.",
         "motionNotes": "No motion. This is a compound primitive other components render inside of, not a state that changes visibly on its own — anything Field itself animated would be inherited (and likely duplicated) by every component built on top of it. Error text appearing or disappearing is the one plausible candidate for a transition; it is left as a plain instantaneous swap here so that a consumer building a specific validation UX (e.g. GhostInput's inline error) chooses its own timing rather than inheriting one that might not fit."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "generation-placeholder",
+      "title": "Generation Placeholder",
+      "description": "A layout-reserving placeholder for AI-generated media — image, video, or audio — that encodes real generation progress as a resolving dot field and then cross-fades into the finished artifact. Takes `status` (`queued` | `generating` | `processing` | `done` | `failed`), an optional `progress` between 0 and 1, a required `aspectRatio` that reserves the artifact's final bounds, and a `label` used as both the visible and announced status text. Renders its children only once `status` is `done`, so the component is a container rather than a sibling that gets swapped out — which is what prevents a layout shift at the moment the artifact appears. Two forms share one rendering engine: `field` draws a dot grid for image and video, `bars` draws a row of vertical bars for audio, where a rectangle of dots would misrepresent the medium. Progress is encoded spatially rather than temporally: every cell holds a stable pseudo-random threshold and resolves once progress passes it (ordered-dither logic), so the pattern itself carries the information and stays fully legible with all animation removed. `progress` is optional and never fabricated — omit it and the component shows an honest indeterminate wave rather than a synthetic percentage creeping toward 90%. Use it anywhere media is being generated. Not for streaming text (use Progressive Reveal, which appends whole items rather than refining in place), not for agent activity with no artifact attached, and not as a generic content skeleton — this component exists precisely because media generation progress is measurable, and a skeleton discards that.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/generation-placeholder/generation-placeholder.tsx",
+          "target": "components/ui/generation-placeholder.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils` and the `pd-fade-in` keyframe supplied by @pixeldosa/pixeldosa-theme's css block. `aspectRatio` is deliberately required rather than optional — it is the prop that prevents a layout shift when the artifact arrives, which is the whole reason this is a container component.",
+      "meta": {
+        "engineeringNotes": "The load-bearing decision is that progress is encoded spatially, not temporally. Each cell derives a stable pseudo-random threshold from its index (a deterministic sine hash, so the pattern never reshuffles between renders — a reshuffling field reads as noise rather than a resolve), and a cell resolves once `progress` passes its threshold. That is ordered-dither logic borrowed from halftone rendering: it produces an organic dissolve that is nonetheless an exact function of real progress, rather than a decorative animation that merely implies work. The payoff is the reduced-motion story, which is unusually strong for an animated component: because the information lives in the pattern rather than the movement, `prefers-reduced-motion` removes every transition and the progress stays completely legible — no fallback had to be invented. `progress` is optional with no synthetic fallback, deliberately: media generation genuinely reports steps (diffusion iterations, encoded frames) where text streaming does not, so a percentage here is measured rather than invented — the system's rule is not 'never show a number' but 'never invent precision you don't have', which is the same rule that makes Confidence Meter refuse one. `aspectRatio` is required because a media placeholder that resizes on completion causes a layout shift at exactly the moment the user's attention is on it. `processing` exists as a state separate from `generating` so a user is never told 'done' while an upscale or encode is still running. The requestAnimationFrame loop that drives indeterminate mode is not started at all when the component is determinate or motion is reduced, since an animation frame loop nobody can see is pure battery cost.",
+        "motionNotes": "Cells transition `transform: scale` at `--pd-duration-base` with `--pd-ease-standard`; because each cell's threshold differs, the resolve reads as a wave without any explicit stagger orchestration — the stagger is a free consequence of the threshold distribution. Indeterminate mode travels a phase offset across the same thresholds on a 2s loop, the single continuous animation in the component, and it maps to real ongoing work rather than decorating a wait. Completion is a cross-fade, never a pop: the artifact fades in over `--pd-duration-base` with `--pd-ease-decelerate` while the field is unmounted, so the two states morph rather than cut. Only `transform` and `opacity` animate, so the whole field composites on the GPU regardless of density. Under `prefers-reduced-motion` every transition is dropped and the wave loop never starts; cells snap to their correct scale and hold a static pattern, which costs nothing because progress was already spatial — the reduced-motion state is the same information without the movement, which is the fallback contract rather than a removal."
       }
     },
     {
@@ -108,8 +306,9 @@
       "description": "A single-line text input with inline AI ghost-text completion: after the user pauses typing, a dimmed continuation appears past the caret, accepted with Tab or the right-arrow key (only when the caret is already at the end of the text) and dismissed with Escape. Takes a fetchSuggestion(value, signal) prop that the consumer implements against their own model — the component owns debouncing, request cancellation on every keystroke, staleness checking (a suggestion that doesn't continue the current text is discarded), and the accessible announcement of the suggestion via a live region. It never inserts text automatically; acceptance is always an explicit keypress. Use for reply drafting, search boxes, or any single-line field where predictive continuation should stay out of the way until the user asks for it. Not for multi-field or full-document autocomplete — this is a single <input>, not an editor.",
       "type": "registry:ui",
       "categories": [
-        "ai",
-        "form"
+        "ai-assisted",
+        "forms",
+        "application"
       ],
       "dependencies": [],
       "registryDependencies": [
@@ -125,7 +324,6 @@
       ],
       "docs": "value/onValueChange are required — this is a controlled component only. fetchSuggestion must resolve to the FULL continued string (current value + completion), not just the completion tail; the component slices the tail itself and drops any result that doesn't start with the value it was requested for, so a response arriving after the user has kept typing can't overwrite what they see. Drops into <FieldControl> directly since id/aria-invalid/aria-describedby/ref all forward to the underlying <input>.",
       "meta": {
-        "pillar": "ai",
         "engineeringNotes": "The ghost text is rendered as a separate mirror div positioned exactly behind the real <input>, with the typed-text portion set to transparent — not as a styled fake caret or a contentEditable trick. This is the only approach that keeps native input behaviour (IME composition, selection, undo, autofill, screen-reader field semantics) completely intact, at the cost of the mirror div needing identical padding/font/line-height to the input, which is why both come from the same className. The whole request lifecycle — debounce timer, AbortController — lives in refs rather than state so that a rapid keystroke can synchronously cancel the previous request without waiting for a re-render; a state-based cancellation would let a slow response race a fast one and briefly show a stale suggestion. The right-arrow accept only fires when the caret is already at the end of the value (checked via selectionStart/selectionEnd), because otherwise it would silently hijack normal in-text cursor movement, which is a worse failure mode than requiring Tab.",
         "motionNotes": "The suggestion's appearance is a plain opacity transition using duration.fast and easing.standard from the token scale — deliberately not a slide or typewriter reveal, both of which would misrepresent what happened: the whole continuation exists immediately (it was already fetched), so animating it in character-by-character would be a fabricated sense of the model 'typing', not a real progressive state. Under prefers-reduced-motion this reduces to a duration.instant swap via the same token path every other component in the system uses; nothing here required a component-specific reduced-motion branch, which is itself a signal the animation is doing the minimum necessary rather than something decorative."
       }
@@ -137,9 +335,8 @@
       "description": "The shared enter/exit animation layer for every overlay surface in the system — Dialog, Sheet, Popover and Drawer. Exports OverlayScrim (the backdrop) and OverlayContent (the panel, with a placement prop of center, top, bottom, left or right that controls which axis it translates from) plus a re-exported AnimatePresence. Not a standalone component: it has no dismiss behaviour, focus trapping or portal logic of its own. Compose it underneath a Radix primitive (Dialog.Overlay/Content, Sheet, Popover) so that primitive owns interaction semantics while this owns motion.",
       "type": "registry:ui",
       "categories": [
-        "core",
-        "motion",
-        "overlay"
+        "overlays",
+        "application"
       ],
       "dependencies": [
         "motion"
@@ -156,7 +353,6 @@
       ],
       "docs": "Render OverlayScrim and OverlayContent inside AnimatePresence, controlled by the same boolean/state that drives your Radix primitive's open prop. Neither component owns mount/unmount timing — AnimatePresence does, via whatever is conditionally rendering them.",
       "meta": {
-        "pillar": "core",
         "engineeringNotes": "Extracted as its own primitive rather than duplicated inside Dialog, Sheet, Popover and Drawer because those four are the same motion problem (scrim fade + panel translate/scale) wearing four different Radix primitives underneath. Without this, four components would each hand-roll slightly different durations the first time someone patches one of them, and the system's visual coherence — the actual point of a token-driven motion scale — degrades one component at a time. Deliberately excludes dismiss-on-click-outside, focus trapping and portalling: those are interaction semantics Radix already solves correctly, and re-solving them here would create two competing sources of truth for overlay behaviour.",
         "motionNotes": "Two states only: scrim opacity, and content opacity+scale+translate along one axis determined by `placement`. Enter uses duration.fast with easing.decelerate (content is arriving, should feel like it's settling in); exit uses duration.instant with easing.accelerate (dismissal should feel immediate, not lingering) — this asymmetry is deliberate, not an oversight. The motion solves orientation: a Sheet sliding in from the right tells the user where it came from and, on exit, where it's returning to, which a plain fade does not. Reduced motion swaps the whole transition object for the shared `reducedMotion` token (near-zero duration) rather than removing the animation, so Motion's exit callback still fires and AnimatePresence still unmounts the content correctly."
       }
@@ -209,14 +405,14 @@
           "ring": "oklch(0.556 0 0)"
         },
         "dark": {
-          "background": "oklch(0.172 0.003 248)",
+          "background": "oklch(0.139 0.003 246)",
           "foreground": "oklch(0.978 0.003 240)",
           "card": "oklch(0.172 0.003 248)",
           "card-foreground": "oklch(0.978 0.003 240)",
           "popover": "oklch(0.139 0.003 243)",
           "popover-foreground": "oklch(0.978 0.003 240)",
           "primary": "oklch(0.978 0.003 240)",
-          "primary-foreground": "oklch(0.172 0.003 248)",
+          "primary-foreground": "oklch(0.139 0.003 246)",
           "secondary": "oklch(0.24 0.006 250)",
           "secondary-foreground": "oklch(0.978 0.003 240)",
           "muted": "oklch(0.24 0.006 250)",
@@ -230,11 +426,146 @@
           "ring": "oklch(0.649 0.014 263)"
         }
       },
+      "css": {
+        "@layer base": {
+          "svg[aria-hidden=\"true\"], [data-pd-decorative]": {
+            "user-select": "none",
+            "-webkit-user-select": "none"
+          }
+        },
+        "@keyframes pd-fade-in": {
+          "from": {
+            "opacity": "0"
+          },
+          "to": {
+            "opacity": "1"
+          }
+        },
+        "@keyframes pd-cell-pulse": {
+          "0%, 100%": {
+            "transform": "scale(0.3)"
+          },
+          "50%": {
+            "transform": "scale(0.9)"
+          }
+        },
+        "@keyframes pd-cell-pulse-opacity": {
+          "0%, 100%": {
+            "opacity": "0.08"
+          },
+          "50%": {
+            "opacity": "0.5"
+          }
+        },
+        "@keyframes pd-sweep": {
+          "0%": {
+            "transform": "translateX(-100%)"
+          },
+          "100%": {
+            "transform": "translateX(100%)"
+          }
+        },
+        "@keyframes pd-orb-spin": {
+          "from": {
+            "transform": "rotateY(0deg)"
+          },
+          "to": {
+            "transform": "rotateY(360deg)"
+          }
+        }
+      },
       "docs": "The cssVars in this item are generated from packages/tokens. Do not edit them here — change the token module and rebuild.",
       "meta": {
-        "pillar": "core",
         "engineeringNotes": "Shipped as a registry:theme item rather than baked into each component so that colour is a project-level decision made once, not a per-component import that would break the moment a consumer wants their own palette. Colours are OKLCH rather than HSL so the light and dark scales can be derived from matched perceptual lightness steps; the practical payoff is that a token pair like muted/muted-foreground holds its contrast ratio across both modes without per-mode hand-tuning. Motion values are emitted as CSS custom properties in addition to the TypeScript exports, so components that need only a CSS transition can honour the motion scale without pulling in a JS animation runtime.",
         "motionNotes": "This item defines the motion scale rather than animating anything itself. Durations are exposed in milliseconds (CSS) and seconds (TypeScript/Motion) from one source, because emitting only one unit guarantees a conversion bug at the first component that needs the other."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "progressive-reveal",
+      "title": "Progressive Reveal",
+      "description": "Reveals a growing collection of items (rows, cards) one at a time as they arrive from a streaming or incrementally-loading source, with a stable layout and no per-character typewriter effect. Takes items (the current known array, expected to grow over time via the consumer's own state), a renderItem(item, index) function for the actual per-item markup, an optional keyExtractor for stable identity, and an isStreaming flag that shows a trailing 'More loading…' indicator while more items are expected. Each item is given its entrance transition exactly once: React's own keyed reconciliation means an item already present on a prior render keeps its existing DOM node and never remounts, so its animation can never replay. A layout prop switches between a vertical stack (default) and a CSS grid for card collections. Use for streaming search results, tool-call output rows, or generated card grids — any collection whose full membership isn't known upfront. Not for streaming prose (use an existing chat/response component) or a single changing value (that's Smart Field or Diff Accept's job, not a collection).",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/progressive-reveal/progressive-reveal.tsx",
+          "target": "components/ui/progressive-reveal.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Is a plain generic function component (no `forwardRef`) since nothing here needs an imperative handle and `forwardRef` has poor generic-type ergonomics. Pass a real `keyExtractor` whenever the source array might ever be spliced rather than purely appended — without one, index-based keys can misattribute 'already seen' identity to the wrong item if earlier entries are removed or reordered.",
+      "meta": {
+        "engineeringNotes": "Enforces 'animate a new item in exactly once' by relying on React's own keyed reconciliation instead of hand-rolled 'already seen' tracking: each item is wrapped in a small RevealItem component keyed by keyExtractor (or index), which mounts fresh — and therefore plays its entrance transition — only the first time its key appears in the list; on every subsequent render where that key was already present, React reuses the existing DOM node and the component is not remounted, so the animation structurally cannot replay. This is simpler and more reliable than maintaining a Set of seen keys by hand, which is easy to get subtly wrong around React's own re-render timing. Scoped deliberately to structured collections (rows, cards), not prose — an append-only list of discrete items is inherently more layout-stable than a single growing text block, since new rows appear below existing content without reflowing it, which is also why this differs from and does not compete with Vercel AI Elements' prose-streaming components (see the roadmap's North Star Reconciliation table).",
+        "motionNotes": "Per-item entrance is a plain opacity + small upward translate (translate-y-1 to 0) using the same two-phase-mount pattern (mount closed, flip to open on the next animation frame) Command Menu and Selection Actions already use, on --pd-duration-fast/--pd-ease-standard. No item's own content is ever revealed character-by-character — the full item value already exists at arrival time, so a typewriter effect would misrepresent it as being generated live, the same reasoning every other AI-tier component in this system has already established independently. The trailing streaming indicator uses Tailwind's built-in animate-pulse (core Tailwind, no plugin required) gated by motion-safe:, falling back to a static reduced-opacity dot under motion-reduce: — the 'more is coming' text itself is unaffected either way, so the signal survives motion removal."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "selection-actions",
+      "title": "Selection Actions",
+      "description": "A floating, selection-triggered toolbar for AI actions on a piece of text: select text inside a given container and a toolbar of consumer-defined actions (e.g. Explain, Rewrite, Translate, Classify, Extract) appears anchored to the selection. Takes a containerRef (scopes selection detection to one region of the page), an actions array ({id, label, icon}), and an onAction(actionId, selectedText, signal) handler returning a SelectionActionResult shaped as one of: { kind: 'replacement', value } which renders through Diff Accept for accept/reject review, { kind: 'text', value } shown as prose, { kind: 'classification', label, confidence? } shown as a label with a tiered confidence indicator, or { kind: 'list', items } shown as a bullet list. An optional onReplace(mergedValue, originalSelectedText) callback fires only when an accepted replacement is applied, letting a plain-string content model splice the result back in. Use for read or editable content surfaces where per-selection AI actions add value without a context switch to chat. Not for a whole-field or whole-document action (use smart-field or diff-accept directly for that).",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/diff-accept",
+        "@pixeldosa/confidence-meter"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/selection-actions/selection-actions.tsx",
+          "target": "components/ui/selection-actions.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils` and the `diff-accept` primitive at `@/components/ui/diff-accept` (installed automatically as a registry dependency), used to render the 'replacement' result kind. Renders via a React portal to document.body with `position: fixed`, so it is not clipped by an `overflow: hidden` ancestor. Keyboard-only users generally cannot create an arbitrary text selection in static, non-editable content — a platform-level limitation this component cannot fix; the guarantee it makes is that once any selection exists, the toolbar itself is fully keyboard-operable.",
+      "meta": {
+        "engineeringNotes": "Composes Diff Accept for the 'replacement' result kind (Rewrite) rather than reimplementing accept/reject a second time — Rewrite is exactly the 'AI proposes replacement text, human reviews' problem Diff Accept already solves, and the two components sharing one review UI keeps the whole AI tier consistent instead of each component inventing its own version of the same interaction. Selection detection listens to document-level `selectionchange`, filtered to whether the selection's anchor node falls inside `containerRef`, debounced (default 200ms) so the toolbar appears once the selection has settled rather than jittering while the user is still dragging or extending with the keyboard — one mechanism covers both input methods, since `selectionchange` fires for either. The toolbar's root uses `onMouseDown` with `preventDefault` — the standard rich-text-editor-toolbar trick — because without it, focusing a toolbar button would collapse the browser's live selection before the click handler ever runs, since focusing an element outside the current selection normally clears it. `onReplace` deliberately takes the original selected text as a second argument rather than assuming a plain string content model on the component's own side: this component cannot know whether the consumer's content is a plain string, a contentEditable region, or a structured rich-text document, so it hands back enough context (the exact original substring) for a plain-string consumer to splice correctly via `content.replace(original, merged)`, while a richer content model would use its own document API and ignore the second argument.",
+        "motionNotes": "The toolbar mounts in a closed visual state and flips to open on the next animation frame (a `visible` state lagging one rAF behind the selection existing), the same two-phase-mount pattern `Command Menu` uses, so the fade+scale-in (`--pd-duration-fast`/`--pd-ease-standard`) actually has a 'from' value to animate away from rather than popping in already-visible. No motion plays while the selection itself is still changing — the toolbar simply doesn't exist yet during that phase (enforced by the debounce), which is the correct behaviour research on floating selection toolbars confirms (centre after the selection settles, not during), achieved structurally rather than via a suppressed-animation flag. Result content (prose, a classification label, a list, or the composed Diff Accept panel) swaps in via a plain state change, never a per-character reveal, consistent with every other AI-tier component's 'the value already exists in full' reasoning. Under `prefers-reduced-motion`, the fade/scale transition drops via `motion-reduce:transition-none` (scale pinned via `motion-reduce:scale-100`), leaving the toolbar's appearance instant but still fully legible."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "smart-field",
+      "title": "Smart Field",
+      "description": "An AI-proposed value for a single text field, shown with a confidence tier and its source before it becomes real data. The field's value never changes until the user explicitly accepts the proposal — clicking the trigger icon requests one via a consumer-supplied fetchProposal(currentValue, signal) function, which resolves to a SmartFieldProposal { value, confidence?: 'low' | 'medium' | 'high', provenance?: string } or null/undefined for no proposal. Once shown, the proposal renders in a panel below the field with Accept/Reject controls; accepting commits proposal.value into the field and shows a brief Undo affordance. Typing manually at any point (while loading or once a proposal is shown) cancels the in-flight request or dismisses the unaccepted proposal, since manual input always overrides an AI suggestion. Use for CRM/record enrichment, settings or profile fields, or any single structured field where AI has enough surrounding context to propose a value. Not for inline predictive continuation while typing (use ghost-input instead), multi-field or long-text diffing, or a consequential/risky action needing full review.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/field",
+        "@pixeldosa/confidence-meter"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/smart-field/smart-field.tsx",
+          "target": "components/ui/smart-field.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "value/onValueChange are required — this is a controlled component only, matching ghost-input's contract. fetchProposal must resolve to the FULL proposed value (not a delta) plus optional confidence/provenance; return null/undefined for 'no proposal available' rather than throwing. triggerIcon is required with no bundled default — pass any size-4 SVG/icon element. autoPropose only fires once, on mount, and only when value is empty, so it can never silently overwrite existing data. Drops into <FieldControl> directly since id/aria-invalid/aria-describedby/ref all forward to the underlying <input>.",
+      "meta": {
+        "engineeringNotes": "Mirrors ghost-input's contract shape (value/onValueChange controlled-only, a fetchX behaviour injected by the consumer, an AbortSignal for cancellation) deliberately, so the AI tier reads as one consistent family rather than each component inventing its own pattern — the two differ only in what they return: a plain continuation string for ghost-input versus a structured { value, confidence, provenance } proposal here, because a complete replacement value needs that context attached and a continuation tail does not. Confidence rendering composes the shared `confidence-meter` primitive (extracted after Selection Actions needed the identical tiered indicator) rather than hand-rolling its own bars a second time — a three-tier enum (low/medium/high), not a raw number, because a fabricated percentage would claim precision the underlying model doesn't actually have, and because the system has no colour scale to spend on a red/yellow/green treatment anyway. autoPropose is opt-in and gated to empty fields only, adopted directly from CRM-enrichment research (Clay/HubSpot/Attio): confidence gates whether a proposal is allowed to overwrite existing data, so the safest default auto-behaviour is 'only ever fill a blank,' never 'silently reconsider what's already there.' Manual typing at any point cancels an in-flight fetch or dismisses a shown-but-unaccepted proposal, reusing ghost-input's staleness philosophy: a suggestion answering a question the field no longer asks is worse than no suggestion. The proposal panel animates open/closed via a CSS grid-template-rows trick (0fr to 1fr) rather than measuring and animating an explicit pixel height, which is the standard token-free way to animate a height that depends on variable content without a ResizeObserver.",
+        "motionNotes": "The proposal panel's height expansion and the field's colour tint both use --pd-duration-fast/--pd-ease-standard; the trigger's busy spinner and accept/reject colour changes use --pd-duration-instant, matching Button's press-feedback timing, because those are immediate state confirmations rather than content arriving. The proposed value itself never animates in character-by-character — the full value already exists the moment it's returned, so a typewriter reveal would misrepresent it as being generated live, the same reasoning ghost-input's plan already established. Confidence Meter (composed, not reimplemented here) has no motion of its own — under prefers-reduced-motion, the panel's grid-template-rows transition and the colour transitions are dropped via motion-reduce:transition-none, leaving the underlying state (panel present/absent, tint present/absent) fully legible without animation."
       }
     }
   ]

@@ -1,0 +1,214 @@
+---
+title: AI Action Toolbar
+description: A keyboard-navigable toolbar of the standard post-generation actions — apply, explain, retry, regenerate, undo, report — with a three-level visual hierarchy that keeps the recommended action dominant.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import * as React from "react";
+import { AIActionToolbar, type AIAction } from "@/components/ui/ai-action-toolbar";
+
+export function SummaryResult({ summary }: { summary: string }) {
+  const [regenerating, setRegenerating] = React.useState(false);
+
+  const actions: AIAction[] = [
+    { id: "apply", label: "Apply", intent: "primary", icon: <CheckIcon /> },
+    { id: "regenerate", label: "Regenerate", busy: regenerating, icon: <RetryIcon /> },
+    { id: "explain", label: "Explain", intent: "quiet" },
+    { id: "report", label: "Report", intent: "quiet" },
+  ];
+
+  return (
+    <>
+      <p>{summary}</p>
+      <AIActionToolbar actions={actions} onAction={handleAction} label="Summary actions" />
+    </>
+  );
+}
+```
+
+Exactly one action should carry `intent="primary"` — the recommended decision. The
+component doesn't enforce this, because a confirmation-only row (a lone quiet Undo)
+legitimately has none.
+
+## Features
+
+- **The real ARIA toolbar pattern.** The whole strip is a single tab stop; `←`/`→`,
+  `Home` and `End` move within it and skip disabled actions. Most shipped versions of
+  this pattern rely on natural tab order instead, which costs a keyboard user one Tab
+  press per action just to get past the toolbar.
+- **Three levels of weight, no colour.** Filled → bordered → underline-only, so the
+  recommended action stays dominant without introducing a hue the token set doesn't have.
+- **Regenerate is deliberately not primary.** Weighting it below Apply is a product
+  stance: read the result rather than reflexively rerolling it.
+- **Busy state stays truthful.** `busy` is a per-action prop owned by you, so it
+  reflects your real in-flight request instead of a second copy that can drift. The
+  button stays mounted and focusable while busy and sets `aria-busy`, rather than being
+  swapped out for a spinner.
+- **One action at a time.** While any action is busy the rest disable — two concurrent
+  actions on one result is never a coherent request.
+- **Renders nothing when it has nothing** — no actions and no message produces no
+  empty shell.
+
+## Variants
+
+The full review strip: one primary action, one secondary, and two quiet meta actions.
+
+<PreviewStack>
+  <ActionToolbarSpecimen
+    label="Review actions"
+    actions={[
+      { id: "apply", label: "Apply", intent: "primary" },
+      { id: "regenerate", label: "Regenerate" },
+      { id: "explain", label: "Explain", intent: "quiet" },
+      { id: "report", label: "Report", intent: "quiet" },
+    ]}
+  />
+</PreviewStack>
+
+### Intents
+
+`primary` is the recommended decision, `secondary` a reversible alternative, `quiet` a
+meta action that doesn't change the result.
+
+<PreviewStack>
+  <ActionToolbarSpecimen
+    label="Intent examples"
+    actions={[
+      { id: "primary", label: "Primary", intent: "primary" },
+      { id: "secondary", label: "Secondary", intent: "secondary" },
+      { id: "quiet", label: "Quiet", intent: "quiet" },
+    ]}
+  />
+</PreviewStack>
+
+### With a leading message
+
+This is how a confirmation row is expressed — the same component as the decision row,
+rather than a second one-off treatment. It's also the shape `Smart Field` and
+`Diff Accept` both render after applying.
+
+<PreviewStack>
+  <ActionToolbarSpecimen
+    message="Changes applied."
+    label="Applied actions"
+    actions={[{ id: "undo", label: "Undo", intent: "quiet" }]}
+  />
+</PreviewStack>
+
+### Busy and disabled
+
+While one action is busy the others disable automatically. The busy button keeps its
+label and stays focusable.
+
+<PreviewStack>
+  <ActionToolbarSpecimen
+    label="Busy example"
+    actions={[
+      { id: "apply", label: "Apply", intent: "primary" },
+      { id: "regenerate", label: "Regenerate", busy: true },
+      { id: "explain", label: "Explain", intent: "quiet" },
+    ]}
+  />
+</PreviewStack>
+
+### Sizes
+
+`sm` is for dense contexts — a per-row toolbar in a table, for instance.
+
+<PreviewStack>
+  <ActionToolbarSpecimen
+    size="sm"
+    label="Small actions"
+    actions={[
+      { id: "apply", label: "Apply", intent: "primary" },
+      { id: "regenerate", label: "Regenerate" },
+    ]}
+  />
+</PreviewStack>
+
+## Examples
+
+An error row — the toolbar doesn't own error state, so render the message yourself and
+offer Retry as an action. This is exactly what `Smart Field` and `Selection Actions`
+already do:
+
+```tsx
+<AIActionToolbar
+  message={error}
+  label="Error actions"
+  actions={[{ id: "retry", label: "Retry", intent: "quiet" }]}
+  onAction={() => rerun()}
+/>
+```
+
+A dense per-row toolbar, where the result being acted on is one row of many:
+
+```tsx
+<AIActionToolbar
+  size="sm"
+  label={`Actions for ${row.name}`}
+  actions={[
+    { id: "apply", label: "Apply", intent: "primary", busy: row.status === "applying" },
+    { id: "skip", label: "Skip", intent: "quiet" },
+  ]}
+  onAction={(id) => resolveRow(row.id, id)}
+/>
+```
+
+Give each row's toolbar a distinct `label` — "Actions" repeated forty times down a table
+is useless to a screen reader user.
+
+Gating an action until the user has done something first:
+
+```tsx
+const actions: AIAction[] = [
+  { id: "apply", label: "Apply", intent: "primary", disabled: !hasReviewed },
+  { id: "explain", label: "Explain", intent: "quiet" },
+];
+```
+
+Disabled actions are skipped by arrow-key navigation, so a disabled Apply never traps
+focus between the other two.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `actions` | `AIAction[]` | — | Required. Rendered in array order. |
+| `onAction` | `(actionId: string) => void` | — | Required. Fires with the activated action's `id`. |
+| `message` | `React.ReactNode` | — | Leading status text, shown before the actions. |
+| `label` | `string` | `"Result actions"` | Accessible name for the toolbar. Make it distinct when several appear on one page. |
+| `size` | `"sm" \| "default"` | `"default"` | |
+
+`AIAction` is `{ id: string; label: string; icon?: React.ReactNode; intent?: "primary" |
+"secondary" | "quiet"; disabled?: boolean; busy?: boolean }`.
+
+All other props forward to the wrapping `<div>`.
+
+## Accessibility
+
+- A real `role="toolbar"` implementing the ARIA APG pattern: **roving tabindex**, so the
+  strip is one tab stop rather than one per action. `←`/`→` wrap at both ends, `Home`
+  and `End` jump to the ends, and disabled actions are skipped throughout.
+- The tab stop is tracked by action `id`, not index, and falls back to the first enabled
+  action if the focused one becomes disabled — so the toolbar can never end up with no
+  tab stop and become keyboard-unreachable.
+- Busy actions set `aria-busy` and stay mounted and focusable. The label never changes
+  mid-interaction, so the accessible name is stable.
+- Every action is a real `<button>` with a visible focus ring in both themes.
+- Labels are always visible — there is no icon-only mode, because "what does this arrow
+  do?" is precisely the ambiguity this component exists to remove.
+- Under `prefers-reduced-motion` the colour transitions become instant. The busy spinner
+  keeps rotating deliberately: removing it would leave a busy state with no visible
+  indication at all.
+
+## When not to use
+
+A floating toolbar triggered by a text selection is `Selection Actions`. A text diff
+needing per-hunk accept/reject is `Diff Accept`. A single whole-field proposal with
+confidence and provenance is `Smart Field`. This is the shared control strip those
+patterns compose — not a replacement for any of them.

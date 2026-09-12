@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@pixeldosa/ui";
 
 import { ComponentPreview } from "@/components/component-preview";
-import { PILLARS, getComponentsByPillar } from "@/lib/registry";
+import { COMPONENT_CATEGORIES, getComponentsByCategory } from "@/lib/registry";
 
 export const metadata: Metadata = {
   title: "Components",
@@ -20,14 +20,14 @@ export default function ComponentsIndexPage() {
         install command, usage, props and engineering notes.
       </p>
 
-      {PILLARS.map((pillar) => {
-        const items = getComponentsByPillar(pillar.id);
+      {COMPONENT_CATEGORIES.map((category) => {
+        const items = getComponentsByCategory(category.id);
         if (items.length === 0) return null;
 
         return (
-          <section key={pillar.id} className="mt-12">
+          <section key={category.id} className="mt-12">
             <h2 className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              {pillar.label}
+              {category.label}
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
               {items.map((item) => (

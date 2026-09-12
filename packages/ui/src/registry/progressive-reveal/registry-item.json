@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "progressive-reveal",
+  "title": "Progressive Reveal",
+  "description": "Reveals a growing collection of items (rows, cards) one at a time as they arrive from a streaming or incrementally-loading source, with a stable layout and no per-character typewriter effect. Takes items (the current known array, expected to grow over time via the consumer's own state), a renderItem(item, index) function for the actual per-item markup, an optional keyExtractor for stable identity, and an isStreaming flag that shows a trailing 'More loading…' indicator while more items are expected. Each item is given its entrance transition exactly once: React's own keyed reconciliation means an item already present on a prior render keeps its existing DOM node and never remounts, so its animation can never replay. A layout prop switches between a vertical stack (default) and a CSS grid for card collections. Use for streaming search results, tool-call output rows, or generated card grids — any collection whose full membership isn't known upfront. Not for streaming prose (use an existing chat/response component) or a single changing value (that's Smart Field or Diff Accept's job, not a collection).",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/progressive-reveal/progressive-reveal.tsx",
+      "target": "components/ui/progressive-reveal.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Is a plain generic function component (no `forwardRef`) since nothing here needs an imperative handle and `forwardRef` has poor generic-type ergonomics. Pass a real `keyExtractor` whenever the source array might ever be spliced rather than purely appended — without one, index-based keys can misattribute 'already seen' identity to the wrong item if earlier entries are removed or reordered.",
+  "meta": {
+    "engineeringNotes": "Enforces 'animate a new item in exactly once' by relying on React's own keyed reconciliation instead of hand-rolled 'already seen' tracking: each item is wrapped in a small RevealItem component keyed by keyExtractor (or index), which mounts fresh — and therefore plays its entrance transition — only the first time its key appears in the list; on every subsequent render where that key was already present, React reuses the existing DOM node and the component is not remounted, so the animation structurally cannot replay. This is simpler and more reliable than maintaining a Set of seen keys by hand, which is easy to get subtly wrong around React's own re-render timing. Scoped deliberately to structured collections (rows, cards), not prose — an append-only list of discrete items is inherently more layout-stable than a single growing text block, since new rows appear below existing content without reflowing it, which is also why this differs from and does not compete with Vercel AI Elements' prose-streaming components (see the roadmap's North Star Reconciliation table).",
+    "motionNotes": "Per-item entrance is a plain opacity + small upward translate (translate-y-1 to 0) using the same two-phase-mount pattern (mount closed, flip to open on the next animation frame) Command Menu and Selection Actions already use, on --pd-duration-fast/--pd-ease-standard. No item's own content is ever revealed character-by-character — the full item value already exists at arrival time, so a typewriter effect would misrepresent it as being generated live, the same reasoning every other AI-tier component in this system has already established independently. The trailing streaming indicator uses Tailwind's built-in animate-pulse (core Tailwind, no plugin required) gated by motion-safe:, falling back to a static reduced-opacity dot under motion-reduce: — the 'more is coming' text itself is unaffected either way, so the signal survives motion removal."
+  }
+}

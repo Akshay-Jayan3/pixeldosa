@@ -1,0 +1,166 @@
+---
+title: Agent Presence
+description: An agent's live state expressed visually rather than described — motion means the machine is busy, stillness means it's your turn.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentPresence } from "@/components/ui/agent-presence";
+
+export function AgentBar({ run }: { run: AgentRun }) {
+  return (
+    <AgentPresence
+      state={run.state}
+      label={run.tool ? `Searching ${run.tool}` : undefined}
+      form="line"
+      size="sm"
+      onCancel={run.abort}
+    />
+  );
+}
+```
+
+## Features
+
+- **Motion means the machine is busy. Stillness means it's your turn.** Machine states
+  animate; hand-off states stop dead and sit brighter. It's learnable in about three
+  interactions, after which nobody reads the label to know whether they're needed.
+- **Rotation speed *is* the state** — 24s per revolution when queued, 4s when working.
+  The same object communicates urgency through tempo, which is what lets states morph
+  into each other rather than cut between separate animations.
+- **A real sphere, not a ring.** The orb distributes points by Fibonacci spiral inside
+  a CSS 3D container, so perspective supplies depth scaling for free. No canvas, no
+  per-frame JavaScript.
+- **The vocabulary is taken, not invented** — every state maps to a real protocol
+  event. See the mapping below.
+- **Reduced motion loses nothing.** Each state holds a visually distinct static
+  configuration, so the grammar still works with every keyframe disabled.
+
+## Variants
+
+### The machine's turn — these move
+
+<PreviewStack>
+  <AgentPresence state="queued" />
+  <AgentPresence state="thinking" />
+  <AgentPresence state="deciding" />
+  <AgentPresence state="working" label="Searching invoices" />
+  <AgentPresence state="streaming" />
+</PreviewStack>
+
+### Your turn — these hold perfectly still
+
+The inversion: every other library pulses the thing that wants attention. Here the
+thing that wants attention is the only thing not moving.
+
+<PreviewStack>
+  <AgentPresence state="suggesting" />
+  <AgentPresence state="asking" />
+  <AgentPresence state="awaitingApproval" />
+</PreviewStack>
+
+### Terminal states
+
+<PreviewStack>
+  <AgentPresence state="done" />
+  <AgentPresence state="failed" />
+  <AgentPresence state="cancelled" />
+</PreviewStack>
+
+### Orb
+
+For hero surfaces — an agent panel header, an empty state, a landing demo.
+
+<PreviewStack>
+  <AgentPresence state="working" form="orb" size="lg" label="Working" />
+  <AgentPresence state="awaitingApproval" form="orb" size="lg" />
+</PreviewStack>
+
+### Line
+
+For status bars, table rows, and anywhere the agent is a footnote rather than the
+subject.
+
+<PreviewStack>
+  <AgentPresence state="thinking" form="line" size="sm" />
+  <AgentPresence state="asking" form="line" size="sm" />
+</PreviewStack>
+
+## Mapping from your agent stack
+
+The state vocabulary is deliberately protocol-shaped, so adopting it is a mapping
+rather than a rewrite. The component itself takes **no AI dependency** — you own the
+stream, you map its events to a state.
+
+| PixelDosa state | AG-UI | OpenAI Responses | AI SDK | LangGraph / MCP |
+| --- | --- | --- | --- | --- |
+| `queued` | — | `queued` | — | — |
+| `thinking` | — | reasoning delta | `reasoning` part | — |
+| `deciding` | `TOOL_CALL_START` → `TOOL_CALL_ARGS` | function call args delta | `tool-call` streaming | — |
+| `working` | `TOOL_CALL_END` → awaiting result | tool call in progress | `tool-call` awaiting result | — |
+| `streaming` | `TEXT_MESSAGE_CONTENT` | `output_text.delta` | `text` part | — |
+| `done` | `RUN_FINISHED` | `completed` | finish | — |
+| `failed` | `RUN_ERROR` | `failed` | error | — |
+| `asking` | — | — | — | **MCP elicitation** |
+| `awaitingApproval` | — | — | — | **LangGraph `interrupt()`** |
+
+A minimal AI SDK adapter is about this long:
+
+```tsx
+function toAgentState(status: string, parts: UIMessagePart[]): AgentState {
+  if (status === "submitted") return "queued";
+  const last = parts.at(-1);
+  if (last?.type === "reasoning") return "thinking";
+  if (last?.type?.startsWith("tool-")) return "working";
+  if (status === "streaming") return "streaming";
+  if (status === "error") return "failed";
+  return "done";
+}
+```
+
+## Examples
+
+Naming the tool matters — `working` alone is a spinner with extra steps:
+
+```tsx
+<AgentPresence state="working" label={`Reading ${file.name}`} onCancel={run.abort} />
+```
+
+Indicator only, where the surrounding UI already says what's happening. The label is
+still announced to screen readers:
+
+```tsx
+<AgentPresence state="thinking" form="line" size="sm" hideLabel />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `state` | `AgentState` | — | Required. One of the eleven states above. |
+| `form` | `"field" \| "orb" \| "line"` | `"field"` | |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | |
+| `label` | `string` | per state | Override the default. For `working`, name the tool. |
+| `hideLabel` | `boolean` | `false` | Visually hides the label; still announced. |
+| `onCancel` | `() => void` | — | Shown throughout the machine's turn. |
+
+## Accessibility
+
+- The label is the real signal, in an `aria-live="polite"` region. The indicator is
+  `aria-hidden` and supplementary — never the only way state is communicated.
+- Hand-off states are distinguished by weight and colour token *as well as* stillness,
+  so the grammar doesn't depend on perceiving motion.
+- Stop is a real keyboard-reachable `<button>` with its hit area extended to ~44px
+  while staying visually compact.
+- Under `prefers-reduced-motion` every keyframe is disabled and each state still holds
+  a distinct static configuration — the same information without the movement.
+
+## When not to use
+
+The reasoning *text* is `Reasoning Stream`. Per-artifact generation progress is
+`Generation Placeholder`. The post-result action strip is `AI Action Toolbar`. This
+component says what the agent is doing — not what it produced, or what you can do
+about it.

@@ -1,0 +1,146 @@
+---
+title: Diff Accept
+description: Review an AI-proposed text change as an inline diff, resolved hunk by hunk — not all-or-nothing — with a conflict guard if the base text has drifted.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import * as React from "react";
+import { DiffAccept } from "@/components/ui/diff-accept";
+
+export function BioField() {
+  const [value, setValue] = React.useState(bio);
+  const [proposal, setProposal] = React.useState<{ base: string; proposed: string } | null>(null);
+
+  async function rewrite() {
+    const proposed = await callYourModel(value);
+    setProposal({ base: value, proposed });
+  }
+
+  return (
+    <>
+      <textarea value={value} onChange={(e) => setValue(e.target.value)} />
+      <button onClick={rewrite}>Rewrite with AI</button>
+      {proposal ? (
+        <DiffAccept
+          baseValue={proposal.base}
+          value={value}
+          proposedValue={proposal.proposed}
+          onApply={(merged) => setValue(merged)}
+          onRegenerate={rewrite}
+        />
+      ) : null}
+    </>
+  );
+}
+```
+
+Unlike `Smart Field` or `Ghost Input`, this component doesn't call an AI provider
+itself — it takes an already-generated `proposedValue` (which may come from your own
+call, or a `Smart Field`-style `fetchProposal`) and handles reviewing it.
+
+### Per-hunk review, not all-or-nothing
+
+Each changed region renders inline with its own Accept/Reject controls. Unresolved
+hunks default to the **original** text when you click Apply — a change only lands in
+the result if it was explicitly accepted.
+
+### Conflict guard
+
+`baseValue` must be exactly the text the proposal was generated against. If `value`
+(the current live value) no longer matches it — the user edited the text elsewhere
+while the proposal was in flight — the diff is not shown. A conflict banner explains
+why and offers `onRegenerate` instead of risking a stale merge.
+
+## Features
+
+- **Hunk-by-hunk review, not all-or-nothing** — each changed region has its own
+  Accept/Reject, and unresolved hunks fall back to the *original* text on Apply. A
+  change only lands if it was explicitly accepted.
+- **A conflict guard that refuses to guess.** If the live `value` has drifted from the
+  `baseValue` the proposal was generated against, the diff is withheld entirely and
+  the user is offered a regenerate instead of a stale merge.
+- **Decoration, not colour**, for additions and removals — strikethrough and underline
+  read correctly for colourblind users, and the token set has no red/green pair to
+  spend here anyway (DESIGN.md §3.2).
+- **A real undo window** after Apply, so accepting is recoverable rather than final.
+- **Labels that survive being read out of context**: each control names the actual
+  changed text, e.g. `Accept: "design engineer"`, not a bare "Accept".
+- **Provider-agnostic** — it reviews a `proposedValue` you already have, and never
+  calls a model itself.
+
+## Examples
+
+Composed after a `Smart Field`-style proposal, where the model call lives in your code
+and this component only handles the review step:
+
+```tsx
+const [proposal, setProposal] = React.useState<{ base: string; proposed: string } | null>(null);
+
+async function rewrite() {
+  const base = value;
+  setProposal({ base, proposed: await callYourModel(base) });
+}
+
+{proposal ? (
+  <DiffAccept
+    baseValue={proposal.base}
+    value={value}
+    proposedValue={proposal.proposed}
+    onApply={(merged) => {
+      setValue(merged);
+      setProposal(null);
+    }}
+    onRegenerate={rewrite}
+  />
+) : null}
+```
+
+Lengthening the undo window for a higher-stakes field, where a mistaken Apply is
+costlier to notice late:
+
+```tsx
+<DiffAccept
+  baseValue={base}
+  value={value}
+  proposedValue={proposed}
+  onApply={setValue}
+  undoWindowMs={15000}
+/>
+```
+
+Omitting `onRegenerate` is valid — the conflict banner then explains the drift without
+offering a retry, which is the right call when regenerating would cost a paid call the
+user didn't ask for.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `baseValue` | `string` | — | Required. The text the proposal was generated against. |
+| `value` | `string` | — | Required. The current live value, compared to `baseValue` for conflicts. |
+| `proposedValue` | `string` | — | Required. The AI's proposed replacement text. |
+| `onApply` | `(mergedValue: string) => void` | — | Required. Fires with the resolved merge when Apply is clicked. |
+| `onRegenerate` | `() => void` | — | Shown as a button on conflict. |
+| `undoWindowMs` | `number` | `6000` | How long Undo stays available after Apply. |
+
+## Accessibility
+
+- Each hunk's Accept/Reject buttons carry a label naming the actual changed text
+  (e.g. `Accept: "design engineer"`), not just "Accept" — meaningful out of context.
+- Additions and removals are distinguished by text decoration (strikethrough /
+  underline + tint), not colour alone — the token set has no red/green pair to spend
+  on this anyway, and decoration reads correctly for colourblind users.
+- Apply/Undo state changes are announced via `aria-live="polite"`.
+- Every control is a real, keyboard-reachable `<button>`.
+- Under `prefers-reduced-motion`, all colour/background transitions drop to instant
+  state changes; the underlying decoration stays fully legible without animation.
+
+## When not to use
+
+A single atomic value with no internal structure to partially accept — a company name,
+a date, a category — is `Smart Field`, not this. Diff Accept is for text with multiple
+independently-reviewable regions.

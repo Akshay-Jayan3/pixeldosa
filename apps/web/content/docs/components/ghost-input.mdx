@@ -44,6 +44,49 @@ Inside a `Field`, drop it straight into `FieldControl` — id and ARIA wiring pa
 </Field>
 ```
 
+## Features
+
+- **Race-proof suggestions**: every keystroke aborts the in-flight request before
+  starting a new debounce, and any response that doesn't extend the current value is
+  discarded — a slow reply can never overwrite what the user is now looking at.
+- **Nothing is ever inserted for you.** Tab (or → at the end of the text) accepts, Esc
+  dismisses. There is no auto-accept timer, by design.
+- **A real `<input>`, not a contentEditable** — IME composition, autofill, native undo
+  and screen-reader field semantics all behave exactly as they would in a plain input.
+- **Announced without double-reading**: the ghost text is `aria-hidden` and an
+  `aria-live` region announces the suggestion plus its accept/dismiss keys instead.
+- **Drops into `Field` unchanged**, with id and ARIA wiring passing straight through.
+
+## Examples
+
+Tuning when a suggestion is requested — wait longer after typing stops, and don't ask
+at all until there's enough context to complete:
+
+```tsx
+<GhostInput
+  value={value}
+  onValueChange={setValue}
+  fetchSuggestion={fetchSuggestion}
+  debounceMs={500}
+  minChars={12}
+/>
+```
+
+Reacting to an accepted completion — useful for logging acceptance rate, which is the
+honest measure of whether the suggestions are any good:
+
+```tsx
+<GhostInput
+  value={value}
+  onValueChange={setValue}
+  fetchSuggestion={fetchSuggestion}
+  onAcceptSuggestion={(full) => analytics.track("ghost_accepted", { length: full.length })}
+/>
+```
+
+The live example at the top of this page is fully interactive — type a few words and
+pause to see the completion appear.
+
 ## Props
 
 | Prop | Type | Default | Description |

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@pixeldosa/ui";
 
 import { ComponentPreview } from "@/components/component-preview";
-import { PILLARS, getComponentsByPillar } from "@/lib/registry";
+import { COMPONENT_CATEGORIES, getComponentsByCategory } from "@/lib/registry";
 
 export default function HomePage() {
   return (
@@ -12,7 +12,7 @@ export default function HomePage() {
         <div aria-hidden="true" className="pd-grid absolute inset-0" />
         <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Core · AI · Motion
+            Components for modern product interfaces
           </p>
           <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
             Production-ready components, crafted by a Design Engineer.
@@ -38,20 +38,19 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-          Three pillars, one system
+          Browse by purpose
         </h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {PILLARS.map((pillar) => {
-            const count = getComponentsByPillar(pillar.id).length;
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {COMPONENT_CATEGORIES.map((category) => {
+            const count = getComponentsByCategory(category.id).length;
             return (
-              <div key={pillar.id} className="rounded-xl border bg-card p-6">
+              <div key={category.id} className="rounded-xl border bg-card p-6">
                 <div className="flex items-baseline justify-between">
-                  <h3 className="text-lg font-medium">{pillar.label}</h3>
+                  <h3 className="text-lg font-medium">{category.label}</h3>
                   <span className="font-mono text-xs text-muted-foreground">
                     {count} shipped
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground text-pretty">{pillar.blurb}</p>
               </div>
             );
           })}

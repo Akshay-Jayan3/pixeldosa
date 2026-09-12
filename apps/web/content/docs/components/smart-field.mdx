@@ -1,0 +1,175 @@
+---
+title: Smart Field
+description: An AI-proposed value for a single field — confidence, source, explicit accept/reject, and one-step undo before it ever becomes real data.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import * as React from "react";
+import { SmartField, type SmartFieldProposal } from "@/components/ui/smart-field";
+
+async function fetchProposal(
+  currentValue: string,
+  signal: AbortSignal
+): Promise<SmartFieldProposal | null> {
+  const response = await fetch(`/api/enrich?value=${currentValue}`, { signal });
+  if (!response.ok) return null;
+  return response.json(); // { value, confidence, provenance }
+}
+
+export function CompanyField() {
+  const [value, setValue] = React.useState("");
+
+  return (
+    <SmartField
+      id="company"
+      value={value}
+      onValueChange={setValue}
+      fetchProposal={fetchProposal}
+      triggerIcon={<SparkleIcon />}
+      triggerLabel="Suggest company name"
+    />
+  );
+}
+```
+
+The field's value never changes until the proposal is explicitly accepted. Typing
+manually at any point — while a fetch is in flight, or once a proposal is shown but not
+yet accepted — cancels the request or dismisses the proposal, since manual input always
+wins over an AI suggestion.
+
+### Confidence and provenance
+
+```tsx
+return {
+  value: "Acme Robotics, Inc.",
+  confidence: "medium",
+  provenance: "acme-robotics.com",
+};
+```
+
+`confidence` is a three-tier enum (`low` / `medium` / `high`), not a raw percentage —
+a fabricated number would claim precision the model doesn't actually have. `provenance`
+is free text rendered as `via {provenance}`; omit it if you have nothing honest to show.
+
+### Auto-propose on an empty field
+
+```tsx
+<SmartField autoPropose value={value} onValueChange={setValue} fetchProposal={fetchProposal} triggerIcon={<SparkleIcon />} />
+```
+
+Fires once, on mount, and only when `value` is empty — it can never silently
+reconsider a value that's already there. Off by default; most fields should wait for an
+explicit click.
+
+## Features
+
+- **Nothing commits silently.** The field's value never changes until the proposal is
+  explicitly accepted, and a one-step Undo stays available afterwards (DESIGN.md §3.7).
+- **Manual input always wins.** Typing at any point — mid-fetch, or with a proposal on
+  screen — cancels the request or dismisses the proposal, so the AI can never overwrite
+  what someone is actively doing.
+- **Confidence as a three-tier enum, not a percentage**, shown as text with a
+  supplementary bar rather than a colour-coded badge.
+- **Provenance next to the proposal**, so a value arrives with its evidence instead of
+  asking to be trusted on its own.
+- **Auto-propose is opt-in and fires once**, only on mount and only into an empty
+  field — it can never silently reconsider a value that's already there.
+- **Drops into `<FieldControl>` unchanged**, forwarding `id`, `aria-invalid` and
+  `aria-describedby` to the real `<input>`.
+
+## Examples
+
+Auto-proposing into an empty field, for a form where the enrichment is the whole point
+and waiting for a click is pure friction:
+
+```tsx
+<SmartField
+  autoPropose
+  value={value}
+  onValueChange={setValue}
+  fetchProposal={fetchProposal}
+  triggerIcon={<SparkleIcon />}
+/>
+```
+
+Reacting to an acceptance — the honest place to measure whether proposals are actually
+good, rather than counting how often they were merely shown:
+
+```tsx
+<SmartField
+  value={value}
+  onValueChange={setValue}
+  fetchProposal={fetchProposal}
+  triggerIcon={<SparkleIcon />}
+  onAcceptProposal={(value, proposal) =>
+    analytics.track("proposal_accepted", { confidence: proposal.confidence })
+  }
+/>
+```
+
+Returning `null` is a first-class answer — say nothing rather than propose noise:
+
+```tsx
+async function fetchProposal(currentValue, signal) {
+  const match = await lookup(currentValue, signal);
+  if (!match || match.score < 0.6) return null;
+  return { value: match.name, confidence: match.tier, provenance: match.domain };
+}
+```
+
+Composed inside a `Field`, where label, description and error wiring come for free:
+
+```tsx
+<Field invalid={Boolean(error)}>
+  <FieldLabel>Company</FieldLabel>
+  <FieldControl>
+    <SmartField
+      value={value}
+      onValueChange={setValue}
+      fetchProposal={fetchProposal}
+      triggerIcon={<SparkleIcon />}
+    />
+  </FieldControl>
+  <FieldError>{error}</FieldError>
+</Field>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | Required. Controlled field value. |
+| `onValueChange` | `(value: string) => void` | — | Required. |
+| `fetchProposal` | `(currentValue: string, signal: AbortSignal) => Promise<SmartFieldProposal \| null \| undefined>` | — | Required. Return `null`/`undefined` for "no proposal." |
+| `onAcceptProposal` | `(value: string, proposal: SmartFieldProposal) => void` | — | Fires after the user accepts. |
+| `triggerIcon` | `React.ReactNode` | — | Required. No bundled icon set — pass a `size-4` icon. |
+| `triggerLabel` | `string` | `"Suggest a value with AI"` | Accessible label for the trigger button. |
+| `autoPropose` | `boolean` | `false` | Fetch once on mount if `value` is empty. |
+| `undoWindowMs` | `number` | `6000` | How long the Undo affordance stays visible after accepting. |
+
+`SmartFieldProposal` is `{ value: string; confidence?: "low" | "medium" | "high";
+provenance?: string }`.
+
+## Accessibility
+
+- Every state change (proposal arrived, accepted, undone) is announced via
+  `aria-live="polite"`.
+- Confidence is communicated as text, never colour alone — the tiered bar indicator
+  next to the label is supplementary, not the only signal.
+- Trigger, Accept, Reject and Undo are all real `<button>` elements, keyboard-reachable
+  by default, with a minimum 44×44px hit target.
+- Drops into `<FieldControl>` directly — `id`, `aria-invalid` and `aria-describedby`
+  all forward to the underlying `<input>`.
+- Under `prefers-reduced-motion`, the proposal panel's expand/collapse and every colour
+  transition lose their animation but not the underlying state change.
+
+## When not to use
+
+Inline predictive continuation while typing is `Ghost Input`, not this — Smart Field
+proposes a complete replacement value reviewed before commit, not a tail appended as
+you type. Multi-field or long-text diffing belongs to `Diff Accept`; a consequential or
+risky action needing full review belongs to `AI Approval Gate`.

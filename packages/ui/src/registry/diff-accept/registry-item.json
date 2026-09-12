@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "diff-accept",
+  "title": "Diff Accept",
+  "description": "Reviews an AI-proposed text change as an inline word-level diff, resolved hunk by hunk rather than all-or-nothing. Takes baseValue (the text the proposal was generated against), value (the current live value), and proposedValue (the AI's suggested replacement), and computes the diff between baseValue and proposedValue using the diff (jsdiff) library. Each contiguous run of changed words becomes one hunk with its own Accept/Reject controls, shown inline as struck-through removed text and underlined/tinted added text. If value no longer matches baseValue — the underlying text changed since the proposal was generated — the diff is not shown; a conflict banner renders instead with an optional onRegenerate callback. Apply commits the current resolution (accepted hunks use the proposed text, pending or rejected hunks keep the original) via onApply, with a brief Undo affordance after. Use for reviewing AI rewrites of existing text — a bio, a description, any content field — where accepting some proposed changes and rejecting others is a real, expected outcome. Not for a single atomic value with no internal structure to partially accept — use smart-field for that.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": ["diff"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/diff-accept/diff-accept.tsx",
+      "target": "components/ui/diff-accept.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Uses diffWords from the diff package for word-level diffing — not a line-level diff, since this targets prose fields, not code. Unlike smart-field/ghost-input, this component does not call an AI provider itself; the consumer supplies an already-generated proposedValue (which may itself come from a smart-field-style fetch). baseValue must be exactly the text the proposal was generated against, not the current value, or the conflict guard will trigger on every render.",
+  "meta": {
+    "engineeringNotes": "Uses diff (jsdiff) for the actual word-level diff computation rather than hand-rolling a diff algorithm — the same relationship command-menu has with cmdk: a solved problem with real edge cases (Unicode, whitespace runs, word-boundary detection) not worth re-solving here. Hunks are grouped from the raw diff parts by merging consecutive added/removed runs into one reviewable unit, so a 'replace X with Y' shows as a single hunk with both the removal and the replacement, not two separate uncoordinated changes. Unresolved (pending) hunks default to the original text when merging, never the proposed one — an AI change only lands in the final result if a hunk is explicitly accepted, matching the system-wide 'never silently commit' rule. The status model is a three-state machine (reviewing/applied/done) rather than a single boolean: collapsing 'applied' and 'done' into one flag caused a real bug during development, where the conflict check (value !== baseValue, which becomes true immediately after Apply changes the live value) would incorrectly override the Undo affordance and show a conflict banner instead — the fix was ordering status checks so 'applied'/'done' short-circuit before the conflict check ever runs, since conflict is only a meaningful question while still reviewing.",
+    "motionNotes": "The system has no 'success'/'added' hue — destructive is the only token keeping real chroma — so additions and removals are distinguished primarily by text decoration (strikethrough for removed, underline plus a bg-accent/40 tint for added), not a red/green colour scheme, with destructive reserved for the removed text only since deletion is the one case that's legitimately danger-adjacent. This is also more accessible than colour alone, not just a token-budget workaround. Colour and background transitions on hunk resolution use --pd-duration-instant/--pd-ease-standard, matching Button's press-feedback timing, since resolving a hunk is an immediate state confirmation. Apply's brief settle state mirrors Smart Field's accept feedback for the same component family consistency. Under prefers-reduced-motion, all colour and background transitions drop via motion-reduce:transition-none, leaving the underlying decoration (strikethrough/underline) and resolved text fully legible without animation."
+  }
+}

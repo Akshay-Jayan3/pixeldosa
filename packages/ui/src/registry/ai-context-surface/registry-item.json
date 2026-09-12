@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ai-context-surface",
+  "title": "AI Context / Provenance Surface",
+  "description": "A collapsed-by-default 'Why this?' disclosure showing an AI-produced value's explanation, sources, and model metadata — the folded-together answer to Citation Card, Source Viewer, and Thinking Indicator, none of which make sense without a chat thread. Takes optional explanation (plain-language reasoning text), sources (an array of { label, url?, snippet? }, rendered as a numbered list, each a link when a url is supplied), model (a string name), and generatedAt (a string or Date, formatted as a relative time within 24 hours or an absolute date otherwise). Renders nothing if none of these props are supplied. The trigger is a small, muted button; expanding it reveals a quiet bg-muted panel with the explanation first, sources second, and a model/timestamp footer line last. Use anywhere an AI-influenced value needs transparency available on demand without competing with the content it explains — a Smart Field proposal, a table cell, a classification result from Selection Actions. Not for a full chat/conversation transcript, and not for a single short provenance caption (Smart Field already has its own inline provenance prop for that).",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/ai-context-surface/ai-context-surface.tsx",
+      "target": "components/ui/ai-context-surface.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. `generatedAt` is formatted internally (relative within 24 hours via Intl.RelativeTimeFormat, an absolute locale date otherwise) rather than left to the consumer, since every consumer would otherwise reimplement the same relative-or-absolute decision. Renders `null` entirely when none of `explanation`/`sources`/`model`/`generatedAt` are supplied — a trigger with nothing behind it is worse than no component.",
+  "meta": {
+    "engineeringNotes": "Deliberately a disclosure (collapsed by default), not an always-visible panel: provenance detail is important to have available but wrong to force onto every view, since it would compete with the actual content for attention the moment it's always open — the same restraint Smart Field's inline `via {provenance}` caption already established, applied here at a larger, richer scale. Folds three previously-separate roadmap ideas (Citation Card, Source Viewer, Thinking Indicator) into one component because all three share the same real constraint this system cares about: working with zero chat thread present, unlike Vercel AI Elements' `Reasoning`/citation components, which are chat-message-scoped and excellent at that job specifically — competing with them there would be a bad trade, per the roadmap's own Reconciliation table. Timestamp formatting uses native `Intl.RelativeTimeFormat` rather than a date-formatting dependency, keeping this primitive dependency-free like every other component in the registry.",
+    "motionNotes": "Expand/collapse reuses the same CSS grid-template-rows (0fr to 1fr) technique Smart Field's proposal panel and Diff Accept's conflict banner already use — a proven, token-free way to animate a height that depends on variable content, on --pd-duration-fast/--pd-ease-standard. The trigger's chevron rotates 90 degrees on open using --pd-duration-instant, matching Button's press-feedback timing, since it's an immediate state confirmation rather than content arriving. Under prefers-reduced-motion, both the panel's height transition and the chevron rotation drop via motion-reduce:transition-none, leaving the open/closed state instant but fully legible — aria-expanded already communicates the state to assistive technology regardless of the icon's rotation."
+  }
+}

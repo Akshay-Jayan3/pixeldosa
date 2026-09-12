@@ -3,7 +3,7 @@ import "server-only";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-export type Pillar = "core" | "ai" | "motion";
+import { GROUP_ORDER, groupFor, isFoundation } from "./component-groups";
 
 export type RegistryFile = {
   path: string;
@@ -23,7 +23,6 @@ export type RegistryItem = {
   cssVars?: Record<string, Record<string, string>>;
   docs?: string;
   meta?: {
-    pillar: Pillar;
     engineeringNotes: string;
     motionNotes?: string;
   };
@@ -36,23 +35,13 @@ export type RegistryItem = {
  */
 const REGISTRY_SRC = resolve(process.cwd(), "../../packages/ui/src/registry");
 
-export const PILLARS: { id: Pillar; label: string; blurb: string }[] = [
-  {
-    id: "core",
-    label: "Core",
-    blurb: "The primitives everything else is built on. Boring on purpose.",
-  },
-  {
-    id: "ai",
-    label: "AI",
-    blurb: "Interfaces designed for streaming, tool calls and uncertainty.",
-  },
-  {
-    id: "motion",
-    label: "Motion",
-    blurb: "High-craft experience components where motion earns its place.",
-  },
-];
+export const COMPONENT_CATEGORIES = [
+  { id: "actions", label: "Actions" },
+  { id: "content", label: "Content" },
+  { id: "forms", label: "Forms" },
+  { id: "ai-assisted", label: "AI-assisted" },
+  { id: "overlays", label: "Overlays" },
+] as const;
 
 let cache: RegistryItem[] | null = null;
 
@@ -79,16 +68,30 @@ export function getComponents(): RegistryItem[] {
   return getRegistryItems().filter((item) => item.type === "registry:ui");
 }
 
-export function getComponentsByPillar(pillar: Pillar): RegistryItem[] {
-  return getComponents().filter((item) => item.meta?.pillar === pillar);
+export function getComponentsByCategory(category: string): RegistryItem[] {
+  return getComponents().filter((item) => item.categories?.[0] === category);
 }
 
-/** Neighbours in the same title-sorted order the sidebar renders, for prev/next paging. */
+/**
+ * Neighbours in the exact order the sidebar renders — grouped, with foundation
+ * primitives excluded. Deriving this from the same grouping the nav uses is the point:
+ * a "next" arrow that jumps to a component the sidebar doesn't show, or that skips
+ * around the visible order, is the kind of small wrongness a user feels without being
+ * able to name it.
+ *
+ * A foundation page reached directly by URL still gets arrows, falling back to the
+ * full title-sorted list so it is never a dead end.
+ */
 export function getAdjacentComponents(name: string): {
   prev: RegistryItem | null;
   next: RegistryItem | null;
 } {
-  const items = getComponents();
+  const all = getComponents();
+  const navOrder = GROUP_ORDER.flatMap((group) =>
+    all.filter((item) => !isFoundation(item) && groupFor(item) === group)
+  );
+
+  const items = navOrder.some((item) => item.name === name) ? navOrder : all;
   const index = items.findIndex((item) => item.name === name);
   if (index === -1) return { prev: null, next: null };
 

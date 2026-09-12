@@ -1,12 +1,22 @@
 import type { ComponentType } from "react";
 
+import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
+import AgentPresenceDemo from "@pixeldosa/ui/registry/agent-presence/agent-presence.demo";
+import AIContextSurfaceDemo from "@pixeldosa/ui/registry/ai-context-surface/ai-context-surface.demo";
 import ButtonDemo from "@pixeldosa/ui/registry/button/button.demo";
+import CommandMenuDemo from "@pixeldosa/ui/registry/command-menu/command-menu.demo";
+import ConfidenceMeterDemo from "@pixeldosa/ui/registry/confidence-meter/confidence-meter.demo";
 import ContentCardExample from "@pixeldosa/ui/registry/card/examples/content-card";
+import DiffAcceptDemo from "@pixeldosa/ui/registry/diff-accept/diff-accept.demo";
 import ListingCardExample from "@pixeldosa/ui/registry/card/examples/listing-card";
 import PricingPairExample from "@pixeldosa/ui/registry/card/examples/pricing-pair";
 import FieldDemo from "@pixeldosa/ui/registry/field/field.demo";
+import GenerationPlaceholderDemo from "@pixeldosa/ui/registry/generation-placeholder/generation-placeholder.demo";
 import GhostInputDemo from "@pixeldosa/ui/registry/ghost-input/ghost-input.demo";
 import OverlayDemo from "@pixeldosa/ui/registry/overlay/overlay.demo";
+import ProgressiveRevealDemo from "@pixeldosa/ui/registry/progressive-reveal/progressive-reveal.demo";
+import SelectionActionsDemo from "@pixeldosa/ui/registry/selection-actions/selection-actions.demo";
+import SmartFieldDemo from "@pixeldosa/ui/registry/smart-field/smart-field.demo";
 
 export type DemoExample = {
   slug: string;
@@ -31,6 +41,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "All six variants, four sizes, loading and disabled states.",
       render: ButtonDemo,
+    },
+  ],
+  "command-menu": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Grouped results, keybind hints, empty state, and a live ⌘K trigger.",
+      render: CommandMenuDemo,
     },
   ],
   card: [
@@ -75,6 +93,78 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "Inline-editable text that reads as a label until focused.",
       render: GhostInputDemo,
+    },
+  ],
+  "smart-field": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Propose, review confidence and source, then accept or undo.",
+      render: SmartFieldDemo,
+    },
+  ],
+  "diff-accept": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Per-hunk accept/reject on an AI rewrite, plus a conflict guard.",
+      render: DiffAcceptDemo,
+    },
+  ],
+  "selection-actions": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Select text to reveal AI actions, Rewrite routed through Diff Accept.",
+      render: SelectionActionsDemo,
+    },
+  ],
+  "confidence-meter": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Three tiers, an optional source caption, never a raw percentage.",
+      render: ConfidenceMeterDemo,
+    },
+  ],
+  "progressive-reveal": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Streaming search results, one fade-in per item, never replayed.",
+      render: ProgressiveRevealDemo,
+    },
+  ],
+  "ai-context-surface": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A collapsed 'Why this?' disclosure — explanation, sources, model.",
+      render: AIContextSurfaceDemo,
+    },
+  ],
+  "ai-action-toolbar": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Apply, regenerate, explain and report over one AI result, arrow-key navigable.",
+      render: AIActionToolbarDemo,
+    },
+  ],
+  "agent-presence": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A full agent run — the machine states move, then it stops and waits for you.",
+      render: AgentPresenceDemo,
+    },
+  ],
+  "generation-placeholder": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A full generate cycle — queued, measured progress, encode, then the artifact.",
+      render: GenerationPlaceholderDemo,
     },
   ],
 };

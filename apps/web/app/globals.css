@@ -25,6 +25,72 @@
   ::selection {
     background-color: color-mix(in oklab, var(--primary) 24%, transparent);
   }
+
+  /* Decorative graphics are never selectable. Stray highlight rectangles around an
+     icon during a drag or a fast double-click are pure visual noise. Mirrored in
+     pixeldosa-theme's `css` block so installed components get it too. */
+  svg[aria-hidden="true"],
+  [data-pd-decorative] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* Shared by components that cross-fade content in on completion. Mirrored in
+   pixeldosa-theme's `css` block so installed components get it too. */
+@keyframes pd-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Indeterminate cell pulse. Runs as a compositor animation with a per-cell negative
+   delay rather than a JS frame loop, so hundreds of cells cost nothing to animate. */
+@keyframes pd-cell-pulse {
+  0%,
+  100% {
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+}
+
+/* Mosaic's indeterminate pulse. Opacity rather than scale, because a mosaic block that
+   shrinks stops being a block. */
+@keyframes pd-cell-pulse-opacity {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Agent Presence orb rotation. Only ever applied while it is the machine's turn —
+   a user-turn orb holds perfectly still, which is the grammar's whole point. */
+@keyframes pd-orb-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Sweep's indeterminate pass: the develop frontier travels instead of resting at a
+   known position, which is the honest shape of "working, extent unknown". */
+@keyframes pd-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* The docs site's own surface treatment — a faint warm grid that reads as

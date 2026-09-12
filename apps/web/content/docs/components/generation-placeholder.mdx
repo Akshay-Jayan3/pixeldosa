@@ -1,0 +1,209 @@
+---
+title: Generation Placeholder
+description: A layout-reserving placeholder for AI-generated media that encodes real generation progress as a resolving dot field, then cross-fades into the finished artifact.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { GenerationPlaceholder } from "@/components/ui/generation-placeholder";
+
+export function GeneratedImage({ job }: { job: Job }) {
+  return (
+    <GenerationPlaceholder
+      status={job.status}
+      progress={job.step / job.totalSteps}
+      aspectRatio="16 / 9"
+      label="Generating image"
+      onCancel={() => job.abort()}
+    >
+      <img src={job.url} alt={job.prompt} />
+    </GenerationPlaceholder>
+  );
+}
+```
+
+The component is a **container**, not a sibling that gets swapped out — children render
+only once `status` is `done`. That, plus the required `aspectRatio`, is what keeps the
+layout still at the exact moment the artifact appears.
+
+## Features
+
+- **Progress is spatial, not temporal.** Every cell holds a stable pseudo-random
+  threshold and resolves once `progress` passes it — ordered-dither logic borrowed from
+  halftone rendering. The pattern *is* the information, so it stays readable with every
+  animation removed.
+- **Never a fabricated percentage.** `progress` is optional with no synthetic fallback.
+  Omit it and you get an honest indeterminate wave rather than a number creeping toward
+  90%. A percentage appears only when your backend actually measured one.
+- **`aspectRatio` is required, deliberately.** A media placeholder that resizes when the
+  artifact arrives causes a layout shift precisely where the user is looking.
+- **`processing` is its own state.** Upscaling and encoding are neither generating nor
+  done, so a user is never told "done" while work is still running.
+- **Four forms, one threshold engine.** `field` (dot density), `mosaic` (coarse→fine
+  resolution — the closest to what generation actually does), `sweep` (a soft develop
+  frontier), and `bars` for audio, where a rectangle would misrepresent the medium.
+- **Cancel stays visible** through every active state, never hidden behind a hover.
+- **Failure stops visibly.** It takes the whole surface with an icon, a plain-language
+  cause, and a retry — rather than dimming the field and reddening a caption, which
+  reads as "still working, but sad".
+- **The indeterminate wave is a CSS animation**, not a frame loop. Hundreds of cells
+  animate on the compositor with a per-cell delay; React never re-renders.
+
+## Variants
+
+A measured generation at 41% — the frontier reads as a soft edge because each cell
+crosses its own threshold rather than a shared one.
+
+<PreviewStack>
+  <GenerationPlaceholder status="generating" progress={0.41} aspectRatio="16 / 9" label="Generating image" />
+</PreviewStack>
+
+### Queued
+
+Accepted, not started. Sparse and at rest, so "waiting in line" doesn't read as
+"working".
+
+<PreviewStack>
+  <GenerationPlaceholder status="queued" aspectRatio="16 / 9" label="Queued" />
+</PreviewStack>
+
+### Indeterminate
+
+No `progress` supplied — a travelling wave rather than an invented number. This is the
+honest default when the backend doesn't report steps.
+
+<PreviewStack>
+  <GenerationPlaceholder status="generating" aspectRatio="16 / 9" label="Generating" />
+</PreviewStack>
+
+### Mosaic
+
+Blocks subdivide coarse → fine as progress climbs. This is what an image actually does
+while it generates — it gains *resolution*, not area — which is why it communicates
+"nearly there" more honestly than a bar. Resolution steps in doublings rather than
+easing, because a smoothly shrinking block reads as a zoom instead of a refinement.
+
+<PreviewStack>
+  <GenerationPlaceholder status="generating" progress={0.55} aspectRatio="16 / 9" form="mosaic" label="Generating image" />
+</PreviewStack>
+
+### Sweep
+
+A develop frontier with a soft gradient edge — the closest of the four to the gradient
+wash people recognise from Gemini-style generation. The frontier sits exactly at
+`progress`, so the visual and the number can never disagree.
+
+<PreviewStack>
+  <GenerationPlaceholder status="generating" progress={0.41} aspectRatio="16 / 9" form="sweep" label="Generating image" />
+</PreviewStack>
+
+### Audio
+
+`form="bars"` for a medium that isn't a rectangle. Same threshold engine, different
+geometry.
+
+<PreviewStack>
+  <GenerationPlaceholder status="generating" progress={0.6} aspectRatio="8 / 1" form="bars" label="Generating audio" />
+</PreviewStack>
+
+### Failed
+
+Failure takes the whole surface rather than dimming the field and turning a caption
+red — a stopped state should visibly stop. The field stays faintly behind it, showing
+how far it got, and `onRetry` gives the message somewhere to go.
+
+<PreviewStack>
+  <GenerationPlaceholder
+    status="failed"
+    aspectRatio="16 / 9"
+    label="Couldn't generate this image. The model timed out."
+  />
+</PreviewStack>
+
+## Examples
+
+Driving it from a real job. Note that `progress` is passed **only** while generating —
+during `processing` there is nothing measured to report, so it's omitted rather than
+frozen at 100%:
+
+```tsx
+<GenerationPlaceholder
+  status={job.status}
+  progress={job.status === "generating" ? job.step / job.totalSteps : undefined}
+  aspectRatio="1 / 1"
+  label={job.status === "processing" ? "Upscaling" : "Generating image"}
+  onCancel={job.abort}
+>
+  <img src={job.url} alt={job.prompt} />
+</GenerationPlaceholder>
+```
+
+A grid of variations, each with its own job — `density="sm"` keeps the field legible at
+a small size:
+
+```tsx
+<div className="grid grid-cols-4 gap-3">
+  {jobs.map((job) => (
+    <GenerationPlaceholder
+      key={job.id}
+      status={job.status}
+      progress={job.progress}
+      aspectRatio="1 / 1"
+      density="sm"
+      label={`Variation ${job.index}`}
+    >
+      <img src={job.url} alt="" />
+    </GenerationPlaceholder>
+  ))}
+</div>
+```
+
+Video, where the measurable quantity is encoded frames rather than diffusion steps:
+
+```tsx
+<GenerationPlaceholder
+  status="processing"
+  aspectRatio="16 / 9"
+  label={`Encoding · frame ${frame} of ${total}`}
+>
+  <video src={url} controls />
+</GenerationPlaceholder>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `status` | `"queued" \| "generating" \| "processing" \| "done" \| "failed"` | — | Required. |
+| `progress` | `number` | — | 0–1. Only supply it when it was actually measured; omit for indeterminate. |
+| `aspectRatio` | `string` | — | Required. Reserves the artifact's final bounds, e.g. `"16 / 9"`. |
+| `label` | `string` | — | Required. Both the visible and the announced status text. |
+| `form` | `"field" \| "mosaic" \| "sweep" \| "bars"` | `"field"` | `field` dot density, `mosaic` coarse→fine resolution, `sweep` a soft develop frontier, `bars` for audio. |
+| `density` | `"sm" \| "default" \| "lg"` | `"default"` | Cell count. `sm` for grid cells, `lg` for hero surfaces. |
+| `onCancel` | `() => void` | — | Shown during `generating` and `processing`. |
+| `onRetry` | `() => void` | — | Recovery action on `failed`. Without it the failure explains but can't be acted on. |
+| `children` | `ReactNode` | — | The artifact. Rendered only when `status` is `done`. |
+
+All other props forward to the wrapping `<div>`.
+
+## Accessibility
+
+- The dot field is `aria-hidden` — supplementary, never the only signal. The `label`
+  plus the percentage is the real status, in an `aria-live="polite"` region.
+- The percentage uses `tabular-nums`, so the line doesn't shift as it climbs.
+- Cancel is a real keyboard-reachable `<button>` with a hit area extended to ~44px
+  while its visible size stays compact.
+- Under `prefers-reduced-motion` every transition is dropped and the indeterminate loop
+  never starts. Cells hold a static pattern — and because progress was already encoded
+  spatially, **nothing is lost**. This is the rare case where the reduced-motion state
+  carries exactly the same information as the animated one.
+
+## When not to use
+
+Streaming text is `Progressive Reveal` — it appends whole items, where this refines in
+place. Agent activity with no artifact attached is `Agent Presence` (planned). And this
+is not a generic content skeleton: it exists precisely because media generation
+progress is *measurable*, and a skeleton throws that information away.

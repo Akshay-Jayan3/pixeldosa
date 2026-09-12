@@ -62,10 +62,6 @@ export default async function ExampleDocPage({ params }: Params) {
         </Link>
       </Button>
 
-      <span className="mt-4 block w-fit rounded-full border px-2.5 py-0.5 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-        {item.meta?.pillar ?? "core"}
-      </span>
-
       <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{example.title}</h1>
       <p className="mt-3 max-w-xl text-muted-foreground text-pretty">{example.description}</p>
 

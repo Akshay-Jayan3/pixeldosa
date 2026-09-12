@@ -7,8 +7,9 @@ import remarkGfm from "remark-gfm";
 import { Button } from "@pixeldosa/ui";
 
 import { CodeBlock } from "@/components/code-block";
-import { CopyIconButton } from "@/components/copy-icon-button";
 import { CopyMarkdownButton } from "@/components/copy-markdown-button";
+import { ExamplePreview } from "@/components/example-preview";
+import { TableOfContents } from "@/components/table-of-contents";
 import { demoExamples } from "@/components/registry-demos";
 import { buildComponentMarkdown, getComponentDoc } from "@/lib/docs";
 import {
@@ -20,6 +21,7 @@ import {
   installCommand,
   type RegistryItem,
 } from "@/lib/registry";
+import { extractHeadings, type TocHeading } from "@/lib/toc";
 import { mdxComponents } from "@/components/mdx-components";
 
 function ArrowIcon({ direction }: { direction: "left" | "right" }) {
@@ -83,118 +85,128 @@ export default async function ComponentDocPage({ params }: Params) {
   const markdown = buildComponentMarkdown(item, doc);
   const examples = demoExamples[name] ?? [];
 
+  const headings: TocHeading[] = [
+    { id: "installation", text: "Installation", level: 2 },
+    ...(doc ? extractHeadings(doc.body) : []),
+    ...(item.meta?.engineeringNotes
+      ? [{ id: "engineering-notes", text: "Engineering Notes", level: 2 as const }]
+      : []),
+    ...(item.meta?.motionNotes ? [{ id: "motion-notes", text: "Motion Notes", level: 2 as const }] : []),
+    ...(source ? [{ id: "source", text: "Source", level: 2 as const }] : []),
+  ];
+
   return (
-    <div className="mx-auto max-w-5xl">
-      <div className="flex items-center justify-between gap-4">
-        <span className="rounded-full border px-2.5 py-0.5 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          {item.meta?.pillar ?? "core"}
-        </span>
-        <div className="flex items-center gap-1">
-          <NavArrow item={prev} direction="left" />
-          <NavArrow item={next} direction="right" />
-        </div>
-      </div>
-
-      <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{item.title}</h1>
-      <p className="mt-3 max-w-xl text-muted-foreground text-pretty">
-        {doc?.frontmatter.description || item.description}
-      </p>
-
-      <div className="mt-5">
-        <CopyMarkdownButton markdown={markdown} />
-      </div>
-
-      {/* 1. Example grid — each tile links to its own preview + code + doc page */}
-      {examples.length > 0 ? (
-        <section className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {examples.map((example) => {
-            const exampleSource = getExampleSource(name, example.slug);
-            const Render = example.render;
-
-            return (
-              <Link
-                key={example.slug}
-                href={`/docs/components/${name}/${example.slug}`}
-                className="group block rounded-xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
-              >
-                <div className="overflow-hidden rounded-xl border bg-card transition-colors duration-[var(--pd-duration-instant)] group-hover:border-border/80">
-                  <div className="flex min-h-56 items-center justify-center overflow-hidden p-8">
-                    <Render />
-                  </div>
-                  <div className="flex items-center justify-between gap-3 border-t px-4 py-3">
-                    <span className="text-sm text-muted-foreground">{example.title}</span>
-                    <div className="flex items-center gap-2">
-                      {exampleSource ? <CopyIconButton text={exampleSource} /> : null}
-                      <span className="inline-flex items-center rounded-md border border-input px-2.5 py-1 text-xs font-medium transition-colors duration-[var(--pd-duration-instant)] group-hover:bg-accent group-hover:text-accent-foreground">
-                        View code
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </section>
-      ) : null}
-
-      <article className="mt-10 max-w-3xl">
-        {/* 2. Install */}
-        <section>
-          <h2 className="text-xl font-medium tracking-tight">Installation</h2>
-          <div className="mt-3">
-            <CodeBlock code={installCommand(item.name)} language="bash" />
+    <div className="mx-auto flex max-w-6xl gap-10">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-4">
+          <Button asChild variant="ghost" size="sm" className="-ml-2">
+            <Link href="/docs/components">Components</Link>
+          </Button>
+          <div className="flex items-center gap-1">
+            <NavArrow item={prev} direction="left" />
+            <NavArrow item={next} direction="right" />
           </div>
-          {item.docs ? (
-            <p className="mt-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground text-pretty">
-              {item.docs}
-            </p>
-          ) : null}
-        </section>
+        </div>
 
-        {/* 3 + 4. Usage and props, authored in MDX */}
-        {doc ? (
-          <section className="mt-10">
-            <MDXRemote
-              source={doc.body}
-              components={mdxComponents}
-              options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
-            />
+        <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{item.title}</h1>
+        <p className="mt-3 max-w-xl text-muted-foreground text-pretty">
+          {doc?.frontmatter.description || item.description}
+        </p>
+
+        <div className="mt-5">
+          <CopyMarkdownButton markdown={markdown} />
+        </div>
+
+        {/* 1. Examples — inline Preview/Code tabs, no click-through to a second page */}
+        {examples.length > 0 ? (
+          <section className="mt-8 grid grid-cols-1 gap-6">
+            {examples.map((example) => {
+              const Render = example.render;
+              return (
+                <ExamplePreview
+                  key={example.slug}
+                  title={examples.length > 1 ? example.title : null}
+                  preview={<Render />}
+                  source={getExampleSource(name, example.slug)}
+                />
+              );
+            })}
           </section>
         ) : null}
 
-        {/* 5. Engineering Notes — sourced from meta.engineeringNotes, never retyped */}
-        {item.meta?.engineeringNotes ? (
-          <section className="mt-12 rounded-xl border-l-2 border-l-primary bg-card p-6">
-            <h2 className="text-xl font-medium tracking-tight">Engineering Notes</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
-              {item.meta.engineeringNotes}
-            </p>
-          </section>
-        ) : null}
-
-        {/* 6. Motion Notes */}
-        {item.meta?.motionNotes ? (
-          <section className="mt-4 rounded-xl border-l-2 border-l-accent-foreground/40 bg-card p-6">
-            <h2 className="text-xl font-medium tracking-tight">Motion Notes</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
-              {item.meta.motionNotes}
-            </p>
-          </section>
-        ) : null}
-
-        {source ? (
-          <section className="mt-12">
-            <h2 className="text-xl font-medium tracking-tight">Source</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              The exact file <code className="font-mono">shadcn add</code> writes into your
-              project.
-            </p>
+        <article className="mt-10 max-w-3xl">
+          {/* 2. Install */}
+          <section>
+            <h2 id="installation" className="scroll-mt-20 text-xl font-medium tracking-tight">
+              Installation
+            </h2>
             <div className="mt-3">
-              <CodeBlock code={source} language={`${item.name}.tsx`} collapsible />
+              <CodeBlock code={installCommand(item.name)} language="bash" />
             </div>
+            {item.docs ? (
+              <p className="mt-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground text-pretty">
+                {item.docs}
+              </p>
+            ) : null}
           </section>
-        ) : null}
-      </article>
+
+          {/* 3 + 4. Usage and props, authored in MDX */}
+          {doc ? (
+            <section className="mt-10">
+              <MDXRemote
+                source={doc.body}
+                components={mdxComponents}
+                options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+              />
+            </section>
+          ) : null}
+
+          {/* 5. Engineering Notes — sourced from meta.engineeringNotes, never retyped */}
+          {item.meta?.engineeringNotes ? (
+            <section className="mt-12 rounded-xl border-l-2 border-l-primary bg-card p-6">
+              <h2 id="engineering-notes" className="scroll-mt-20 text-xl font-medium tracking-tight">
+                Engineering Notes
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
+                {item.meta.engineeringNotes}
+              </p>
+            </section>
+          ) : null}
+
+          {/* 6. Motion Notes */}
+          {item.meta?.motionNotes ? (
+            <section className="mt-4 rounded-xl border-l-2 border-l-accent-foreground/40 bg-card p-6">
+              <h2 id="motion-notes" className="scroll-mt-20 text-xl font-medium tracking-tight">
+                Motion Notes
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
+                {item.meta.motionNotes}
+              </p>
+            </section>
+          ) : null}
+
+          {source ? (
+            <section className="mt-12">
+              <h2 id="source" className="scroll-mt-20 text-xl font-medium tracking-tight">
+                Source
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                The exact file <code className="font-mono">shadcn add</code> writes into your
+                project.
+              </p>
+              <div className="mt-3">
+                <CodeBlock code={source} language={`${item.name}.tsx`} collapsible />
+              </div>
+            </section>
+          ) : null}
+        </article>
+      </div>
+
+      <aside className="hidden w-48 shrink-0 xl:block">
+        <div className="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-y-auto py-10">
+          <TableOfContents headings={headings} />
+        </div>
+      </aside>
     </div>
   );
 }
