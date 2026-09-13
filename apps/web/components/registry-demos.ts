@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
+import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
 import AgentAskDemo from "@pixeldosa/ui/registry/agent-ask/agent-ask.demo";
 import AgentPresenceDemo from "@pixeldosa/ui/registry/agent-presence/agent-presence.demo";
@@ -162,6 +163,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A full agent run — the machine states move, then it stops and waits for you.",
       render: AgentPresenceDemo,
+    },
+  ],
+  "ai-form-fill": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "One fill request, three fields, each reviewed on its own confidence.",
+      render: AIFormFillDemo,
     },
   ],
   "thinking-experience": [

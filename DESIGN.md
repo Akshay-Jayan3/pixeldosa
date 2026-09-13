@@ -232,6 +232,14 @@ elsewhere.
 3. **Is it safe to look away?** → a queued or long-running state must read differently
    from one about to finish, so the user can leave without anxiety.
 
+**Shimmer the verb, never the content.** A status *verb* — "Thinking", "Reading",
+"Generating" — may shimmer while the machine is genuinely working, because the activity
+it names really is ongoing. Content, results, reasoning text and field values must never
+shimmer: they are already determined, and animating them implies they are still being
+composed. That is the same lie as a fake typewriter (§3.3), one layer up. The `pd-shimmer`
+utility from the theme exists for exactly this and nothing else — apply it only to a
+label describing work in progress, and drop it the moment the state is terminal.
+
 The grammar is an **additional** channel, never the only one: every state still carries
 a text label and an `aria-live` announcement (§3.8). A user who cannot perceive motion
 loses nothing — under `prefers-reduced-motion` each state holds a *distinct static
@@ -291,6 +299,7 @@ Full vocabulary, protocol mappings, and component set:
 | Keep cancel visible during every machine state | Hide cancel behind a hover or overflow menu |
 | Quantize model output into discrete cells | Render a smooth bar or a raw percentage for a model's certainty |
 | Morph continuously between agent states | Cross-fade between two separate animations |
+| Shimmer a status verb while work is genuinely ongoing | Shimmer content, results or a finished state |
 
 ---
 

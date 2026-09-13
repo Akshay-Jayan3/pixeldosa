@@ -84,7 +84,11 @@ function LiveStatusLine({
       {/* Keyed on the status text so React's reconciliation runs the swap exactly once
           per real change — a status that re-renders unchanged never re-animates. */}
       <p key={status} className="flex min-w-0 flex-1 items-baseline gap-1.5 animate-[pd-status-swap_var(--pd-duration-fast)_var(--pd-ease-decelerate)_both] motion-reduce:animate-none">
-        <span className="shrink-0 text-foreground">{status}</span>
+        {/* The verb shimmers only while the machine is genuinely working. On the user's
+            turn it goes solid and still, which is the turn-taking grammar expressed in a
+            second channel. The detail beside it never shimmers — a filename is a fact,
+            not an activity. */}
+        <span className={cn("shrink-0 text-foreground", active && "pd-shimmer")}>{status}</span>
         {detail ? (
           // The object truncates before the verb does: "Reading" stays readable even
           // when the filename can't.

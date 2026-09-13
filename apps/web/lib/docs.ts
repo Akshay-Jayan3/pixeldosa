@@ -51,3 +51,71 @@ export function buildComponentMarkdown(item: RegistryItem, doc: Doc | null): str
 
   return sections.join("\n");
 }
+
+export const SITE_URL = "https://pixeldosa.akshayjayan.com";
+
+const AGENT_GUIDE_PATH = resolve(
+  process.cwd(),
+  "../../packages/ui/src/registry/pixeldosa-agent-guide/SKILL.md"
+);
+
+/** The agent guide without its skill frontmatter — the single source for agent-facing rules. */
+export function getAgentGuide(): string {
+  const { content } = matter(readFileSync(AGENT_GUIDE_PATH, "utf8"));
+  return content.trim();
+}
+
+/**
+ * Docs MDX mixes real usage with docs-site-only wrappers. An agent reading it would copy
+ * `<PreviewStack>` or a `*Specimen` component into a project where neither exists, so
+ * those are stripped or mapped back to the real component before publishing to agents.
+ */
+function sanitizeForAgents(markdown: string): string {
+  return markdown
+    .split("\n")
+    .filter((line) => !/^\s*<\/?(Preview|PreviewStack)>\s*$/.test(line))
+    .filter((line) => !/^\s*<AIFormFillSpecimen\s*\/>\s*$/.test(line))
+    .join("\n")
+    .replace(/ActionToolbarSpecimen/g, "AIActionToolbar")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
+/** Per-component markdown for coding agents: install line, what it composes, usage, notes. */
+export function buildAgentMarkdown(
+  item: RegistryItem,
+  doc: Doc | null,
+  installCommand: string
+): string {
+  const composes = (item.registryDependencies ?? [])
+    .filter((dependency) => dependency !== "@pixeldosa/pixeldosa-theme")
+    .map((dependency) => `\`${dependency.replace("@pixeldosa/", "")}\``);
+
+  const sections = [
+    `# ${item.title}`,
+    "",
+    `> ${doc?.frontmatter.description || item.description}`,
+    "",
+    "```bash",
+    installCommand,
+    "```",
+  ];
+
+  if (composes.length > 0) {
+    sections.push("", `Composes (installed automatically): ${composes.join(", ")}.`);
+  }
+
+  if (item.docs) sections.push("", `**Before you use it:** ${item.docs}`);
+  if (doc?.body) sections.push("", sanitizeForAgents(doc.body.trim()));
+  if (item.meta?.engineeringNotes) {
+    sections.push("", "## Why it works this way", "", item.meta.engineeringNotes);
+  }
+
+  sections.push(
+    "",
+    "---",
+    "",
+    `Follow the PixelDosa UX rules when building with this component: ${SITE_URL}/llms.txt`
+  );
+
+  return sections.join("\n");
+}

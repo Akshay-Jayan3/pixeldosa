@@ -71,6 +71,50 @@
   }
 }
 
+/* Live status shimmer — a luminance sweep across a status *verb* while the machine is
+   genuinely working. Never applied to content or results: shimmering finished text
+   would imply it is still being determined, which is the same lie as a fake typewriter.
+   Monochrome by construction: it sweeps muted-foreground → foreground → muted-foreground,
+   so it needs no hue. */
+@keyframes pd-shimmer {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+/* Guarded: without background-clip support the text would render transparent, so the
+   risky declarations only apply where clipping actually works. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .pd-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--muted-foreground) 0%,
+      var(--muted-foreground) 35%,
+      var(--foreground) 50%,
+      var(--muted-foreground) 65%,
+      var(--muted-foreground) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: pd-shimmer 2.4s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-shimmer {
+    animation: none;
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: inherit;
+  }
+}
+
 /* A replaced status line. Short and small — the swap says "this changed", and at this
    frequency anything longer would read as churn. */
 @keyframes pd-status-swap {

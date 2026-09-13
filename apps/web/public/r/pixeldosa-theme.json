@@ -101,6 +101,33 @@
         "transform": "translateX(100%)"
       }
     },
+    "@keyframes pd-shimmer": {
+      "from": {
+        "background-position": "180% 0"
+      },
+      "to": {
+        "background-position": "-80% 0"
+      }
+    },
+    "@supports ((-webkit-background-clip: text) or (background-clip: text))": {
+      ".pd-shimmer": {
+        "background-image": "linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 35%, var(--foreground) 50%, var(--muted-foreground) 65%, var(--muted-foreground) 100%)",
+        "background-size": "250% 100%",
+        "-webkit-background-clip": "text",
+        "background-clip": "text",
+        "color": "transparent",
+        "animation": "pd-shimmer 2.4s linear infinite"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".pd-shimmer": {
+        "animation": "none",
+        "background-image": "none",
+        "-webkit-background-clip": "border-box",
+        "background-clip": "border-box",
+        "color": "inherit"
+      }
+    },
     "@keyframes pd-status-swap": {
       "from": {
         "opacity": "0",

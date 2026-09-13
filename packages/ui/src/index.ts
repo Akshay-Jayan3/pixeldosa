@@ -90,6 +90,11 @@ export {
   type AgentPresenceForm,
 } from "./registry/agent-presence/agent-presence";
 export {
+  AIFormFill,
+  type AIFormFillProps,
+  type FormFillField,
+} from "./registry/ai-form-fill/ai-form-fill";
+export {
   ThinkingExperience,
   type ThinkingExperienceProps,
   type AskRequest,

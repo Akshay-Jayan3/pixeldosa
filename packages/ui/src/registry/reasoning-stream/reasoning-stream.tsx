@@ -114,7 +114,9 @@ function ReasoningStream({
       >
         <ChevronIcon open={expanded} />
         {isStreaming ? (
-          label
+          // Only while reasoning is still arriving. Once it resolves to "Thought for
+          // 12s" the label states a completed fact and holds still.
+          <span className="pd-shimmer">{label}</span>
         ) : durationMs !== undefined ? (
           <>
             Thought for <span className="tabular-nums">{formatDuration(durationMs)}</span>
@@ -143,7 +145,10 @@ function ReasoningStream({
       <div
         id={showTicker ? undefined : panelId}
         className={cn(
-          "grid transition-[grid-template-rows] duration-[var(--pd-duration-fast)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none",
+          // overflow-hidden is load-bearing, not cosmetic: a 0fr grid row does not clip
+          // its own content, so without it the collapsed trace spills out of the
+          // container and renders over whatever follows.
+          "grid overflow-hidden transition-[grid-template-rows] duration-[var(--pd-duration-fast)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none",
           expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
       >

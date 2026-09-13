@@ -4,7 +4,7 @@ import type { MDXComponents } from "mdx/types";
 
 import * as PixelDosaUI from "@pixeldosa/ui";
 
-import { ActionToolbarSpecimen } from "@/components/mdx-specimens";
+import { ActionToolbarSpecimen, AIFormFillSpecimen } from "@/components/mdx-specimens";
 import { slugify } from "@/lib/toc";
 
 /**
@@ -62,6 +62,7 @@ export const mdxComponents: MDXComponents = {
   Preview,
   PreviewStack,
   ActionToolbarSpecimen,
+  AIFormFillSpecimen,
   h2: ({ children, ...props }) => (
     <h2
       {...props}

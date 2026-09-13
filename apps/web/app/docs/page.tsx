@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
 
@@ -56,16 +57,17 @@ export default function DocsIndexPage() {
         <CodeBlock code="npx shadcn@latest add @pixeldosa/button" language="bash" />
       </div>
 
-      <h2 className="mt-10 text-xl font-medium tracking-tight">Using AI tools</h2>
+      <h2 className="mt-10 text-xl font-medium tracking-tight">Building with an AI agent?</h2>
       <p className="mt-2 text-sm text-muted-foreground text-pretty">
-        Point the shadcn MCP server at this registry and an agent can discover, read and
-        install PixelDosa components directly. Each registry item carries{" "}
-        <code className="font-mono">meta.engineeringNotes</code> and{" "}
-        <code className="font-mono">meta.motionNotes</code> explaining not just what the
-        component does but why it is built the way it is.
+        Install the agent guide so your coding agent uses PixelDosa the way it&apos;s meant to
+        be used, then connect the shadcn MCP server.{" "}
+        <Link href="/docs/ai" className="text-foreground underline underline-offset-4">
+          Set up Claude Code, Cursor or any agent
+        </Link>
+        .
       </p>
       <div className="mt-3">
-        <CodeBlock code="npx shadcn@latest mcp init" language="bash" />
+        <CodeBlock code="npx shadcn@latest add @pixeldosa/pixeldosa-agent-guide" language="bash" />
       </div>
     </article>
   );

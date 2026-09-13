@@ -112,10 +112,41 @@ requirement for *any* streaming surface, not a chat feature. It now applies as a
 standing requirement to `Progressive Reveal`, `Reasoning Stream` and
 `Live Tool-Call Console` rather than becoming a component of its own.
 
-**Forward bet — generative UI / A2UI compatibility (2026-09-05, grounded in the actual
-spec, not secondhand summary):** the industry's 2026 convergence point for "AI
+**Locked principle (2026-09-13) — pure components. Taste and UX are the moat, not
+protocols.** PixelDosa takes **no dependency** on A2UI, the AI SDK, AG-UI, LangGraph,
+MCP or any other agent stack, and never will as a requirement. Every component must be
+usable by a team with nothing but React: props in, callbacks out, no provider, no
+runtime, no protocol. Reasons, in order of weight:
+
+1. **Protocols are young and moving.** A2UI is an early-stage public preview (v0.9.1
+   production, v1.0 a release candidate, "expect changes"); the AI SDK broke its
+   tool-call lifecycle between v5 and v6. Code copied into a consumer's repo cannot be
+   patched when a protocol shifts under it.
+2. **Protocol integration is commodity.** Any team — or any coding agent — can wire a
+   stream to a prop in an afternoon. What they cannot shortcut is knowing that an
+   approval must state reversibility, that a collapsed reasoning trace needs
+   `overflow-hidden`, or that "Accept all" quietly destroys per-field review.
+   **That judgment is the product.**
+3. **The audience is AI startups on every stack** — Python backends, custom
+   orchestration, no framework at all. A dependency excludes some of them; taste
+   excludes none.
+
+What this permits, and nothing more: **documentation recipes** (a mapping table, a
+ten-line adapter snippet on a docs page) that show a team how their stack's events map
+onto a component's props. Recipes are copy-paste examples, not packages, never imported
+by a component, and never a registry dependency. The existing Agent Presence mapping
+table is the model.
+
+What it still asks of every component, because it's simply good design: plain-data
+props wherever possible and named callbacks rather than opaque objects — which happens
+to keep every protocol path open without committing to any of them.
+
+~~**Forward bet — generative UI / A2UI compatibility**~~ *— superseded by the principle
+above. Kept for the record of what was considered:* (2026-09-05, grounded in the actual
+spec, not secondhand summary): the industry's 2026 convergence point for "AI
 response as interactive component instead of text" is **Generative UI**, and Google's
-open-sourced **A2UI protocol** (v1.0, local reference copy under `../a2ui`) states the
+open-sourced **A2UI protocol** (early preview, v0.9.1; local copy under `../a2ui` — an
+earlier note here wrongly said v1.0) states the
 model explicitly: *"defining your own catalog allows you to restrict the agent to
 using exactly the components and visual language that exist in your application."* The
 protocol's own `catalogs/basic/catalog.json` is a bare baseline (`Text`, `Button`,
@@ -549,6 +580,65 @@ rather than a second AI Elements.
   states already exist as local behaviour (Diff Accept's conflict guard is `stale`,
   invented here before anyone else had it); this promotes them to system-wide states.
 
+**B1.6 — trust calibration ⭐ research-backed (added 2026-09-13)**
+
+Synthesised from UX research (NN/g State of UX 2026, practitioner write-ups on AI UX
+failure, agent UX studies) and from the model-side view of how agentic work actually
+fails. The finding that reshapes priorities: **the gap is not "more trust", it is trust
+that matches reliability.** Two opposite failures are both real — *over-trust* (users
+rarely verify citations, despite saying citations raise their confidence) and
+*under-trust* (the **audit burden**: AI produces work faster than people can review it,
+so users stop doing less work and start supervising the machine). Every component in
+B0–B1.5 enables review; almost none reduces how much review is needed. That is an honest
+tension with this system's own "nothing commits silently" thesis, and this tier answers
+it.
+
+The agentic contract the tier completes: **Intent → Plan → Evidence → Action → Result →
+Correction.** Action and Result are well covered. Intent, Plan and Correction are where
+trust breaks, and where nothing here existed.
+
+- [ ] **AI Triage Table** — highest priority. Review volume, not review ability. Groups
+  AI outputs by confidence, collapses what is safe to a count, spotlights what needs a
+  human eye, and shows what did *not* change so nobody scans for it. The first component
+  whose job is to *reduce* checking. Must not become a disguised "Accept all": bulk
+  handling applies only to a group the user has explicitly inspected.
+- [ ] **Intent Preview** — "Here's what I think you want" before work starts. A model
+  that misreads intent early compounds the error through every later step; catching it
+  in one sentence costs almost nothing.
+- [ ] **Agent Plan** — the plan as an editable surface before it runs: reorder, remove,
+  or add a step. Distinct from Task Plan Runner (B2), which is execution; this is
+  agreement.
+- [ ] **Agent Steer** — redirect a running agent without stopping it ("not that file —
+  this one"). Real use changes direction mid-run; today the only options are Stop or
+  wait. No surveyed library covers it.
+- [ ] **Tool Call Card** — what the agent *did* (read, searched, called) versus what it
+  asserted. Makes retrieved knowledge distinguishable from assumed knowledge.
+- [ ] **Autonomy & Memory Controls** — "be less autonomous with me" and "here's what I
+  remember about you, edit or forget it". Users explicitly ask for off switches and lower
+  automation defaults; the skill's "match autonomy to risk" rule has no UI anywhere.
+- **Design constraint on Inline Citations (B1.5):** users rarely verify sources, so
+  treat citations as a comfort signal unless verification takes one click — design for
+  the check actually happening.
+
+**Stance reversal — own chat primitives (2026-09-13).** The earlier "deliberately
+skipped, Vercel owns it" position is withdrawn. A startup wants one coherent system, not
+Vercel for chat and something else for everything else. PixelDosa ships its own **Chat,
+Message and Prompt Composer**, differentiated by carrying the trust layer and by taking
+no SDK dependency — not by avoiding the category.
+
+**Foundation priority — a startup must be able to build a whole product.** PixelDosa is
+strong at the AI tier and thin underneath it. Promoted ahead of B2: **Data Table, Tabs,
+Empty State, Skeleton**, plus the chat primitives above.
+
+**Agent-readiness — shipped 2026-09-13.** AI coding agents are a primary audience: most
+teams meet PixelDosa through one. Discovery already worked (the shadcn MCP server and CLI
+search rank items correctly from descriptions written for cold LLM comprehension); using
+the components *well* did not. Shipped: `pixeldosa-agent-guide` (a `registry:file`
+installing a Claude Code skill with the component-selection table and UX rules),
+generated `/llms.txt`, `/llms-full.txt` and `/llms/<name>.md`, and a Build with AI docs
+page. All generated from the registry and the guide, so they cannot drift, and none adds
+an SDK or protocol dependency.
+
 **B2 — operational AI**
 - [ ] Bulk Prompt Table — one instruction across rows, per-row status/retry/cancel
 - → *AI Approval Gate — **moved to B1.5**, where it serves as the `awaitingApproval`
@@ -622,13 +712,23 @@ niche lock-in (AI startups only) — see North Star. Not paused, cut.
 - [ ] AI Chat Experience
 - [ ] Artifact Generation
 - [ ] Prompt → Result
-- [ ] Thinking Experience
 - [ ] Tool Execution
 - [ ] Agent Team
 - [ ] AI Workflow
 - [ ] Knowledge Search
 - [ ] AI Playground
-- [ ] AI Form Fill
+- [x] AI Form Fill — **shipped 2026-09-12.** Second Block. An agent filling a form the
+  user is already looking at: one request proposes values for every field, but review
+  stays per-field, each with its own confidence tier, provenance, accept/reject and undo.
+  **Deliberately has no "Accept all"** — per-field review is the entire point of Smart
+  Field, and one click taking twelve values across three confidence tiers would quietly
+  undo it. Verified: one fill → 3 proposals at High/Medium/Low confidence with 3
+  different sources, and every field value unchanged until explicitly accepted.
+  Required a small consumer-driven addition to Smart Field — a `proposeToken` prop so a
+  parent can make many fields propose together without any field surrendering ownership
+  of its proposal state, undo window or in-flight request. The token ignores its first
+  render, so mounting is never a request. Composes Smart Field, Field, AI Action Toolbar
+  and Live Status Line.
 - [ ] AI Research Flow
 - [ ] AI Automation Flow
 

@@ -42,6 +42,14 @@ export interface SmartFieldProps
    * want this, so it's an opt-in rather than cut entirely.
    */
   autoPropose?: boolean;
+  /**
+   * Changing this value requests a proposal. It exists so a parent can fill several
+   * fields from one action — `AI Form Fill` bumps a single token and every field it
+   * governs proposes at once — without this component giving up ownership of its own
+   * proposal state. Ignored on first render, so mounting is never a request; use
+   * `autoPropose` for that.
+   */
+  proposeToken?: number | string;
   /** How long the Undo affordance stays visible after accepting, in ms. */
   undoWindowMs?: number;
   wrapperClassName?: string;
@@ -65,6 +73,7 @@ const SmartField = React.forwardRef<HTMLInputElement, SmartFieldProps>(function 
     triggerIcon,
     triggerLabel = "Suggest a value with AI",
     autoPropose = false,
+    proposeToken,
     undoWindowMs = 6000,
     className,
     wrapperClassName,
@@ -147,6 +156,18 @@ const SmartField = React.forwardRef<HTMLInputElement, SmartFieldProps>(function 
     requestProposal(value);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPropose]);
+
+  // Parent-driven request. The first render is recorded rather than acted on, so simply
+  // mounting with a token present is not a request — otherwise every field a parent
+  // rendered would fetch immediately, which is exactly the unannounced behaviour
+  // `autoPropose` exists to keep opt-in.
+  const lastToken = React.useRef(proposeToken);
+  React.useEffect(() => {
+    if (proposeToken === undefined || proposeToken === lastToken.current) return;
+    lastToken.current = proposeToken;
+    requestProposal(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proposeToken]);
 
   const dismissProposal = React.useCallback(() => {
     setProposal(null);

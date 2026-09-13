@@ -150,6 +150,38 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "ai-form-fill",
+      "title": "AI Form Fill",
+      "description": "An agent filling out a form the user is already looking at — the embedded-in-product case rather than a chat. Takes a `fields` array describing each field and how to resolve its proposal, a controlled `values` record with `onValueChange`, an optional `onFill` hook that runs once per request so the whole batch can be fetched in a single round trip, and a required `triggerIcon` since no icon set is bundled. One action proposes values for every field at once, but every field is still reviewed on its own terms: each renders a Smart Field carrying its own confidence tier, provenance caption, explicit accept and reject, and one-step undo. The bulk request is the only thing that is bulk. There is deliberately no 'Accept all' control — per-field review is the entire point of the primitive underneath, and a button that let someone take twelve AI-proposed values in a single click would quietly undo the guarantee the whole AI tier is built on. Composes Smart Field, Field, AI Action Toolbar and Live Status Line, which transitively pulls Confidence Meter and Agent Presence. Fields propose together through a single token the block bumps, so no field gives up ownership of its own proposal state, undo window or in-flight request. Use it for enrichment and autofill inside real product forms — CRM records, onboarding, invoice details. Not for a single field, which is Smart Field used directly, and not for approving a consequential action, which is AI Approval Gate.",
+      "type": "registry:block",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "block"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/smart-field",
+        "@pixeldosa/field",
+        "@pixeldosa/ai-action-toolbar",
+        "@pixeldosa/live-status-line"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/ai-form-fill/ai-form-fill.tsx",
+          "target": "components/blocks/ai-form-fill.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in Smart Field, Field, AI Action Toolbar and Live Status Line, plus Confidence Meter and Agent Presence transitively. Fetch the whole batch once in `onFill` and have each field's `fetchProposal` read from that result — otherwise a five-field form makes five round trips for one user action.",
+      "meta": {
+        "engineeringNotes": "The load-bearing decision is what this block refuses to add. Bulk filling makes an 'Accept all' control feel obvious, and it is exactly wrong: Smart Field exists so that a proposed value is reviewed with its confidence and source before it becomes real data, and a single click that accepts twelve values with three different confidence tiers silently discards that. So the request is bulk and the review stays per-field — which is the honest reading of the system's 'nothing commits silently' rule rather than a convenience compromise. Making fields propose together required a small, consumer-driven addition to Smart Field rather than a workaround here: a `proposeToken` prop whose change requests a proposal. The alternatives were worse — remounting each field to re-fire `autoPropose` would have destroyed focus and in-flight requests, and hoisting proposal state into this block would have taken ownership of confidence, undo and abort away from the component that already does all of it correctly. The token deliberately ignores its first render, so mounting fields with a token present is not a request; that keeps unannounced fetching opt-in behind `autoPropose`, which is the posture the AI tier holds. `onFill` exists so the whole batch is one round trip: without it, a five-field form would make five separate model calls for a single user action, which is both slow and expensive in a way the user never asked for.",
+        "motionNotes": "Almost nothing belongs to this block. Every moving part is inherited: Smart Field's proposal panel expands via the house grid-template-rows transition, Live Status Line swaps its status text and carries Agent Presence's indicator, and AI Action Toolbar supplies the fill button's colour transitions and its busy spinner during the batch request. The block itself adds no entrance animation and no motion of its own, which is the correct outcome for a composition — one rhythm, set once in the motion tokens, applied by the parts rather than re-stated by the whole. The one motion decision made here is that the status line appears only while a fill is actually in flight, so the surface is completely still whenever the agent is not working and the user is reviewing. Under prefers-reduced-motion every inherited transition drops to instant and each composed component handles its own fallback."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "button",
       "title": "Button",
       "description": "A clickable control that triggers an action. Renders a native button element, or any element via the asChild prop when the trigger must be a link. Supports six visual variants (default, secondary, outline, ghost, destructive, link), four sizes including a square icon size, and a loading state that blocks interaction while announcing itself as busy to assistive technology. Use for actions such as submitting, saving or opening a dialog; use a plain anchor for navigation that changes the URL.",
@@ -447,6 +479,31 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "pixeldosa-agent-guide",
+      "title": "PixelDosa Agent Guide",
+      "description": "An instruction file for AI coding agents building with PixelDosa, installed into a team's repository so their agent knows not just which component to use but how to use it well. Covers registry setup, a job-to-component selection table, when to start from a Block instead of assembling parts, the non-negotiable UX rules (nothing commits silently, never add Accept all, approvals phrased as consequences with reversibility and impact stated, nothing waiting on the user is animated, shimmer only on active status verbs, a visible Stop during every working state, no faked typing, confidence as tiers not percentages), a mapping table from common agent events to component states, and a pre-finish checklist. Installs as a Claude Code skill; other agents can be pointed at the same file or at the site's llms.txt. Contains no code and adds no dependencies.",
+      "type": "registry:file",
+      "categories": [
+        "ai-assisted",
+        "agents"
+      ],
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/pixeldosa-agent-guide/SKILL.md",
+          "target": "~/.claude/skills/pixeldosa/SKILL.md",
+          "type": "registry:file"
+        }
+      ],
+      "docs": "Installs to .claude/skills/pixeldosa/SKILL.md, where Claude Code discovers it automatically. For Cursor, Copilot, or other agents, reference this file from your rules or AGENTS.md, or point the agent at https://pixeldosa.akshayjayan.com/llms.txt.",
+      "meta": {
+        "engineeringNotes": "Coding agents already find and install PixelDosa through the shadcn MCP server and CLI search, because every registry description was written for cold LLM comprehension. What they could not do was use the components well: nothing stopped an agent from wiring an AI value straight into data or adding an Accept all button, since those decisions live in the design system's judgment rather than its props. This item transfers that judgment into the consumer's repository as a plain markdown skill, so the rules travel with the code instead of staying on a docs site the agent may never read. It is the same source the site's llms.txt draws its rules from, so the two cannot drift. It ships as registry:file with no dependencies, consistent with the principle that PixelDosa never requires an agent stack.",
+        "motionNotes": "No motion — this item is a documentation file, not a component. It does, however, carry the system's motion rules to agents in written form: motion means the machine is busy and stillness means it is the user's turn, shimmer is reserved for active status verbs, completed text is never revealed character by character, and prefers-reduced-motion is always respected rather than overridden."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "pixeldosa-theme",
       "title": "PixelDosa Theme",
       "description": "The PixelDosa design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every PixelDosa component animates against. Install this once per project before or alongside any other PixelDosa component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
@@ -551,6 +608,33 @@
           },
           "100%": {
             "transform": "translateX(100%)"
+          }
+        },
+        "@keyframes pd-shimmer": {
+          "from": {
+            "background-position": "180% 0"
+          },
+          "to": {
+            "background-position": "-80% 0"
+          }
+        },
+        "@supports ((-webkit-background-clip: text) or (background-clip: text))": {
+          ".pd-shimmer": {
+            "background-image": "linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 35%, var(--foreground) 50%, var(--muted-foreground) 65%, var(--muted-foreground) 100%)",
+            "background-size": "250% 100%",
+            "-webkit-background-clip": "text",
+            "background-clip": "text",
+            "color": "transparent",
+            "animation": "pd-shimmer 2.4s linear infinite"
+          }
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          ".pd-shimmer": {
+            "animation": "none",
+            "background-image": "none",
+            "-webkit-background-clip": "border-box",
+            "background-clip": "border-box",
+            "color": "inherit"
           }
         },
         "@keyframes pd-status-swap": {

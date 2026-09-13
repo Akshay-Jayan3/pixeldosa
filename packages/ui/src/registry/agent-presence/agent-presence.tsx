@@ -233,7 +233,10 @@ function AgentPresence({
         className={cn(
           "text-sm",
           hideLabel && "sr-only",
-          config.turn === "user" ? "font-medium text-foreground" : "text-muted-foreground"
+          config.turn === "user" ? "font-medium text-foreground" : "text-muted-foreground",
+          // Shimmers only while the machine is actually working — a terminal state like
+          // `done` or `failed` describes a finished fact, not an ongoing activity.
+          !hideLabel && moving && "pd-shimmer"
         )}
       >
         {text}

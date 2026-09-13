@@ -63,6 +63,9 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
         <NavLink href="/docs" active={pathname === "/docs"}>
           Getting started
         </NavLink>
+        <NavLink href="/docs/ai" active={pathname === "/docs/ai"}>
+          Build with AI
+        </NavLink>
         <NavLink href="/docs/components" active={pathname === "/docs/components"}>
           Browse all
         </NavLink>

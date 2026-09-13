@@ -1,0 +1,108 @@
+---
+title: AI Form Fill
+description: An agent filling a form you're already looking at — one request, but every field still reviewed on its own terms.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AIFormFill } from "@/components/blocks/ai-form-fill";
+
+const batch = React.useRef<Record<string, SmartFieldProposal>>({});
+
+<AIFormFill
+  fields={[
+    { name: "company", label: "Company", fetchProposal: async () => batch.current.company },
+    { name: "industry", label: "Industry", fetchProposal: async () => batch.current.industry },
+  ]}
+  values={values}
+  onValueChange={(name, value) => setValues((v) => ({ ...v, [name]: value }))}
+  onFill={async () => { batch.current = await enrich(values); }}
+  triggerIcon={<SparkleIcon />}
+/>
+```
+
+Fetch the whole batch once in `onFill`, then have each field's `fetchProposal` read
+from it. Otherwise a five-field form makes five round trips for one user action.
+
+## What it refuses to do
+
+Bulk filling makes an **"Accept all"** button feel obvious. It isn't there, deliberately.
+
+Smart Field exists so a proposed value is reviewed *with its confidence and source*
+before it becomes real data. A single click that accepts twelve values across three
+different confidence tiers silently discards that. So: **the request is bulk, the
+review stays per-field.**
+
+That's the honest reading of "nothing commits silently" — not a convenience compromise.
+
+## Features
+
+- **One request, many proposals.** A single token bump makes every field propose
+  together, while each keeps ownership of its own proposal, confidence, undo window and
+  in-flight request.
+- **Per-field confidence and provenance.** A high-confidence company name and a
+  low-confidence headcount guess don't get treated the same way.
+- **Every field independently reversible** — accept, reject, one-step undo, unchanged
+  from Smart Field.
+- **Status only while working.** The surface is completely still whenever the agent
+  isn't running and you're reviewing.
+
+## Variants
+
+### Ready
+
+Notice the first field has an existing value — filling proposes *alongside* it rather
+than overwriting, and nothing changes until accepted.
+
+<PreviewStack>
+  <AIFormFillSpecimen />
+</PreviewStack>
+
+## Examples
+
+Proposing for empty fields only, leaving anything the user already typed alone:
+
+```tsx
+const fields = ALL_FIELDS.filter((f) => !values[f.name]);
+```
+
+Gating the commit behind an approval when writing the form is consequential:
+
+```tsx
+<AIFormFill {...formProps} />
+{dirty ? (
+  <AIApprovalGate
+    action={`Update the customer record with ${acceptedCount} AI-proposed values`}
+    reversible
+    impact={[{ label: "Fields changed", value: String(acceptedCount) }]}
+    onApprove={save}
+    onReject={revert}
+  />
+) : null}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `fields` | `FormFillField[]` | Required. `{ name, label, description?, placeholder?, fetchProposal }`. |
+| `values` | `Record<string, string>` | Required. Controlled. |
+| `onValueChange` | `(name, value) => void` | Required. |
+| `onFill` | `() => void \| Promise<void>` | Runs once per request — fetch the batch here. |
+| `triggerIcon` | `ReactNode` | Required. No icon set is bundled. |
+| `fillLabel` | `string` | Defaults to `"Fill with AI"`. |
+| `status` | `string` | Status text while filling. |
+
+## Composes
+
+`Smart Field` · `Field` · `AI Action Toolbar` · `Live Status Line` — and transitively
+`Confidence Meter` and `Agent Presence`.
+
+## When not to use
+
+A single field is `Smart Field` used directly. Approving a consequential action is
+`AI Approval Gate`. A full agent run with reasoning and interrupts is
+`Thinking Experience`.
