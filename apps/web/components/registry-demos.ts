@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
+import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-preview.demo";
+import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
 import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
@@ -164,6 +166,22 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A full agent run — the machine states move, then it stops and waits for you.",
       render: AgentPresenceDemo,
+    },
+  ],
+  "intent-preview": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Three guesses restated before a run — one corrected in place.",
+      render: IntentPreviewDemo,
+    },
+  ],
+  "agent-plan": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A five-step plan you can reorder, trim or extend before it runs.",
+      render: AgentPlanDemo,
     },
   ],
   "ai-triage-table": [

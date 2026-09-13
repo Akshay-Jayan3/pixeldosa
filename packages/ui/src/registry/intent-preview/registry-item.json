@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "intent-preview",
+  "title": "Intent Preview",
+  "description": "An agent restates what it understood — and the guesses it made — before any work starts. Takes an `interpretation` (the request restated as one plain sentence), optional `assumptions` (each a labelled best guess, optionally with alternative readings the user can switch to in place), optional `boundaries` listing what the agent will deliberately not do, and `onStart`, which receives the confirmed values, plus optional `onRephrase` and `onCancel`. The guesses arrive pre-filled, so when they are right confirming costs one click; when one is wrong it is corrected with a native select rather than by rewriting the prompt, and the start button changes to 'Start with changes' so the difference is visible. The reason it exists: a model that misreads a request early builds every later step on that mistake, so the cheapest correction in an agentic run is the first one. Distinct from Agent Ask, which blocks until the user supplies something the agent cannot guess — this is for when the agent could proceed on its best guess, but being wrong would be expensive. Holds perfectly still, since it is the user's turn. Composes AI Action Toolbar. Use it before long runs, runs with side effects, or requests with ambiguous scope. Not for every request — adding a confirmation to a cheap, reversible action is friction that trains people to click through without reading.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "forms", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme", "@pixeldosa/ai-action-toolbar"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/intent-preview/intent-preview.tsx",
+      "target": "components/ui/intent-preview.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Use it only where misreading the request would be costly — long runs, side effects, ambiguous scope. On cheap, reversible actions it is friction.",
+  "meta": {
+    "engineeringNotes": "Built from the model-side view of how agentic runs fail: interpretation happens before planning, and an early misreading compounds through every step that follows. Surfacing the interpretation in one sentence, together with the specific guesses that filled gaps in the request, moves correction to the single point where it is nearly free. Two decisions keep that from becoming friction. First, assumptions arrive pre-filled with the agent's best guess, so the common case — the guess is right — costs one click, and the start label changes to 'Start with changes' only when something was corrected, so the confirmation carries information rather than ceremony. Second, correction happens in place through a native select of alternative readings rather than by rephrasing the whole request, which is both faster and more precise. Boundaries ('I won't…') are included because what an agent will not do is part of its intent and is the thing users most want to know before a run with side effects. It is deliberately distinct from Agent Ask: Ask blocks on missing information the agent cannot guess, whereas Intent Preview is for requests the agent could act on immediately, where acting on a wrong guess would be expensive.",
+    "motionNotes": "Still, by design. This is a user-turn surface under the system's turn-taking grammar, so nothing moves or shimmers while it waits — the absence of motion is the signal that nothing proceeds until the user confirms. The only motion is the shared colour transition on hover and focus at `--pd-duration-instant`, inherited from the composed AI Action Toolbar and the select's own focus ring, and it drops to instant under prefers-reduced-motion. Entrance motion belongs to whatever surface reveals the preview, not to the component."
+  }
+}

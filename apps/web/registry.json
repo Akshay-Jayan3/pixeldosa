@@ -33,6 +33,35 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-plan",
+      "title": "Agent Plan",
+      "description": "An agent's plan laid out for agreement before anything runs — the user can reorder steps, remove one, or add their own, then run the plan as edited. Takes `steps` (each with a `title`, optional `detail`, and an optional `needsApproval` flag for steps with external effects), an optional `title`, `onRun`, which receives the final ordered steps, an optional `onCancel`, and `allowAdd` to permit user-added steps. Steps that will stop for approval are labelled 'Asks for approval', and the header counts them, so the user knows before running where the agent will pause. Removing a step never deletes it outright: it stays in place struck through with an Undo, because a plan edit that cannot be seen or reversed is exactly the silent change the system exists to prevent. Reordering uses explicit move-up and move-down controls rather than drag, so it works identically by keyboard, touch and pointer, and every edit is announced through a live region. The run button reads 'Run edited plan' once anything changed. Plans are where an agent's misunderstanding becomes visible while it is still free to fix — once execution starts, a wrong step costs a tool call, a side effect, or a cancel and restart. This component is the agreement; execution belongs to Task Plan Runner. Composes AI Action Toolbar. Holds still, since it is the user's turn. Use it before multi-step runs, especially ones that touch external systems. Not for showing progress through a running plan.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/ai-action-toolbar"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-plan/agent-plan.tsx",
+          "target": "components/ui/agent-plan.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Mark any step with an external effect as `needsApproval` so the user sees where the run will pause before it starts. This component does not execute steps — it hands the agreed plan to `onRun`.",
+      "meta": {
+        "engineeringNotes": "Separates agreeing on a plan from executing it, because the two need opposite designs: agreement is a still, editable surface where the user is in control, while execution is a moving status surface where the machine is. Merging them produces the common pattern where a plan is shown only as it starts running, which is too late to change it cheaply. Removal is modelled as a reversible state rather than a deletion — the step remains in place, struck through, numbered out of the sequence, with Undo — so an edit is always visible and never destructive. Reordering deliberately uses explicit up and down buttons instead of drag and drop: drag is pointer-first, hard to make accessible, and ambiguous on touch, while buttons behave identically across every input method and announce the resulting position through a live region (counting only steps that remain). The icon buttons are 32 pixels with hit areas extended vertically to 44, not horizontally, because the three controls sit side by side and overlapping hit areas would turn a near-miss into the wrong edit. Steps flagged `needsApproval` are labelled and counted in the header, so where the run will pause is known before it starts rather than discovered during it.",
+        "motionNotes": "Still, as a user-turn surface: nothing moves on its own and nothing shimmers. Removed steps drop to reduced opacity with a strikethrough rather than animating out, so an edit reads as a changed state instead of a disappearance and remains reversible in place. Reordering changes position immediately without a sliding animation — a swap that animates on every press would slow repeated keyboard moves and add motion to what is a precise, deliberate edit. The remaining motion is the shared colour transition on hover and focus at `--pd-duration-instant`, which drops to instant under prefers-reduced-motion."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "agent-presence",
       "title": "Agent Presence",
       "description": "An agent's live state, expressed visually rather than described in text. Takes a `state` from an eleven-value vocabulary grounded in real protocol events — eight machine states (`queued`, `thinking`, `deciding`, `working`, `streaming`, `done`, `failed`, `cancelled`) and three hand-off states (`suggesting`, `asking`, `awaitingApproval`) — plus an optional `label` that overrides the state's default text, and an `onCancel` shown throughout the machine's turn. The organising rule is a turn-taking grammar: motion means the machine is busy, stillness means it is the user's turn. Machine states animate; hand-off states stop completely and sit brighter and heavier, so a user learns to read 'am I needed?' without reading a word. Three forms share the one vocabulary: `field` renders a cell matrix (the system's signature), `orb` renders a true Fibonacci-distributed sphere in CSS 3D for hero surfaces, and `line` renders three inline dots for status bars and table rows. The text label is the real signal and is announced through an `aria-live` region; the indicator itself is `aria-hidden` and supplementary. Purely presentational: it does not fetch, does not own the agent run, and does not interpret protocol events for you — map your stream's events to a state and pass it in. Use it anywhere an agent's activity needs to be visible in ordinary product UI. Not for showing the reasoning text itself (that is Reasoning Stream), not for a per-artifact generation progress bar (that is Generation Placeholder), and not for the post-result action strip (that is AI Action Toolbar).",
@@ -447,6 +476,35 @@
       "meta": {
         "engineeringNotes": "The ghost text is rendered as a separate mirror div positioned exactly behind the real <input>, with the typed-text portion set to transparent — not as a styled fake caret or a contentEditable trick. This is the only approach that keeps native input behaviour (IME composition, selection, undo, autofill, screen-reader field semantics) completely intact, at the cost of the mirror div needing identical padding/font/line-height to the input, which is why both come from the same className. The whole request lifecycle — debounce timer, AbortController — lives in refs rather than state so that a rapid keystroke can synchronously cancel the previous request without waiting for a re-render; a state-based cancellation would let a slow response race a fast one and briefly show a stale suggestion. The right-arrow accept only fires when the caret is already at the end of the value (checked via selectionStart/selectionEnd), because otherwise it would silently hijack normal in-text cursor movement, which is a worse failure mode than requiring Tab.",
         "motionNotes": "The suggestion's appearance is a plain opacity transition using duration.fast and easing.standard from the token scale — deliberately not a slide or typewriter reveal, both of which would misrepresent what happened: the whole continuation exists immediately (it was already fetched), so animating it in character-by-character would be a fabricated sense of the model 'typing', not a real progressive state. Under prefers-reduced-motion this reduces to a duration.instant swap via the same token path every other component in the system uses; nothing here required a component-specific reduced-motion branch, which is itself a signal the animation is doing the minimum necessary rather than something decorative."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "intent-preview",
+      "title": "Intent Preview",
+      "description": "An agent restates what it understood — and the guesses it made — before any work starts. Takes an `interpretation` (the request restated as one plain sentence), optional `assumptions` (each a labelled best guess, optionally with alternative readings the user can switch to in place), optional `boundaries` listing what the agent will deliberately not do, and `onStart`, which receives the confirmed values, plus optional `onRephrase` and `onCancel`. The guesses arrive pre-filled, so when they are right confirming costs one click; when one is wrong it is corrected with a native select rather than by rewriting the prompt, and the start button changes to 'Start with changes' so the difference is visible. The reason it exists: a model that misreads a request early builds every later step on that mistake, so the cheapest correction in an agentic run is the first one. Distinct from Agent Ask, which blocks until the user supplies something the agent cannot guess — this is for when the agent could proceed on its best guess, but being wrong would be expensive. Holds perfectly still, since it is the user's turn. Composes AI Action Toolbar. Use it before long runs, runs with side effects, or requests with ambiguous scope. Not for every request — adding a confirmation to a cheap, reversible action is friction that trains people to click through without reading.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/ai-action-toolbar"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/intent-preview/intent-preview.tsx",
+          "target": "components/ui/intent-preview.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Use it only where misreading the request would be costly — long runs, side effects, ambiguous scope. On cheap, reversible actions it is friction.",
+      "meta": {
+        "engineeringNotes": "Built from the model-side view of how agentic runs fail: interpretation happens before planning, and an early misreading compounds through every step that follows. Surfacing the interpretation in one sentence, together with the specific guesses that filled gaps in the request, moves correction to the single point where it is nearly free. Two decisions keep that from becoming friction. First, assumptions arrive pre-filled with the agent's best guess, so the common case — the guess is right — costs one click, and the start label changes to 'Start with changes' only when something was corrected, so the confirmation carries information rather than ceremony. Second, correction happens in place through a native select of alternative readings rather than by rephrasing the whole request, which is both faster and more precise. Boundaries ('I won't…') are included because what an agent will not do is part of its intent and is the thing users most want to know before a run with side effects. It is deliberately distinct from Agent Ask: Ask blocks on missing information the agent cannot guess, whereas Intent Preview is for requests the agent could act on immediately, where acting on a wrong guess would be expensive.",
+        "motionNotes": "Still, by design. This is a user-turn surface under the system's turn-taking grammar, so nothing moves or shimmers while it waits — the absence of motion is the signal that nothing proceeds until the user confirms. The only motion is the shared colour transition on hover and focus at `--pd-duration-instant`, inherited from the composed AI Action Toolbar and the select's own focus ring, and it drops to instant under prefers-reduced-motion. Entrance motion belongs to whatever surface reveals the preview, not to the component."
       }
     },
     {

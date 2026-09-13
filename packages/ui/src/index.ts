@@ -90,6 +90,16 @@ export {
   type AgentPresenceForm,
 } from "./registry/agent-presence/agent-presence";
 export {
+  IntentPreview,
+  type IntentPreviewProps,
+  type IntentAssumption,
+} from "./registry/intent-preview/intent-preview";
+export {
+  AgentPlan,
+  type AgentPlanProps,
+  type PlanStep,
+} from "./registry/agent-plan/agent-plan";
+export {
   AITriageTable,
   type AITriageTableProps,
   type TriageItem,

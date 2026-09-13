@@ -1,0 +1,87 @@
+---
+title: Intent Preview
+description: The agent restates what it understood and the guesses it made, before any work starts — one click when it's right, one correction when it isn't.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { IntentPreview } from "@/components/ui/intent-preview";
+
+<IntentPreview
+  interpretation="Reconcile this quarter's flagged invoices and draft a summary of the root cause."
+  assumptions={[
+    { id: "dataset", label: "Dataset", value: "Q3 Revenue Final.xlsx", options: ["Q3 Revenue.xlsx"] },
+    { id: "audience", label: "Summary for", value: "Finance team", options: ["Leadership"] },
+  ]}
+  boundaries={["Change any invoice", "Send the summary without asking first"]}
+  onStart={(values) => run(values)}
+  onRephrase={() => focusPrompt()}
+/>
+```
+
+## Why it exists
+
+An agent interprets a request before it plans anything. If it misreads you there, every
+later step builds on the mistake. **The cheapest correction in an agentic run is the
+first one** — this puts it where it costs one click.
+
+## Features
+
+- **Guesses arrive filled in.** When they're right, confirming is one click. When one's
+  wrong, you correct *that one* in place — no rewriting the prompt.
+- **Changes are visible.** The button becomes "Start with changes" once anything was
+  corrected, so the confirmation carries information rather than ceremony.
+- **Boundaries are part of intent.** "I won't send the summary without asking first" is
+  often the thing people most want to know before a run.
+- **Holds still** — it's your turn.
+
+## Intent Preview vs Agent Ask
+
+| | Agent Ask | Intent Preview |
+| --- | --- | --- |
+| Can the agent proceed without you? | No — it's missing something | Yes — on its best guess |
+| What you do | Supply the answer | Confirm or correct the guesses |
+| Cost when things are fine | Always an answer | One click |
+
+## Examples
+
+Only where misreading is expensive. A cheap, reversible action doesn't need it:
+
+```tsx
+const needsPreview = task.estimatedSteps > 3 || task.hasSideEffects;
+```
+
+Followed by a plan, for runs where both the reading and the steps matter:
+
+```tsx
+{phase === "intent" ? <IntentPreview {...intent} onStart={() => setPhase("plan")} /> : null}
+{phase === "plan" ? <AgentPlan steps={plan} onRun={execute} /> : null}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `interpretation` | `string` | Required. The request restated in one plain sentence. |
+| `assumptions` | `{ id, label, value, options? }[]` | The guesses that filled gaps. `options` makes one correctable. |
+| `boundaries` | `string[]` | What the agent will deliberately not do. |
+| `onStart` | `(values) => void` | Required. Receives the confirmed values. |
+| `onRephrase` | `() => void` | Back to the prompt. |
+| `onCancel` | `() => void` | |
+| `startLabel` | `string` | Defaults to `"Start"`. |
+
+## Accessibility
+
+- A labelled `<section>` whose name is the interpretation itself.
+- Assumptions are a `<dl>`; corrections use a native `<select>`, so they work on every
+  input method and open the platform picker on phones.
+- Actions are a keyboard toolbar.
+
+## When not to use
+
+A question the agent can't guess the answer to is `Agent Ask`. The steps it will take are
+`Agent Plan`. And don't put this in front of cheap, reversible actions — confirmations
+nobody needs train people to click through without reading.

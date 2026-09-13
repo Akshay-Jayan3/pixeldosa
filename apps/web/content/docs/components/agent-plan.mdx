@@ -1,0 +1,83 @@
+---
+title: Agent Plan
+description: The agent's plan laid out for agreement before anything runs — reorder, remove, or add a step, then run it as edited.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentPlan } from "@/components/ui/agent-plan";
+
+<AgentPlan
+  steps={[
+    { id: "1", title: "Pull the 5 flagged invoices" },
+    { id: "2", title: "Match them against the August import", detail: "Reads ledger/august-import.json" },
+    { id: "3", title: "Email the summary to finance@acme.com", needsApproval: true },
+  ]}
+  onRun={(steps) => execute(steps)}
+  onCancel={() => close()}
+/>
+```
+
+## Why it exists
+
+A plan is where an agent's misunderstanding becomes visible while it's still free to
+fix. Once execution starts, a wrong step costs a tool call, a side effect, or a cancel
+and restart. **This is the agreement. Running it is a different component.**
+
+## Features
+
+- **Reorder, remove, add.** Explicit up and down buttons rather than drag, so it works
+  the same by keyboard, touch and mouse. Every edit is announced.
+- **Removal is reversible.** A removed step stays in place, struck through, with Undo —
+  never silently deleted.
+- **You know where it will pause.** Steps with external effects are labelled "Asks for
+  approval", and the header counts them.
+- **Edits are visible.** "Run edited plan" once anything changed; steps you added are
+  marked "Added by you".
+- **Holds still** — it's your turn.
+
+## Examples
+
+Mark every step with an external effect, so the user sees the pauses before running:
+
+```tsx
+const steps = agentPlan.map((step) => ({
+  ...step,
+  needsApproval: ["send_email", "update_record", "charge"].includes(step.tool),
+}));
+```
+
+A fixed plan the user can trim and reorder but not extend:
+
+```tsx
+<AgentPlan steps={steps} allowAdd={false} onRun={execute} />
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `steps` | `{ id, title, detail?, needsApproval? }[]` | Required. The proposed plan, in order. |
+| `onRun` | `(steps) => void` | Required. Receives the plan as edited. |
+| `onCancel` | `() => void` | |
+| `title` | `string` | Defaults to `"Proposed plan"`. |
+| `allowAdd` | `boolean` | Defaults to `true`. |
+
+## Accessibility
+
+- An ordered list inside a labelled `<section>`.
+- Each step's controls are a labelled group; every icon button names the step it acts on
+  ("Move 'Check billing contacts' up").
+- Moves, removals and additions are announced — including the new position, counting only
+  steps that remain.
+- Icon buttons have a 44px tall hit area, expanded vertically only, so neighbouring
+  controls don't overlap.
+
+## When not to use
+
+Showing progress through a plan that's already running is `Task Plan Runner` (planned) —
+a moving surface where this one is still. Confirming what the agent understood before
+there's a plan is `Intent Preview`.

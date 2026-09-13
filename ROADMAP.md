@@ -609,12 +609,20 @@ trust breaks, and where nothing here existed.
   commit exactly the staged count. **Surfaced a latent accessibility bug** in AI Context
   Surface and Reasoning Stream — collapsed `0fr` panels left their links and buttons
   tabbable while hidden — fixed with `inert` in both.
-- [ ] **Intent Preview** — "Here's what I think you want" before work starts. A model
-  that misreads intent early compounds the error through every later step; catching it
-  in one sentence costs almost nothing.
-- [ ] **Agent Plan** — the plan as an editable surface before it runs: reorder, remove,
-  or add a step. Distinct from Task Plan Runner (B2), which is execution; this is
-  agreement.
+- [x] **Intent Preview** — **shipped 2026-09-13.** The agent restates the request in one
+  sentence plus the guesses it made, pre-filled, before work starts — one click when
+  right, an in-place correction (native select) when not. The start button becomes
+  "Start with changes" only when something was corrected. Includes boundaries ("I
+  won't…"). Distinct from Agent Ask: Ask blocks on information the agent can't guess;
+  this is for when it could proceed but a wrong guess would be expensive. Verified a
+  correction flows through to `onStart` alongside untouched guesses.
+- [x] **Agent Plan** — **shipped 2026-09-13.** The plan as an agreement before it runs:
+  reorder with explicit up/down (works identically by keyboard, touch, pointer), remove
+  reversibly (struck through in place with Undo, never deleted), add steps ("Added by
+  you"). Steps with external effects are labelled and counted so pauses are known up
+  front. Verified: moves announce the visible position skipping removed steps, and
+  `onRun` receives the edited order without removed steps. Execution stays with Task
+  Plan Runner (B2).
 - [ ] **Agent Steer** — redirect a running agent without stopping it ("not that file —
   this one"). Real use changes direction mid-run; today the only options are Stop or
   wait. No surveyed library covers it.
