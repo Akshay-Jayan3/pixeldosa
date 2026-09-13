@@ -1,0 +1,92 @@
+---
+title: Agent Steer
+description: Redirect a running agent without stopping it — "not that file, this one" — and see whether it actually took the redirect on board.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentSteer } from "@/components/ui/agent-steer";
+
+<AgentSteer
+  running={run.active}
+  currentStep={run.step}
+  steers={steers}
+  suggestions={["Not that file — use middleware.ts"]}
+  onSteer={(text, mode) => agent.redirect({ text, mode })}
+  onWithdraw={(id) => agent.withdraw(id)}
+/>
+```
+
+## Why it exists
+
+Real use changes direction halfway. Most agent UIs give you two options: **Stop**, which
+throws away the work so far, or **wait**, which lets the agent keep going the wrong way.
+Agent Steer is the third option.
+
+## Features
+
+- **Status comes from the agent, not the key press.** A redirect reads "Sent — waiting
+  for the agent" until the agent acknowledges it. Then it moves to queued, applied, or
+  declined with a reason. It never looks applied when it isn't.
+- **Enter waits for a clean break.** A steer applies after the current step, where the
+  agent can re-plan. **Interrupt now** is a separate control, because abandoning a tool
+  call halfway can leave a half-written file or a half-sent request.
+- **Withdrawable.** Change your mind about the change of mind, as long as it hasn't
+  been applied.
+- **Suggestions fill, they don't send.** A one-tap redirect is still your sentence to edit.
+- **Relative to something.** The current step is shown above the input, so "not that
+  one" has a "that".
+
+## Statuses
+
+| Status | Meaning | Who sets it |
+| --- | --- | --- |
+| `pending` | Sent, not yet acknowledged | You, on send |
+| `queued` | Accepted, applies after the current step | The agent |
+| `applied` | The agent is now following it | The agent |
+| `declined` | Couldn't apply; put the reason in `note` | The agent |
+
+## Examples
+
+Mapping an agent's events to statuses:
+
+```tsx
+agent.on("redirect:received", ({ id }) => update(id, { status: "queued" }));
+agent.on("redirect:applied", ({ id }) => update(id, { status: "applied" }));
+agent.on("redirect:rejected", ({ id, reason }) => update(id, { status: "declined", note: reason }));
+```
+
+Beside a status line, with Stop still visible:
+
+```tsx
+<LiveStatusLine state="working" status={run.step} startedAt={run.startedAt} onCancel={stop} />
+<AgentSteer running currentStep={run.step} steers={steers} onSteer={steer} />
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `running` | `boolean` | Required. Steering is disabled when nothing is running. |
+| `currentStep` | `string` | What the agent is doing now. |
+| `steers` | `{ id, text, mode, status, note? }[]` | Your redirects and their real status. |
+| `suggestions` | `string[]` | Fill the input for editing. Never sent automatically. |
+| `onSteer` | `(text, mode: "next" \| "now") => void` | Required. |
+| `onWithdraw` | `(id) => void` | Shows Withdraw on pending and queued redirects. |
+| `placeholder` | `string` | |
+
+## Accessibility
+
+- The input is labelled by the current step, so screen readers hear what's being redirected.
+- Status changes to the latest redirect are announced politely, in the same words shown on screen.
+- Enter submits the default, after-this-step steer. Interrupt needs its own button press.
+- The pending shimmer falls back to static text under reduced motion.
+
+## When not to use
+
+Not a replacement for Stop. Keep a Stop control visible. It isn't a chat composer either:
+use it only while a run is in flight. Before a run, correct the plan with `Intent Preview`
+or `Agent Plan`.

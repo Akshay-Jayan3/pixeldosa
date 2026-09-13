@@ -48,6 +48,10 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | Show the model's reasoning while it thinks | `reasoning-stream` | streaming the reasoning into the answer |
 | Agent needs structured input to continue | `agent-ask` | a chat message asking a question |
 | Agent wants to do something consequential | `ai-approval-gate` | a confirm() dialog |
+| Confirm how the agent read the request before a costly run | `intent-preview` | a "Are you sure?" dialog |
+| Let the user edit the steps before a run starts | `agent-plan` | a read-only checklist |
+| Redirect a running agent without stopping it | `agent-steer` | a chat input that silently queues |
+| Review many AI changes at once, riskiest first | `ai-triage-table` | an "Accept all" button |
 | Actions on an AI result: apply, regenerate, explain, report | `ai-action-toolbar` | loose buttons |
 | AI proposes a value for one field | `smart-field` | writing the value directly |
 | Inline completion while typing | `ghost-input` | auto-inserting text |
@@ -118,6 +122,7 @@ Components take no AI dependency — map your stack's events to props yourself.
 | Run finished / errored | `state="done"` / `"failed"` |
 | Agent needs input (e.g. MCP elicitation) | `state="asking"` + `agent-ask` |
 | Agent paused for approval (e.g. LangGraph `interrupt()`) | `state="awaitingApproval"` + `ai-approval-gate` |
+| Redirect received / applied / rejected | `agent-steer` status `queued` / `applied` / `declined` (reason in `note`) |
 
 ## Before you finish
 

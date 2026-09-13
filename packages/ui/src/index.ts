@@ -100,6 +100,13 @@ export {
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
 export {
+  AgentSteer,
+  type AgentSteerProps,
+  type SteerMessage,
+  type SteerMode,
+  type SteerStatus,
+} from "./registry/agent-steer/agent-steer";
+export {
   AITriageTable,
   type AITriageTableProps,
   type TriageItem,

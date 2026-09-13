@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
 import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-preview.demo";
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
+import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
 import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
 import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
@@ -182,6 +183,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "agent-steer": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A running fix redirected to another file — queued, then applied at the next step.",
+      render: AgentSteerDemo,
     },
   ],
   "ai-triage-table": [

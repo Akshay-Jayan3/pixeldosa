@@ -90,6 +90,34 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-steer",
+      "title": "Agent Steer",
+      "description": "Redirect a running agent without stopping it — 'not that file, this one'. Takes `running`, the `currentStep` the agent is on (so a redirect has something to be relative to), a caller-owned `steers` list where each redirect carries a real status — pending (sent, not yet acknowledged), queued (accepted, applies after the current step), applied, or declined with a reason — plus optional `suggestions` that fill the input for editing but never send, `onSteer(text, mode)`, and `onWithdraw(id)` for redirects the agent has not applied yet. Enter steers after the current step; interrupting mid-step is a separate, deliberate control, because stopping a tool call halfway can leave partial side effects. Status is never inferred from the key press: a redirect reads 'waiting for the agent' until the agent says otherwise, so it cannot look applied when it isn't. Use it beside a Live Status Line or Thinking Experience during long runs. Not a replacement for Stop, which stays visible, and not a chat composer.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-steer/agent-steer.tsx",
+          "target": "components/ui/agent-steer.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. The steers list is yours: set each status from what the agent actually reports. Keep a Stop control visible next to it — steering is not a replacement for stopping.",
+      "meta": {
+        "engineeringNotes": "Built for the gap between Stop and wait: in real use, people change their minds mid-run, and today's agent UIs make them throw away the work so far to say so. Two decisions carry the trust. First, the component owns no status. Each redirect's status comes from the caller, meaning from the agent: it shows 'Sent — waiting for the agent' until the agent acknowledges, so pressing Enter never makes a redirect look like it has taken effect. Declined redirects show the agent's reason rather than disappearing. Second, the default applies at the next step boundary, where the agent can re-plan cleanly. Interrupting is a separate, secondary control, because abandoning a tool call mid-flight can leave half-written files or half-sent requests, and that risk should be chosen rather than triggered by the Enter key. Redirects that haven't been applied can be withdrawn. Suggestions fill the input rather than sending, so a one-tap redirect is still the user's sentence. The live region announces status changes to the latest redirect in words that match the visible text.",
+        "motionNotes": "Almost still. The agent's motion belongs to the status surface beside it, such as Live Status Line, not to the steer control. The one moving element is the shared `pd-shimmer` on a pending redirect's status. Under the turn-taking grammar that is the only state where work is genuinely happening on the machine's side for that redirect; queued, applied and declined are settled facts and hold still. Colour transitions on hover and focus run at `--pd-duration-instant`, and the shimmer falls back to static text under prefers-reduced-motion and where background-clip text is unsupported."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "ai-action-toolbar",
       "title": "AI Action Toolbar",
       "description": "A keyboard-navigable toolbar of the standard post-generation actions on an AI-produced result — apply, explain, retry, regenerate, undo, report. Takes an `actions` array of `{ id, label, icon?, intent?, disabled?, busy? }` plus a single `onAction(actionId)` callback, and renders them as a row of real buttons with three levels of visual weight: `intent=\"primary\"` is filled (the recommended action, e.g. Apply), `secondary` is bordered (reversible alternatives, e.g. Regenerate), and `quiet` is underline-only (meta actions that don't change the result, e.g. Explain, Report, Undo). An optional `message` renders leading status text before the actions, which is how confirmation rows like 'Changes applied. Undo' are expressed. Implements the ARIA toolbar pattern properly — the whole strip is one tab stop with arrow keys, Home and End moving within it and skipping disabled actions — rather than the natural-tab-order approximation most implementations use. Busy state is a per-action prop owned by the caller, not internal state, so it reflects the caller's real in-flight request; while any action is busy the others disable, since two concurrent actions on one result is never a coherent request. Purely presentational otherwise: it does not fetch, does not own an undo timer, and does not own the result it acts on. Use it attached to any AI output the user must now decide about. Not for a selection-triggered floating toolbar (use Selection Actions), a text diff needing per-hunk accept/reject (use Diff Accept), or a single whole-field proposal (use Smart Field) — this is the shared control strip those patterns compose, not a replacement for them.",

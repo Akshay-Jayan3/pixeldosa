@@ -623,9 +623,15 @@ trust breaks, and where nothing here existed.
   front. Verified: moves announce the visible position skipping removed steps, and
   `onRun` receives the edited order without removed steps. Execution stays with Task
   Plan Runner (B2).
-- [ ] **Agent Steer** — redirect a running agent without stopping it ("not that file —
-  this one"). Real use changes direction mid-run; today the only options are Stop or
-  wait. No surveyed library covers it.
+- [x] **Agent Steer** — **shipped 2026-09-13.** Redirect a running agent without stopping
+  it ("not that file — this one"). Status is caller-owned and comes from the agent —
+  pending ("waiting for the agent", the only shimmer) → queued → applied, or declined
+  with a reason — so a redirect never looks applied on Enter. Enter applies at the next
+  step boundary; "Interrupt now" is a separate control because abandoning a tool call
+  mid-flight can leave partial side effects. Unapplied redirects are withdrawable;
+  suggestions fill the input, never send. Verified: withdraw-while-pending is never
+  acted on, interrupt applies immediately, live region matches visible text, no overflow
+  at 400px.
 - [ ] **Tool Call Card** — what the agent *did* (read, searched, called) versus what it
   asserted. Makes retrieved knowledge distinguishable from assumed knowledge.
 - [ ] **Autonomy & Memory Controls** — "be less autonomous with me" and "here's what I
