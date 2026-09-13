@@ -82,6 +82,9 @@ function AIContextSurface({
 
       <div
         id={panelId}
+        // A 0fr row hides the panel visually but leaves its source links focusable and
+        // exposed to assistive technology; inert removes them while collapsed.
+        inert={!open}
         className={cn(
           "grid overflow-hidden transition-[grid-template-rows] duration-[var(--pd-duration-fast)] ease-[var(--pd-ease-standard)]",
           "motion-reduce:transition-none",

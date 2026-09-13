@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ai-triage-table",
+  "title": "AI Triage Table",
+  "description": "Reviews many AI-proposed changes at once, organised around where human attention is needed rather than the order the AI produced them. Takes an `items` array of proposed changes — each with a `label`, an optional `before` value, the proposed `after` value, a `confidence` tier and an optional `provenance` — an optional `unchanged` list of things the AI examined and left alone, and an `onApply` callback that receives the ids the user accepted. Changes are grouped by confidence in attention order: low-confidence changes open first because they most need a human, medium follows, and high-confidence changes start collapsed to a count. Items the AI left unchanged collapse to a single line ('40 checked and left unchanged') so nobody scans forty rows to confirm nothing happened. Every row has its own Accept and Reject with a one-step Undo, before values are shown struck through beside the proposed value, and decisions are staged — nothing is written until Apply, which states how many changes it will commit and that unreviewed items stay as they are. It does not become an Accept-all: bulk acceptance exists only for the high-confidence group, and only after that group has been opened; low and medium changes must be decided individually. Composes AI Action Toolbar and Confidence Meter. Use it when AI output arrives in volume — enrichment across many records, bulk categorisation, data cleanup, batch corrections. Not for one field (use Smart Field), a single form (use AI Form Fill), or a text rewrite (use Diff Accept).",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme",
+    "@pixeldosa/ai-action-toolbar",
+    "@pixeldosa/confidence-meter"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/ai-triage-table/ai-triage-table.tsx",
+      "target": "components/ui/ai-triage-table.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in AI Action Toolbar and Confidence Meter. Pass `unchanged` whenever you have it — showing what the AI deliberately left alone is half of what makes review cheap.",
+  "meta": {
+    "engineeringNotes": "Built in direct response to the audit burden: AI now produces changes faster than people can check them, and every earlier component in this system enables review without reducing it, which at volume turns the user into a full-time auditor. Triage reduces review in three ways. It orders by attention rather than by arrival — low confidence first, high confidence collapsed — so effort lands where errors are likely. It collapses what the AI left unchanged into a count, since confirming that nothing happened is otherwise the most tedious part of reviewing a batch. And it states consequences at the point of commitment ('Apply 5', 'not reviewed will stay as they are'). The hard boundary is that it must not become Accept-all by another name. Bulk acceptance is limited to the high-confidence group, and gated on that group having been opened — tracked as an explicit inspected set, with the reason stated in text rather than hidden behind a disabled button. Decisions are staged rather than committed, so every row's Undo is simply removing a staged decision, with no undo timer to manage. Collapsed groups use the house grid-template-rows pattern with overflow-hidden, and are marked inert while closed: a 0fr row hides content visually but otherwise leaves its buttons focusable and exposed to assistive technology.",
+    "motionNotes": "Deliberately quiet: this is a user-turn surface, so nothing moves on its own and nothing shimmers. Groups expand and collapse through the house grid-template-rows transition at `--pd-duration-fast`, the disclosure chevrons rotate at `--pd-duration-instant`, and a decided row fades to reduced opacity over `--pd-duration-fast` so the eye moves on to what remains without the row disappearing — its Undo stays reachable. Action colours transition through the composed AI Action Toolbar. There is no entrance animation and no motion tied to counts changing, since numbers updating in a review surface should read as information rather than event. Under prefers-reduced-motion every transition drops to instant and the grouping, counts and decided-state opacity still carry all the information."
+  }
+}

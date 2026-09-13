@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
+import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
 import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
 import AgentAskDemo from "@pixeldosa/ui/registry/agent-ask/agent-ask.demo";
@@ -163,6 +164,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A full agent run — the machine states move, then it stops and waits for you.",
       render: AgentPresenceDemo,
+    },
+  ],
+  "ai-triage-table": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "48 accounts enriched — low confidence first, 40 unchanged collapsed to one line.",
+      render: AITriageTableDemo,
     },
   ],
   "ai-form-fill": [

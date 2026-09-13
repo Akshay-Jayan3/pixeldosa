@@ -597,11 +597,18 @@ The agentic contract the tier completes: **Intent → Plan → Evidence → Acti
 Correction.** Action and Result are well covered. Intent, Plan and Correction are where
 trust breaks, and where nothing here existed.
 
-- [ ] **AI Triage Table** — highest priority. Review volume, not review ability. Groups
-  AI outputs by confidence, collapses what is safe to a count, spotlights what needs a
-  human eye, and shows what did *not* change so nobody scans for it. The first component
-  whose job is to *reduce* checking. Must not become a disguised "Accept all": bulk
-  handling applies only to a group the user has explicitly inspected.
+- [x] **AI Triage Table** — **shipped 2026-09-13.** The first component whose job is to
+  *reduce* checking rather than enable it. Orders by attention — low confidence opens
+  first, high confidence collapses to a count — and collapses what the AI left unchanged
+  into one line ("40 checked and left unchanged"). Decisions are staged with per-row
+  Undo; nothing is written until Apply, which states the count and that unreviewed items
+  stay as they are. **Does not become Accept-all:** bulk accept exists only for the
+  high-confidence group and only after it has been opened, with the reason stated in
+  text. Verified: high group starts inert with "Open to review before accepting"; opening
+  it reveals "Accept 4"; no bulk accept ever appears on low or medium; Undo and Apply
+  commit exactly the staged count. **Surfaced a latent accessibility bug** in AI Context
+  Surface and Reasoning Stream — collapsed `0fr` panels left their links and buttons
+  tabbable while hidden — fixed with `inert` in both.
 - [ ] **Intent Preview** — "Here's what I think you want" before work starts. A model
   that misreads intent early compounds the error through every later step; catching it
   in one sentence costs almost nothing.

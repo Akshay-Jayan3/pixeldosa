@@ -1,0 +1,103 @@
+---
+title: AI Triage Table
+description: Review many AI-proposed changes at once — organised by where attention is needed, with what didn't change collapsed to a single line.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AITriageTable } from "@/components/ui/ai-triage-table";
+
+<AITriageTable
+  title="Enrich 48 accounts"
+  items={proposals}          // { id, label, before?, after, confidence, provenance? }[]
+  unchanged={untouched}      // { id, label }[]
+  onApply={(acceptedIds) => save(acceptedIds)}
+/>
+```
+
+## The problem it solves
+
+AI now produces changes faster than people can check them. Research on AI products calls
+this the **audit burden**: people aren't doing less work, they're supervising the machine.
+
+Every other review component helps someone check AI output. This one reduces **how much
+checking there is** — without ever quietly accepting anything.
+
+## Features
+
+- **Attention order, not arrival order.** Low-confidence changes open first because
+  they're where errors live. High-confidence changes start collapsed to a count.
+- **What didn't change is one line.** "40 checked and left unchanged" — nobody scans
+  forty rows to confirm nothing happened. Expand it if you want to see them.
+- **Before and after, side by side.** The old value struck through, the proposal beside
+  it, the source underneath.
+- **Nothing is written until Apply.** Decisions are staged; every row has a one-step
+  Undo. Apply states exactly how many changes it will commit, and that anything
+  unreviewed stays as it is.
+
+## What it refuses to do
+
+It is not "Accept all" with better styling.
+
+- **Bulk accept exists only for the high-confidence group** — low and medium changes
+  must be decided one by one.
+- **And only after that group has been opened.** Until then it says *"Open to review
+  before accepting"* in plain text, rather than showing a disabled button that explains
+  nothing.
+
+Accepting is where risk lives, so that's where friction stays. Everything else gets out
+of the way.
+
+## Examples
+
+Only pass what actually changed as `items`. If the AI produced a value identical to the
+current one, it belongs in `unchanged`:
+
+```tsx
+const items = results.filter((r) => r.after !== r.before);
+const unchanged = results.filter((r) => r.after === r.before).map(({ id, label }) => ({ id, label }));
+```
+
+Gating a consequential apply behind an approval:
+
+```tsx
+const [pending, setPending] = React.useState<string[] | null>(null);
+
+<AITriageTable items={items} unchanged={unchanged} onApply={setPending} />
+
+{pending ? (
+  <AIApprovalGate
+    action={`Update ${pending.length} customer records`}
+    reversible
+    impact={[{ label: "Records", value: String(pending.length) }]}
+    onApprove={() => save(pending)}
+    onReject={() => setPending(null)}
+  />
+) : null}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `items` | `TriageItem[]` | Required. `{ id, label, before?, after, confidence, provenance? }`. |
+| `unchanged` | `{ id, label }[]` | What the AI examined and left alone. |
+| `onApply` | `(acceptedIds: string[]) => void` | Required. The only point anything is committed. |
+| `title` | `string` | Defaults to `"Review proposed changes"`. |
+
+## Accessibility
+
+- A labelled `<section>` with a live "N of M reviewed" count.
+- Each group header is a real disclosure with `aria-expanded` and `aria-controls`.
+- Collapsed groups are `inert` — hidden rows can't be tabbed into or read out.
+- Every row's decision controls are a keyboard toolbar; Undo is always reachable.
+- Before/after is marked by strikethrough and underline plus a screen-reader "changes
+  to", never colour alone.
+
+## When not to use
+
+One field is `Smart Field`. One form is `AI Form Fill`. A text rewrite is `Diff Accept`.
+Use this when AI output arrives in **volume**.

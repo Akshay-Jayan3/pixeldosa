@@ -144,6 +144,7 @@ function ReasoningStream({
       {/* Expanded: the full trace, scroll-anchored. */}
       <div
         id={showTicker ? undefined : panelId}
+        inert={!expanded}
         className={cn(
           // overflow-hidden is load-bearing, not cosmetic: a 0fr grid row does not clip
           // its own content, so without it the collapsed trace spills out of the

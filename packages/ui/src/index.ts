@@ -90,6 +90,12 @@ export {
   type AgentPresenceForm,
 } from "./registry/agent-presence/agent-presence";
 export {
+  AITriageTable,
+  type AITriageTableProps,
+  type TriageItem,
+  type TriageDecision,
+} from "./registry/ai-triage-table/ai-triage-table";
+export {
   AIFormFill,
   type AIFormFillProps,
   type FormFillField,
