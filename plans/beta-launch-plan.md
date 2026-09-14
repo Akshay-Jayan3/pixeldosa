@@ -94,8 +94,8 @@ docs, QA, build). They're held back from announcements until launch week.
 
 | # | Build | What it must get right |
 | --- | --- | --- |
-| 1 | **Message** | User and assistant roles; streaming text that never fakes typing; a slot for Reasoning Stream, Tool Call Group and Inline Citations *inside* the message; states for streaming, done, failed (with retry) and stopped; AI Action Toolbar attached. |
-| 2 | **Message Scroller** | Stick to bottom only while the reader is at the bottom; "Jump to latest" with an unread count when they've scrolled up; no jump when older messages load above; a live region that announces completed messages, not every token. Reuses the scroll anchoring proven in Reasoning Stream. |
+| 1 | ✅ **Message** (built 2026-09-14) | User and assistant roles; streaming text that never fakes typing; a slot for Reasoning Stream, Tool Call Group and Inline Citations *inside* the message; states for streaming, done, failed (with retry) and stopped; AI Action Toolbar attached. |
+| 2 | ✅ **Message Scroller** (built 2026-09-14) | Stick to bottom only while the reader is at the bottom; "Jump to latest" with an unread count when they've scrolled up; no jump when older messages load above; a live region that announces completed messages, not every token. Reuses the scroll anchoring proven in Reasoning Stream. |
 | 3 | **Code Block** | Safe with partial streaming (an unclosed fence doesn't break layout); copy with confirmation; optional Apply / Insert action; language label; long lines scroll; no dependency on a heavy highlighter (pluggable). |
 | 4 | **Suggestions** | Follow-up chips after an answer; fill the composer or send (the caller chooses and it's labelled); keyboard navigable; never shown while streaming. |
 | 5 | **AI Chat Experience** (block) | Message, Message Scroller, Prompt Composer, Suggestions, Reasoning Stream, Tool Call Group, Inline Citations and Agent Presence composed into one working assistant screen. The hero demo for launch. |

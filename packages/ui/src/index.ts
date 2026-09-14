@@ -100,6 +100,18 @@ export {
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
 export {
+  MessageScroller,
+  type MessageScrollerProps,
+} from "./registry/message-scroller/message-scroller";
+export {
+  Message,
+  MessageContent,
+  type MessageProps,
+  type MessageContentProps,
+  type MessageRole,
+  type MessageStatus,
+} from "./registry/message/message";
+export {
   PromptComposer,
   type PromptComposerProps,
   type ComposerControl,

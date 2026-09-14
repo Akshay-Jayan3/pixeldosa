@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "message",
+  "title": "Message",
+  "description": "One turn in a conversation, and the container the rest of an AI answer lives inside. `Message` takes a `role` ('user' or 'assistant'), a caller-owned `status` for assistant turns ('streaming', 'done', 'failed' or 'stopped'), and optional `author`, `avatar`, `meta` and `actions` (usually an AI Action Toolbar), plus `error`, `onRetry` and `onContinue`. Children are the turn's parts in the order the work happened: Reasoning Stream, Tool Call Group, then `MessageContent`. `MessageContent` styles plain HTML from any markdown renderer. User turns render as a right-aligned bubble. Assistant turns render full-width with no bubble, so long answers, code and tables have room. While streaming, text renders as it really arrives with a quantized cell cursor, never simulated typing, and actions stay hidden so nobody acts on half an answer. A failed turn keeps what arrived, says why and offers Retry. A stopped turn keeps the partial answer, labelled incomplete, with Continue. Use it for any assistant or agent conversation. Pair it with Message Scroller for the list.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/message/message.tsx",
+      "target": "components/ui/message.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Bring your own markdown renderer and wrap its output in `MessageContent`. Set `status` from the stream itself: 'done' only when the stream closes, 'stopped' when the user aborted.",
+  "meta": {
+    "engineeringNotes": "Designed as the turn, not the text bubble. An assistant reply contains reasoning, tool calls, citations and prose, and treating those as siblings of the message breaks both reading order and accessibility. Here they are children of one `<article>`, named 'You said' or '<author> said' and marked `aria-busy` while streaming, so assistive tech treats the turn as one unit that is still arriving. Status is caller-owned because only the stream knows it. Each status has distinct UI, and none discards content: failed keeps the partial answer (dimmed) with an actionable error in an alert region and Retry; stopped labels the answer incomplete with Continue and Start over. Actions on assistant turns render only once the status is 'done', because copying or applying half an answer is an error the interface shouldn't invite. The user bubble keeps its actions hidden until hover or focus-within, and always shows them on touch devices via `(hover: none)`. Assistant turns have no bubble so code, tables and long prose get the full width. `MessageContent` carries typography for the HTML any markdown renderer emits, so the component stays renderer-agnostic and dependency-free.",
+    "motionNotes": "The only moving part is the streaming cursor: one quantized cell pulsing on the shared `pd-cell-pulse` keyframe, the system's machine-busy grammar, rather than a blinking text caret, which would imply typing. It disappears the moment status leaves 'streaming', and the answer holds still once done. Actions on the user's own message fade in at `--pd-duration-fast` on hover or focus. There's no entrance animation on the message itself, because the list decides how new turns arrive. Under prefers-reduced-motion the cursor is a static cell and the fade is instant."
+  }
+}

@@ -1,0 +1,74 @@
+---
+title: Message Scroller
+description: The conversation list that follows new messages only while you're following along, and never moves under you while you read.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { Message, MessageContent } from "@/components/ui/message";
+import { MessageScroller } from "@/components/ui/message-scroller";
+
+<MessageScroller className="h-[600px]" announcement={lastFinished} onReachTop={loadOlder}>
+  {messages.map((message) => (
+    <Message key={message.id} role={message.role} status={message.status}>
+      <MessageContent>{message.content}</MessageContent>
+    </Message>
+  ))}
+</MessageScroller>
+```
+
+## Why it exists
+
+The most common chat bug: you scroll up to reread something while the assistant is still
+answering, and the page keeps dragging you back down. The scroller treats "should I
+follow?" as a question about **you**, not about the content.
+
+## Features
+
+- **Follows only while you're at the bottom.** Scroll up and it stops. Nothing moves under you.
+- **Jump to latest.** A pill appears when you're scrolled away, counting messages that
+  arrived: "2 new messages".
+- **History loads without a jump.** When older messages arrive above, your view stays exactly where it was.
+- **Streaming is followed too,** not just new messages, because a growing answer adds no new elements.
+- **Announces finished messages, not tokens.** Screen readers hear what you pass as `announcement`.
+- **Keyboard scrollable.** The region is focusable and named "Conversation".
+
+## Examples
+
+Full-height chat layout:
+
+```tsx
+<div className="flex h-dvh flex-col">
+  <MessageScroller className="flex-1">{turns}</MessageScroller>
+  <PromptComposer onSubmit={send} />
+</div>
+```
+
+Announce a finished reply once:
+
+```tsx
+onFinish={(message) => setAnnouncement(`Assistant replied: ${message.text.slice(0, 120)}`)}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `ReactNode` | Messages with stable `key`s. |
+| `announcement` | `string` | Set when a message finishes. |
+| `onReachTop` | `() => void` | Fires near the top. Load older messages here. |
+| `label` | `string` | Region name. Defaults to `"Conversation"`. |
+
+## Accessibility
+
+- A focusable, named region, so it can be scrolled with the keyboard.
+- A polite status region carries `announcement`. It isn't a live log, which would read every token.
+- The jump pill is a real button and uses instant scrolling under reduced motion.
+
+## When not to use
+
+Not for feeds where the newest item belongs at the top. For a reasoning trace inside one
+message, `Reasoning Stream` already scrolls itself the same way.

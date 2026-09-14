@@ -5,6 +5,8 @@ import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-prev
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
 import ToolCallCardDemo from "@pixeldosa/ui/registry/tool-call-card/tool-call-card.demo";
+import MessageScrollerDemo from "@pixeldosa/ui/registry/message-scroller/message-scroller.demo";
+import MessageDemo from "@pixeldosa/ui/registry/message/message.demo";
 import PromptComposerDemo from "@pixeldosa/ui/registry/prompt-composer/prompt-composer.demo";
 import InlineCitationsDemo from "@pixeldosa/ui/registry/inline-citations/inline-citations.demo";
 import AutonomyControlDemo from "@pixeldosa/ui/registry/autonomy-control/autonomy-control.demo";
@@ -188,6 +190,22 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "message-scroller": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A conversation that streams a long reply. Scroll up mid-stream and it stops following.",
+      render: MessageScrollerDemo,
+    },
+  ],
+  message: [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A streamed answer: reasoning, two queries, then a cited reply. Stop or fail it mid-stream.",
+      render: MessageDemo,
     },
   ],
   "prompt-composer": [

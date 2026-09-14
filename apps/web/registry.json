@@ -649,6 +649,60 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "message",
+      "title": "Message",
+      "description": "One turn in a conversation, and the container the rest of an AI answer lives inside. `Message` takes a `role` ('user' or 'assistant'), a caller-owned `status` for assistant turns ('streaming', 'done', 'failed' or 'stopped'), and optional `author`, `avatar`, `meta` and `actions` (usually an AI Action Toolbar), plus `error`, `onRetry` and `onContinue`. Children are the turn's parts in the order the work happened: Reasoning Stream, Tool Call Group, then `MessageContent`. `MessageContent` styles plain HTML from any markdown renderer. User turns render as a right-aligned bubble. Assistant turns render full-width with no bubble, so long answers, code and tables have room. While streaming, text renders as it really arrives with a quantized cell cursor, never simulated typing, and actions stay hidden so nobody acts on half an answer. A failed turn keeps what arrived, says why and offers Retry. A stopped turn keeps the partial answer, labelled incomplete, with Continue. Use it for any assistant or agent conversation. Pair it with Message Scroller for the list.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/message/message.tsx",
+          "target": "components/ui/message.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Bring your own markdown renderer and wrap its output in `MessageContent`. Set `status` from the stream itself: 'done' only when the stream closes, 'stopped' when the user aborted.",
+      "meta": {
+        "engineeringNotes": "Designed as the turn, not the text bubble. An assistant reply contains reasoning, tool calls, citations and prose, and treating those as siblings of the message breaks both reading order and accessibility. Here they are children of one `<article>`, named 'You said' or '<author> said' and marked `aria-busy` while streaming, so assistive tech treats the turn as one unit that is still arriving. Status is caller-owned because only the stream knows it. Each status has distinct UI, and none discards content: failed keeps the partial answer (dimmed) with an actionable error in an alert region and Retry; stopped labels the answer incomplete with Continue and Start over. Actions on assistant turns render only once the status is 'done', because copying or applying half an answer is an error the interface shouldn't invite. The user bubble keeps its actions hidden until hover or focus-within, and always shows them on touch devices via `(hover: none)`. Assistant turns have no bubble so code, tables and long prose get the full width. `MessageContent` carries typography for the HTML any markdown renderer emits, so the component stays renderer-agnostic and dependency-free.",
+        "motionNotes": "The only moving part is the streaming cursor: one quantized cell pulsing on the shared `pd-cell-pulse` keyframe, the system's machine-busy grammar, rather than a blinking text caret, which would imply typing. It disappears the moment status leaves 'streaming', and the answer holds still once done. Actions on the user's own message fade in at `--pd-duration-fast` on hover or focus. There's no entrance animation on the message itself, because the list decides how new turns arrive. Under prefers-reduced-motion the cursor is a static cell and the fade is instant."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "message-scroller",
+      "title": "Message Scroller",
+      "description": "The scrolling list of a conversation, which follows new content only while the reader is following along. Wrap `Message` elements with stable keys in `MessageScroller` and give it a height. It starts at the latest message. While the reader is at the bottom, new messages and streaming growth stay in view. The moment they scroll up, it stops following, nothing moves under them, and a 'Jump to latest' pill appears, counting messages that arrived meanwhile ('2 new messages'). Clicking it scrolls smoothly back down and pins again. When older messages load above (`onReachTop` fires near the top), the view compensates for the added height, so the page doesn't jump. Screen readers hear `announcement`, which you set when a message finishes, never per token. The region is keyboard-scrollable and named 'Conversation'. Use it for any chat or agent transcript. Not for feeds that should always show the newest item first.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/message-scroller/message-scroller.tsx",
+          "target": "components/ui/message-scroller.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Give children stable `key`s, because history prepends are detected by the first key changing. Give the scroller a height (`h-[…]` or `flex-1` in a flex column). Set `announcement` when a reply finishes.",
+      "meta": {
+        "engineeringNotes": "Auto-scroll is where chat interfaces most often break trust: a stream drags the view down while someone is reading an earlier answer. Here 'pinned' is a fact about the reader, recomputed from their own scroll position with a 48px tolerance. Following happens only while pinned, both when children are added (layout effect) and when the last message grows during streaming (a ResizeObserver on the content, since token growth adds no children). While unpinned, added children are counted into the jump pill. A smooth jump sets a guard, so the intermediate 'not at bottom' frames of the animation don't unpin and flash the pill back. A 700ms fallback lands on the bottom even if streaming moved the target mid-animation. Prepended history is detected by the first child's key changing alongside a higher count, and compensated by adding the height delta to scrollTop in a layout effect before paint. Native `overflow-anchor` is disabled, so browsers with and without support behave identically. Accessibility uses a named, focusable region for keyboard scrolling and a separate polite status for caller-supplied announcements, because a live log would read every streamed token.",
+        "motionNotes": "Following while pinned is instant, not smooth: animating toward a target that moves with every token lags behind and reads as sluggish. Smooth scrolling is reserved for the user's explicit 'Jump to latest', and falls back to instant under prefers-reduced-motion. The jump pill fades in at `--pd-duration-fast` on the decelerate curve when the reader leaves the bottom, and hover colour runs at `--pd-duration-instant`. History prepends are compensated before paint, so there is no visible jump. Everything becomes instant under prefers-reduced-motion."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "overlay",
       "title": "Overlay Motion Primitive",
       "description": "The shared enter/exit animation layer for every overlay surface in the system — Dialog, Sheet, Popover and Drawer. Exports OverlayScrim (the backdrop) and OverlayContent (the panel, with a placement prop of center, top, bottom, left or right that controls which axis it translates from) plus a re-exported AnimatePresence. Not a standalone component: it has no dismiss behaviour, focus trapping or portal logic of its own. Compose it underneath a Radix primitive (Dialog.Overlay/Content, Sheet, Popover) so that primitive owns interaction semantics while this owns motion.",

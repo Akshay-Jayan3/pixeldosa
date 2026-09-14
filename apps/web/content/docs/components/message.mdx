@@ -1,0 +1,108 @@
+---
+title: Message
+description: One turn of a conversation, with reasoning, tool calls, citations and the answer kept together in the order the work happened.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { Message, MessageContent } from "@/components/ui/message";
+
+<Message role="user">Why did churn go up in August?</Message>
+
+<Message
+  role="assistant"
+  author="Assistant"
+  status={stream.status}
+  error={stream.error}
+  onRetry={retry}
+  onContinue={resume}
+  actions={<AIActionToolbar actions={answerActions} onAction={handle} />}
+>
+  <ReasoningStream steps={stream.reasoning} isStreaming={stream.phase === "reasoning"} />
+  <ToolCallGroup calls={stream.toolCalls} />
+  <MessageContent>
+    <Markdown>{stream.text}</Markdown>
+  </MessageContent>
+</Message>
+```
+
+## Why it exists
+
+An AI answer isn't only text. It's the reasoning, what the model looked up and what it
+concluded, and those belong to one turn. Split them into separate rows and the reading
+order breaks, screen readers lose the thread, and it's no longer clear which tool
+calls produced which answer.
+
+## Features
+
+- **The turn is the container.** Children render in order: reasoning, tools, then the answer.
+- **Real streaming, no fake typing.** Text appears as chunks arrive, with a small
+  quantized cursor at the end.
+- **No acting on half an answer.** Actions stay hidden until the message is `done`.
+- **Nothing is thrown away.** A failed turn keeps what arrived, says why and offers Retry. A
+  stopped turn is labelled incomplete, with Continue.
+- **Room to read.** User turns are compact bubbles. Assistant turns use the full width for
+  code, tables and long answers.
+- **Any markdown renderer.** `MessageContent` styles the HTML it produces.
+
+## Statuses
+
+| `status` | Looks like | Offers |
+| --- | --- | --- |
+| `streaming` | Text as it arrives, plus the cursor | Nothing yet |
+| `done` | Final answer | `actions` |
+| `failed` | Partial text, dimmed, plus an error | Retry |
+| `stopped` | Partial text, labelled incomplete | Continue, Start over |
+
+## Examples
+
+Mapping stream events, whatever your runtime:
+
+```tsx
+const status =
+  aborted ? "stopped" : error ? "failed" : streamClosed ? "done" : "streaming";
+```
+
+A user message with edit, shown on hover and always visible on touch:
+
+```tsx
+<Message role="user" actions={<button onClick={edit}>Edit</button>}>
+  {text}
+</Message>
+```
+
+## Props
+
+### Message
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `role` | `"user" \| "assistant"` | Required. |
+| `status` | `"streaming" \| "done" \| "failed" \| "stopped"` | Assistant turns. Defaults to `"done"`. |
+| `author` | `ReactNode` | Also names the article for screen readers when it's a string. |
+| `avatar` | `ReactNode` | Assistant turns. |
+| `meta` | `ReactNode` | Timestamp or similar. |
+| `actions` | `ReactNode` | Shown when `done`, or on hover and focus for user turns. |
+| `error` | `string` | Shown when `failed`. |
+| `onRetry` | `() => void` | |
+| `onContinue` | `() => void` | Offered when `stopped`. |
+
+### MessageContent
+
+A `div` with typography for paragraphs, lists, headings, links, inline code and quotes.
+
+## Accessibility
+
+- Each turn is an `<article>` named "You said" or "Assistant said".
+- `aria-busy` is set while streaming, so the turn isn't announced piece by piece.
+- Errors render in an alert region.
+- The streaming cursor is decorative and static under reduced motion.
+
+## When not to use
+
+Use `Message Scroller` for the list itself: scrolling, jumping to the latest message and
+announcements. For a single generated artifact with no conversation, use `Prompt Composer` and
+show the result directly.
