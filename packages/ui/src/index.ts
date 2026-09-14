@@ -99,6 +99,10 @@ export {
   type AgentPlanProps,
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
+// `splitCodeFences` is deliberately not re-exported here, like `agentPresenceStates`: the
+// docs site spreads this module into its MDX component map, which only accepts
+// components. Import it from the component file.
+export { CodeBlock, type CodeBlockProps, type MarkdownSegment } from "./registry/code-block/code-block";
 export {
   MessageScroller,
   type MessageScrollerProps,

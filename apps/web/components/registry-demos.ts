@@ -5,6 +5,7 @@ import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-prev
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
 import ToolCallCardDemo from "@pixeldosa/ui/registry/tool-call-card/tool-call-card.demo";
+import CodeBlockDemo from "@pixeldosa/ui/registry/code-block/code-block.demo";
 import MessageScrollerDemo from "@pixeldosa/ui/registry/message-scroller/message-scroller.demo";
 import MessageDemo from "@pixeldosa/ui/registry/message/message.demo";
 import PromptComposerDemo from "@pixeldosa/ui/registry/prompt-composer/prompt-composer.demo";
@@ -190,6 +191,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "code-block": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "An answer streaming a code fix. Copy and Apply wait until the block is complete.",
+      render: CodeBlockDemo,
     },
   ],
   "message-scroller": [

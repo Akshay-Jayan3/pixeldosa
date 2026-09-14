@@ -1,0 +1,92 @@
+---
+title: Code Block
+description: Code in an AI answer that's safe to copy. It waits for the stream to finish, confirms the copy, and handles unclosed fences mid-stream.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { CodeBlock, splitCodeFences } from "@/components/ui/code-block";
+
+{splitCodeFences(message.text).map((segment, index) =>
+  segment.type === "code" ? (
+    <CodeBlock
+      key={index}
+      code={segment.content}
+      language={segment.language}
+      streaming={!segment.complete}
+      onApply={() => insertIntoEditor(segment.content)}
+    />
+  ) : (
+    <Markdown key={index}>{segment.content}</Markdown>
+  )
+)}
+```
+
+## Why it exists
+
+People paste generated code into real projects. The failures that matter aren't visual:
+copying half a function while it's still streaming, a copy that silently fails and pastes
+the old clipboard, or a markdown renderer that falls apart on an unclosed fence.
+
+## Features
+
+- **Waits for the stream.** While `streaming`, the header says "Writing" and Copy and
+  Apply are disabled.
+- **Copy you can trust.** It shows "Copied" or "Couldn't copy", and both are announced.
+- **Apply with a real result.** Return a promise and the button shows Applying, Applied, or Retry apply.
+- **Unclosed fences handled.** `splitCodeFences` turns a still-open fence into a streaming block.
+- **Long code stays out of the way.** Blocks over 24 lines collapse behind "Show all N lines".
+- **Scroll or wrap.** Long lines scroll by default, and Wrap is one tap away.
+- **Bring your own highlighter.** Pass `highlight`. The component has zero dependencies.
+
+## Examples
+
+With Shiki (or any highlighter that returns HTML):
+
+```tsx
+const highlight = (code, language) => (
+  <span dangerouslySetInnerHTML={{ __html: highlighter.codeToHtml(code, { lang: language, theme }) }} />
+);
+
+<CodeBlock code={code} language="ts" highlight={highlight} />
+```
+
+A file-scoped block with line numbers that never collapses:
+
+```tsx
+<CodeBlock code={source} filename="src/http/client.ts" showLineNumbers collapseAfter={Infinity} />
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `code` | `string` | Required. |
+| `language` | `string` | Shown in the header if there's no `filename`. |
+| `filename` | `string` | |
+| `streaming` | `boolean` | Disables Copy and Apply and shows "Writing". |
+| `highlight` | `(code, language) => ReactNode` | Optional highlighter. |
+| `onApply` | `() => void \| Promise<void>` | Adds an Apply action. |
+| `applyLabel` | `string` | Defaults to `"Apply"`. |
+| `showLineNumbers` | `boolean` | Hidden while wrapping. |
+| `collapseAfter` | `number` | Defaults to `24`. |
+
+### splitCodeFences(markdown)
+
+Returns `{ type: "text", content }` and `{ type: "code", content, language, complete }`
+segments. A trailing fence that hasn't closed yet has `complete: false`.
+
+## Accessibility
+
+- The block is a group named after its file or language, and `aria-busy` while streaming.
+- Copy and apply results are announced in a polite status region.
+- Wrap is a toggle button with `aria-pressed`, and "Show all" controls the code region.
+- Line numbers are decorative and hidden from screen readers.
+
+## When not to use
+
+Not for editing code. It shows code for reading, copying and applying. For reviewing changes
+to existing code, use `Diff Accept`.

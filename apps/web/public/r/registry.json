@@ -392,6 +392,33 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "code-block",
+      "title": "Code Block",
+      "description": "Code in an AI answer, built for the fact that people paste it into real projects. `CodeBlock` takes `code`, optional `language` or `filename`, `streaming`, a pluggable `highlight(code, language)` renderer (bring Shiki or Prism, with no bundled grammar), `onApply` (sync or returning a promise), `showLineNumbers` and `collapseAfter`. While `streaming`, the header shows 'Writing' and Copy and Apply are disabled, so half a function can't be copied. Copy confirms 'Copied' or says 'Couldn't copy', both announced. Apply reports 'Applying', 'Applied' or 'Retry apply' from its promise. Long lines scroll horizontally by default, with a Wrap toggle. Blocks longer than `collapseAfter` lines (24) collapse behind 'Show all N lines'. The file also exports `splitCodeFences(markdown)`, which splits a possibly streaming markdown answer into text and code segments. An unclosed trailing fence becomes `{ complete: false }`, so it renders as a streaming CodeBlock instead of breaking layout. Use it in assistant messages, docs and diffs of generated code.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/code-block/code-block.tsx",
+          "target": "components/ui/code-block.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Pass `streaming` while the fence is open. `splitCodeFences` tells you when that is. Highlighting is up to you: pass `highlight`, or leave it off for plain text.",
+      "meta": {
+        "engineeringNotes": "Built around the next action people take with generated code, which is copying it somewhere that matters. Streaming state is explicit: the group is `aria-busy`, the header reads 'Writing', and both Copy and Apply are disabled until the stream completes. Copy handles clipboard failure (permissions, insecure contexts) with a visible and announced 'Couldn't copy', because the silent alternative pastes stale clipboard contents. Apply is promise-aware, so the caller's real result drives 'Applying', 'Applied' or 'Retry apply'. `splitCodeFences` exists because markdown renderers handle an unclosed fence badly mid-stream. It detects fences with matching marker type and length (``` or ~~~, three or more), treats a trailing unclosed fence as an incomplete code segment, and leaves text segments for the caller's renderer. Highlighting is a render prop, so the registry item has zero dependencies and teams keep whichever highlighter their app already loads. Line numbers are a separate aria-hidden gutter computed from the line count, which works with any highlighter's output, and are hidden when wrapping, since wrapped lines would misalign them. A trailing newline is trimmed, so streams don't show a phantom empty line.",
+        "motionNotes": "Motion only for machine work. 'Writing' in the header and 'Applying' on the button take the shared `pd-shimmer`, because both are the machine's turn. The code itself never shimmers or animates in, since it is content. Button feedback ('Copied', 'Applied') is a text swap, not an animation, so it can be read immediately, and 'Copied' reverts after 2s. Hover colour runs at `--pd-duration-instant`. The collapse fade is static. Everything is static under prefers-reduced-motion."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "command-menu",
       "title": "Command Menu",
       "description": "A global, keyboard-first overlay (⌘K/Ctrl+K) for finding resources and running actions across an app. Renders as a centered floating panel on desktop and a full-width sheet under the sm breakpoint. Exports CommandMenu (the controlled root), CommandMenuInput, CommandMenuList (which auto-renders a live result-count announcer), CommandMenuEmpty, CommandMenuGroup, CommandMenuSeparator, and CommandMenuItem (accepts onSelect, an optional leading icon, and an optional keybind hint rendered as a kbd badge). Composes cmdk for the ARIA combobox/filter engine under a Radix Dialog for focus trapping, portalling and dismiss-on-escape/outside-click, with a token-driven CSS fade+scale for entrance/exit. Controlled-only: there is no internal open state, because the global shortcut listener has to live in the host app regardless. Use for apps with enough destinations or repeat actions that menu-hunting has real cost — dashboards, admin panels, developer tools; do not use it for a menu triggered from one visible button or row, use a Menu or ContextMenu instead.",
