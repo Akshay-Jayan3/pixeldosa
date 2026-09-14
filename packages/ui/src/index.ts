@@ -100,6 +100,14 @@ export {
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
 export {
+  PromptComposer,
+  type PromptComposerProps,
+  type ComposerControl,
+  type ComposerOption,
+  type ComposerAttachment,
+  type ComposerSubmission,
+} from "./registry/prompt-composer/prompt-composer";
+export {
   CitedText,
   Cite,
   type CitedTextProps,

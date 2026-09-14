@@ -5,6 +5,10 @@ Two tiers: **Level 1 — Components** (small, reusable pieces) and **Level 2 —
 **Widgets**, sits alongside both — see North Star for what it is and why it's not a
 tier above Blocks.
 
+> **What ships next, and in what order, lives in [`plans/beta-launch-plan.md`](plans/beta-launch-plan.md)**
+> (2026-09-14): beta launch plus weekly drops. This file remains the full inventory and the
+> record of what shipped and why.
+
 ## North star: premium interactive first
 
 **Note on sourcing:** a more detailed, previously-written set of planning docs lives
@@ -544,7 +548,14 @@ rather than a second AI Elements.
   sentence should not have to open a panel about the entire response. The same
   fold-away error as Thinking Indicator, caught the same way. Must be keyboard
   reachable and must degrade to a plain numbered reference list without hover.
-- [ ] Prompt Composer — **added 2026-09-12 from the competitive scan.** The system
+- [x] Prompt Composer — **shipped 2026-09-14.** Text + structured `controls` as
+  labelled pills (native select overlaid transparently so the pill sizes to the chosen
+  value, not the longest option; changed-from-default pills outlined) + attachments
+  (button, drop, paste; caller-owned upload status; send blocked with a visible,
+  announced reason while uploading). Enter sends except during IME composition,
+  autosize to 240px, count only in the last 10%, Send → Stop while busy, suggestions
+  fill but never send. Verified IME guard, blocked-send reason, autosize shrink, pill
+  widths and no overflow at 390px. Originally: **added 2026-09-12 from the competitive scan.** The system
   argues "don't make every AI feature a blank chat box" and then ships no alternative.
   A composer that pairs free text with *structured* controls (tone, length, audience,
   format) plus attachment context, so the interface carries the specification instead

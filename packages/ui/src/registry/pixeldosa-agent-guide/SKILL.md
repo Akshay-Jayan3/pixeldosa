@@ -51,6 +51,7 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | Confirm how the agent read the request before a costly run | `intent-preview` | a "Are you sure?" dialog |
 | Let the user edit the steps before a run starts | `agent-plan` | a read-only checklist |
 | Redirect a running agent without stopping it | `agent-steer` | a chat input that silently queues |
+| A request that produces an artifact (draft, image, report) | `prompt-composer` (spec as `controls`) | a blank chat textarea |
 | Sources for individual claims in an answer | `inline-citations` (`CitedText` + `Cite`, pass the retrieved passage as `quote`) | footnote links with no passage |
 | Let users set how much the agent does without asking | `autonomy-control` | a cautious/autonomous slider |
 | Show and edit what the agent remembers about the user | `agent-memory` | a hidden memory store |

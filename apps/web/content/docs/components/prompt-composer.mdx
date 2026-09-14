@@ -1,0 +1,99 @@
+---
+title: Prompt Composer
+description: A request composer that isn't a blank chat box. Free text, structured controls for tone, length, audience and format, and attachments for context.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { PromptComposer } from "@/components/ui/prompt-composer";
+
+<PromptComposer
+  controls={[
+    { id: "tone", label: "Tone", options: ["Neutral", "Friendly", "Formal"], defaultValue: "Neutral" },
+    { id: "length", label: "Length", options: ["Short", "Medium", "Long"], defaultValue: "Medium" },
+  ]}
+  attachments={attachments}
+  onAttachFiles={upload}
+  onRemoveAttachment={remove}
+  busy={generating}
+  onStop={abort}
+  onSubmit={({ text, values, attachments }) => generate(buildPrompt(text, values), attachments)}
+/>
+```
+
+## Why it exists
+
+A blank box asks people to be good at prompting. "Make it friendlier, keep it short,
+it's for customers" isn't creative input. It's a **specification**, and typing it as
+prose every time is inconsistent and invisible until the result comes back wrong. The
+composer turns it into controls you can see before you send.
+
+## Features
+
+- **Specification as pills.** "Tone: Friendly" is a native select, so it works with a
+  keyboard, a screen reader or a phone picker. Pills changed from their default are
+  outlined, so the non-default parts of the request stand out.
+- **Enter to send, Shift+Enter for a new line.** Enter doesn't send while an input
+  method (IME) is composing. Japanese or Chinese typists don't send half a sentence.
+- **Attach any way.** Use the button, drag and drop, or paste. Upload status is shown on each
+  file, and sending waits for uploads with a visible reason.
+- **Stop while generating.** Send becomes Stop and stays reachable.
+- **A count only when it matters.** It appears in the last 10% before `maxLength`.
+- **Suggestions fill, they don't send.**
+
+## Examples
+
+Turn values into the prompt on your side, where you control the wording:
+
+```tsx
+function buildPrompt(text, { tone, length, audience, format }) {
+  return `Write a ${length.toLowerCase()} ${format.toLowerCase()} for ${audience.toLowerCase()} in a ${tone.toLowerCase()} tone.\n\n${text}`;
+}
+```
+
+Uploads stay yours. Report status back:
+
+```tsx
+onAttachFiles={(files) => {
+  for (const file of files) {
+    const id = crypto.randomUUID();
+    add({ id, name: file.name, status: "uploading" });
+    uploadFile(file).then(
+      () => update(id, { status: "ready" }),
+      () => update(id, { status: "failed" }),
+    );
+  }
+}}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `onSubmit` | `({ text, values, attachments }) => void` | Required. |
+| `controls` | `{ id, label, options, defaultValue }[]` | Options are strings or `{ value, label }`. |
+| `attachments` | `{ id, name, detail?, status? }[]` | `status`: `"uploading" \| "ready" \| "failed"`. |
+| `onAttachFiles` | `(files: File[]) => void` | Enables attach, drop and paste. |
+| `onRemoveAttachment` | `(id) => void` | |
+| `accept` | `string` | Passed to the file input. |
+| `suggestions` | `string[]` | Shown while the text is empty. |
+| `busy` / `onStop` | `boolean` / `() => void` | Send becomes Stop. |
+| `maxLength` | `number` | |
+| `submitLabel` | `string` | Defaults to `"Generate"`. |
+| `label` | `string` | Accessible name for the text area. |
+| `clearOnSubmit` | `boolean` | Defaults to `true`. Controls keep their values. |
+
+## Accessibility
+
+- The text area has a label and is described by the keyboard hint.
+- Each control is a native `<select>` whose name includes its label ("Tone").
+- Send uses `aria-disabled`, so it stays focusable, and the reason it's blocked is shown and announced.
+- Attachment remove buttons are named after the file.
+
+## When not to use
+
+This isn't a chat input. There's no thread and no history. Use it where a request
+produces an artifact. For redirecting an agent that's already running, use `Agent Steer`.

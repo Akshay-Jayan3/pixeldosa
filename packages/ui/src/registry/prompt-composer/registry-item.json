@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "prompt-composer",
+  "title": "Prompt Composer",
+  "description": "A request composer that isn't a blank chat box. Free text for what only words can say, structured `controls` for what shouldn't need prompt engineering (tone, length, audience, format), and attachments for context. Each control is a labelled pill ('Tone: Friendly') backed by a native select, and a pill changed from its default is outlined, so the specification can be read at a glance. `onSubmit` receives `{ text, values, attachments }`. The text area grows with its content up to a cap. Enter sends and Shift+Enter adds a line, except during IME composition. Attachments come in through the attach button, drag and drop, or paste. You upload them via `onAttachFiles` and pass `attachments` back with status uploading, ready or failed. Sending is blocked while an upload runs, and the composer says why. `suggestions` fill the text but never send, the character count appears only near `maxLength`, and while `busy`, Send becomes Stop. Use it for generation features: drafts, images, reports. Not a chat input: no thread, no history.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "forms", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/prompt-composer/prompt-composer.tsx",
+      "target": "components/ui/prompt-composer.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Put anything users would otherwise type as boilerplate (\"make it friendlier, keep it short\") into `controls`, and turn `values` into the prompt on your side. Upload in `onAttachFiles` and keep `attachments` in your state.",
+  "meta": {
+    "engineeringNotes": "Exists because the system argues against making every AI feature a blank chat box and needed an alternative. The composer splits a request into what only words can say (the text) and what is really a specification (controls), because specifications typed as prose are inconsistent and invisible until the result comes back wrong. Controls are native selects inside labelled pills, so they are keyboard, screen reader and phone friendly with no custom listbox. A changed value gets a stronger outline, so the non-default parts of the request stand out. Details are handled where composers usually slip. Enter is ignored while `isComposing`, so IME users confirming a candidate don't send half a sentence. The text area autosizes from scrollHeight up to 240px, because `field-sizing: content` isn't universal yet. Send is `aria-disabled`, not `disabled`, so it stays focusable and the blocked reason ('Waiting for attachments to finish uploading') is shown and announced. The count appears only in the last 10% before `maxLength`. The file input is reset after each pick, so the same file can be picked again. Uploads are the caller's, and the composer only reflects their status. It stays headless about what happens next: the caller assembles the prompt from `values`.",
+    "motionNotes": "Quiet, because composing is the user's turn. The only moving element is the shared `pd-shimmer` on an uploading attachment's 'Uploading' label, which is real machine work. Borders and backgrounds change colour at `--pd-duration-instant` on focus, hover, drag-over and control changes. The text area grows instantly as lines are added, with no height transition, so the caret never lags the text. Send swaps to Stop without animation, so the control is usable the moment generation starts. Everything is instant or static under prefers-reduced-motion."
+  }
+}
