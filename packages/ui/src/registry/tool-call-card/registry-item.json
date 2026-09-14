@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tool-call-card",
+  "title": "Tool Call Card",
+  "description": "What an agent actually did — read a file, ran a search, fetched a page, wrote a change — shown as a record beside what it says. `ToolCallCard` takes a `kind` (read, search, fetch, write, run, call), the exact `target` it touched, a `status` (running, done, failed, blocked), and optional `name`, `input`, `output`, `error` and `durationMs`. It leads with a plain sentence, verb then target, and keeps the arguments and result one click away. `effect` defaults from the kind: read-only calls stay quiet, while calls that made changes or reached outside the app carry a label, because those are what a reviewer hunts for. `ToolCallGroup` folds a run's calls into one line ('Read 2 files, searched once, wrote 1 file') with counts of calls that made changes and calls that failed, and shows the running call in place of the tally. Use it next to agent answers so retrieved knowledge is distinguishable from asserted knowledge. Not a log viewer or a debugging console.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/tool-call-card/tool-call-card.tsx",
+      "target": "components/ui/tool-call-card.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Map each tool your agent exposes to a `kind`, and override `effect` for tools whose side effects the kind doesn't imply (e.g. a `run` that is read-only). Show the group next to the answer it supports, not in a separate debug panel.",
+  "meta": {
+    "engineeringNotes": "Built for a trust gap seen from the model side. An agent's answer blends what it retrieved with what it inferred, and the text alone reads the same either way. A visible record of the calls lets a reader tell 'the config sets a 30s timeout' backed by a read of config.ts from the same sentence with nothing behind it, and it makes failures just as visible: the demo's answer admits the docs fetch failed, and the failed card is right there. Three decisions keep this from becoming a log dump. The summary is a sentence, verb then exact target in monospace, so it scans like prose. Evidence (arguments and result) sits in a disclosure, capped in height with its own scroll so one large result cannot swamp the run. And effect is a first-class prop defaulted from the kind, so the handful of calls that changed something are labelled among the many that only looked. Blocked calls never ran, so they never carry an effect label. The group tallies only finished calls and reports failures separately, so the headline never counts a failed read as a read. Collapsible regions use the house 0fr→1fr grid with overflow-hidden, padding inside the min-h-0 child, and inert while closed.",
+    "motionNotes": "Motion only where the machine is working. A running call's verb takes the shared `pd-shimmer`. The target never shimmers, because it is content and must stay readable. While any call runs, the group headline swaps its tally for that call, so the one moving line is always the current action. Disclosures open with a grid-template-rows transition at `--pd-duration-fast` and a chevron rotation on the same curve. Hover colour runs at `--pd-duration-instant`. Finished, failed and blocked calls hold still. Everything falls back to instant or static text under prefers-reduced-motion."
+  }
+}

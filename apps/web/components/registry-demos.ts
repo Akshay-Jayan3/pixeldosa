@@ -4,6 +4,7 @@ import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-act
 import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-preview.demo";
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
+import ToolCallCardDemo from "@pixeldosa/ui/registry/tool-call-card/tool-call-card.demo";
 import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
 import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
@@ -183,6 +184,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "tool-call-card": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A bug fix's five tool calls — one failed fetch, one change — beside the answer they support.",
+      render: ToolCallCardDemo,
     },
   ],
   "agent-steer": [

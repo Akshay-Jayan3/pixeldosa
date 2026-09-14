@@ -100,6 +100,16 @@ export {
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
 export {
+  ToolCallCard,
+  ToolCallGroup,
+  type ToolCallCardProps,
+  type ToolCallGroupProps,
+  type ToolCall,
+  type ToolCallKind,
+  type ToolCallStatus,
+  type ToolCallEffect,
+} from "./registry/tool-call-card/tool-call-card";
+export {
   AgentSteer,
   type AgentSteerProps,
   type SteerMessage,

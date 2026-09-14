@@ -51,6 +51,7 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | Confirm how the agent read the request before a costly run | `intent-preview` | a "Are you sure?" dialog |
 | Let the user edit the steps before a run starts | `agent-plan` | a read-only checklist |
 | Redirect a running agent without stopping it | `agent-steer` | a chat input that silently queues |
+| Show what the agent actually read, searched, or changed | `tool-call-card` (`ToolCallGroup` for a run) | a raw event log |
 | Review many AI changes at once, riskiest first | `ai-triage-table` | an "Accept all" button |
 | Actions on an AI result: apply, regenerate, explain, report | `ai-action-toolbar` | loose buttons |
 | AI proposes a value for one field | `smart-field` | writing the value directly |
@@ -122,6 +123,7 @@ Components take no AI dependency — map your stack's events to props yourself.
 | Run finished / errored | `state="done"` / `"failed"` |
 | Agent needs input (e.g. MCP elicitation) | `state="asking"` + `agent-ask` |
 | Agent paused for approval (e.g. LangGraph `interrupt()`) | `state="awaitingApproval"` + `ai-approval-gate` |
+| Tool call started / returned / errored | `tool-call-card` `status="running"` / `"done"` with `output` / `"failed"` with `error` |
 | Redirect received / applied / rejected | `agent-steer` status `queued` / `applied` / `declined` (reason in `note`) |
 
 ## Before you finish

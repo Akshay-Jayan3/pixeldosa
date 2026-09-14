@@ -1,0 +1,115 @@
+---
+title: Tool Call Card
+description: What the agent actually did — read, searched, fetched, wrote — as a record beside what it says, so retrieved knowledge looks different from assumed knowledge.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ToolCallCard, ToolCallGroup } from "@/components/ui/tool-call-card";
+
+<ToolCallCard
+  kind="read"
+  name="fs.read_file"
+  target="src/config.ts"
+  status="done"
+  input={{ path: "src/config.ts" }}
+  output={fileExcerpt}
+  durationMs={42}
+/>
+
+<ToolCallGroup calls={run.toolCalls} />
+```
+
+## Why it exists
+
+"The config sets a 30s timeout" reads the same whether the agent opened the file or
+guessed. A record of the calls next to the answer shows which it was. It also shows
+what didn't work: a failed fetch sits right beside an answer that skipped those docs.
+
+## Features
+
+- **A sentence, not a log line.** Verb, then the exact target in monospace:
+  "Read `src/config.ts`". Arguments and result are one click away.
+- **Acting stands out from looking.** Read-only calls stay quiet. Calls that made
+  changes or reached outside the app are labelled, because those are what a reviewer
+  looks for.
+- **One line for a whole run.** `ToolCallGroup` reads "Read 2 files, searched once, wrote
+  1 file", with "1 call made changes" and "1 failed" beside it. While a call runs, that call replaces the tally.
+- **Honest counts.** Only finished calls count as done. Failures and blocked calls are
+  reported separately.
+- **Evidence can't swamp the page.** Results are height-capped with their own scroll.
+
+## Effects
+
+| `effect` | Default for | Shown as |
+| --- | --- | --- |
+| `read-only` | `read`, `search`, `fetch` | nothing extra |
+| `changes` | `write`, `run` | "Made changes" |
+| `external` | `call` | "Outside this app" |
+
+Override when the kind lies: a `run` of `git status` is read-only.
+
+## Examples
+
+Mapping tool events, whatever your agent runtime:
+
+```tsx
+const kindFor = { read_file: "read", grep: "search", web_fetch: "fetch", edit_file: "write", bash: "run" };
+
+const calls = events.map((event) => ({
+  id: event.id,
+  kind: kindFor[event.tool] ?? "call",
+  name: event.tool,
+  target: event.args.path ?? event.args.query ?? event.args.url ?? event.tool,
+  status: event.error ? "failed" : event.result === undefined ? "running" : "done",
+  input: event.args,
+  output: event.result,
+  error: event.error,
+}));
+```
+
+A call the user's permissions stopped:
+
+```tsx
+<ToolCallCard kind="write" target=".env" status="blocked" error="Secrets files are outside this agent's scope." />
+```
+
+## Props
+
+### ToolCallCard
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `kind` | `"read" \| "search" \| "fetch" \| "write" \| "run" \| "call"` | Required. |
+| `target` | `string` | Required. What it touched: path, query, URL, command. |
+| `status` | `"running" \| "done" \| "failed" \| "blocked"` | Required. |
+| `name` | `string` | The raw tool name. |
+| `effect` | `"read-only" \| "changes" \| "external"` | Defaults from `kind`. |
+| `input` | `string \| object` | Objects render as formatted JSON. |
+| `output` | `ReactNode` | Strings render as a scrollable block. |
+| `error` | `string` | Why it failed or was blocked. |
+| `durationMs` | `number` | Hidden while running. |
+| `defaultOpen` | `boolean` | |
+
+### ToolCallGroup
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `calls` | `(ToolCallCardProps & { id })[]` | Required. |
+| `defaultOpen` | `boolean` | Collapsed by default. |
+
+## Accessibility
+
+- Summaries are buttons with `aria-expanded`, and details are hidden with `inert` when closed.
+- Calls in a group are an ordered list, because the order is part of the record.
+- Status is carried by words ("Couldn't fetch", "Not allowed to write"), not only colour.
+- The running shimmer falls back to static text under reduced motion.
+
+## When not to use
+
+Don't use it for a debugging console or a raw event log. It's for people reviewing
+what an agent did. For the agent's current activity in one line, use `Live Status Line`.
+For why it produced an answer, use `AI Context Surface`.

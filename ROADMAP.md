@@ -632,8 +632,17 @@ trust breaks, and where nothing here existed.
   suggestions fill the input, never send. Verified: withdraw-while-pending is never
   acted on, interrupt applies immediately, live region matches visible text, no overflow
   at 400px.
-- [ ] **Tool Call Card** — what the agent *did* (read, searched, called) versus what it
-  asserted. Makes retrieved knowledge distinguishable from assumed knowledge.
+- [x] **Tool Call Card** — **shipped 2026-09-14.** What the agent *did* (read, searched,
+  fetched, wrote, ran, called) versus what it asserted. A sentence summary (verb + exact
+  target in mono), evidence (input/result, height-capped) one click away, and `effect`
+  defaulted from kind so the few calls that changed something are labelled among the
+  many that only looked. `ToolCallGroup` folds a run into one line ("Searched once, read
+  2 files, wrote 1 file · 1 call made changes · 1 failed"), counting only finished calls,
+  and swaps in the running call while one is in flight. Verified: running verb shimmers
+  and target doesn't, collapsed panels inert, no overflow at 400px.
+- **Idea parked (2026-09-14):** a "Using PixelDosa with your own tokens" recipe (e.g.
+  Escala Tokens `variables.css` → shadcn vars) and an a11y/contrast checklist in the agent
+  guide — see competitive scan note on Escala Tokens (neighbour layer, not a competitor).
 - [ ] **Autonomy & Memory Controls** — "be less autonomous with me" and "here's what I
   remember about you, edit or forget it". Users explicitly ask for off switches and lower
   automation defaults; the skill's "match autonomy to risk" rule has no UI anywhere.
