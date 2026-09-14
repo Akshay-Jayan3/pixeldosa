@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ComponentThumbnail } from "@/components/component-thumbnail";
 import { GROUP_LABELS, GROUP_ORDER, groupFor, isFoundation } from "@/lib/component-groups";
+import { getNewComponents } from "@/lib/changelog";
 import { getComponentDoc } from "@/lib/docs";
 import { getComponents, type RegistryItem } from "@/lib/registry";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,7 @@ function summaryFor(item: RegistryItem) {
   return getComponentDoc(item.name)?.frontmatter.description || item.description;
 }
 
-function ComponentCard({ item, wide }: { item: RegistryItem; wide: boolean }) {
+function ComponentCard({ item, wide, isNew }: { item: RegistryItem; wide: boolean; isNew: boolean }) {
   return (
     <Link
       href={`/docs/components/${item.name}`}
@@ -34,6 +35,11 @@ function ComponentCard({ item, wide }: { item: RegistryItem; wide: boolean }) {
       <div className="flex flex-col gap-1 border-t px-5 py-4">
         <h3 className="flex items-center gap-1.5 font-medium text-foreground">
           {item.title}
+          {isNew ? (
+            <span className="rounded-sm border px-1 text-[0.625rem] font-medium uppercase leading-4 tracking-wide text-muted-foreground">
+              New
+            </span>
+          ) : null}
           <svg
             aria-hidden="true"
             viewBox="0 0 16 16"
@@ -55,6 +61,7 @@ function ComponentCard({ item, wide }: { item: RegistryItem; wide: boolean }) {
 
 export default function ComponentsIndexPage() {
   const components = getComponents();
+  const recent = getNewComponents();
   const sections = [
     ...GROUP_ORDER.map((group) => ({
       id: group,
@@ -84,7 +91,7 @@ export default function ComponentsIndexPage() {
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {section.items.map((item) => (
-                <ComponentCard key={item.name} item={item} wide={section.id === "blocks"} />
+                <ComponentCard key={item.name} item={item} wide={section.id === "blocks"} isNew={recent.has(item.name)} />
               ))}
             </div>
           </section>

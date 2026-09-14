@@ -75,7 +75,7 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-20 sm:px-6 sm:pt-28">
           <div className="flex flex-col items-start gap-5">
             <Link
-              href="/docs/components"
+              href="/changelog"
               className="group inline-flex items-center gap-2 rounded-full border bg-background/60 py-1 pl-1 pr-3 text-xs text-muted-foreground backdrop-blur transition-colors duration-[var(--pd-duration-instant)] hover:text-foreground"
             >
               <span className="rounded-full bg-foreground px-2 py-0.5 font-medium text-background">Beta</span>
@@ -245,7 +245,7 @@ export default function HomePage() {
             </p>
           </div>
           <Button asChild variant="outline">
-            <Link href="/docs/components">See what's shipped</Link>
+            <Link href="/changelog">See the changelog</Link>
           </Button>
         </div>
       </section>

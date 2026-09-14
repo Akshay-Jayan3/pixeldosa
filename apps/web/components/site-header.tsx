@@ -27,6 +27,9 @@ export function SiteHeader() {
           <Link href="/docs/ai" className="hidden hover:text-foreground sm:inline">
             Build with AI
           </Link>
+          <Link href="/changelog" className="hidden hover:text-foreground sm:inline">
+            Changelog
+          </Link>
         </nav>
 
         <div className="ml-auto">

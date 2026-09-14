@@ -23,6 +23,16 @@ export default function DocsIndexPage() {
         into your project as source you own — there is no runtime package to depend on.
       </p>
 
+      <aside aria-label="About the beta" className="mt-6 rounded-lg border px-4 py-3 text-sm text-muted-foreground text-pretty">
+        <span className="font-medium text-foreground">PixelDosa is in beta.</span> Components are ready to use, and
+        new ones ship weekly. Props can still change between drops. Every change is listed in the{" "}
+        <Link href="/changelog" className="text-foreground underline underline-offset-4">
+          changelog
+        </Link>
+        , and anything that breaks existing code is marked Breaking. Because components install as source you own, an
+        update never changes your copy until you reinstall it.
+      </aside>
+
       <h2 className="mt-10 text-xl font-medium tracking-tight">1. Initialise shadcn</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         This creates <code className="font-mono">components.json</code> and the{" "}

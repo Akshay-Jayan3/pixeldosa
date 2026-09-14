@@ -7,7 +7,16 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type SidebarExample = { slug: string; title: string };
-type SidebarItem = { name: string; title: string; examples: SidebarExample[] };
+type SidebarItem = { name: string; title: string; isNew?: boolean; examples: SidebarExample[] };
+
+/** Quiet by design: a sidebar with ten loud badges stops meaning anything. */
+function NewBadge() {
+  return (
+    <span className="shrink-0 rounded-sm border border-border px-1 text-[0.625rem] font-medium uppercase leading-4 tracking-wide text-muted-foreground">
+      New
+    </span>
+  );
+}
 export type SidebarGroup = { id: string; label: string; items: SidebarItem[] };
 
 function ChevronIcon() {
@@ -69,6 +78,9 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
         <NavLink href="/docs/components" active={pathname === "/docs/components"}>
           Browse all
         </NavLink>
+        <NavLink href="/changelog" active={pathname === "/changelog"}>
+          Changelog
+        </NavLink>
       </div>
 
       {groups.map((group) => (
@@ -98,6 +110,7 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                       )}
                     >
                       <span>{item.title}</span>
+                      {item.isNew ? <NewBadge /> : null}
                     </Link>
                   </li>
                 );
@@ -115,7 +128,10 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                       )}
                     >
                       <span>{item.title}</span>
-                      <ChevronIcon />
+                      <span className="flex items-center gap-1.5">
+                        {item.isNew ? <NewBadge /> : null}
+                        <ChevronIcon />
+                      </span>
                     </summary>
                     <ul className="ml-2 mt-0.5 space-y-0.5 border-l border-border/70 pl-2">
                       <li>

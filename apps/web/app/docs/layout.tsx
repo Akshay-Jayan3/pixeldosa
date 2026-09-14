@@ -1,6 +1,7 @@
 import { DocsSidebarNav, type SidebarGroup } from "@/components/docs-sidebar-nav";
 import { demoExamples } from "@/components/registry-demos";
 import { GROUP_LABELS, GROUP_ORDER, groupFor, isFoundation } from "@/lib/component-groups";
+import { getNewComponents } from "@/lib/changelog";
 import { getComponents } from "@/lib/registry";
 
 /**
@@ -15,11 +16,13 @@ import { getComponents } from "@/lib/registry";
  * needs `usePathname` for active-state highlighting and must run on the client.
  */
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
+  const recent = getNewComponents();
   const items = getComponents()
     .filter((item) => !isFoundation(item))
     .map((item) => ({
       name: item.name,
       title: item.title,
+      isNew: recent.has(item.name),
       group: groupFor(item),
       examples: (demoExamples[item.name] ?? []).map((example) => ({
         slug: example.slug,

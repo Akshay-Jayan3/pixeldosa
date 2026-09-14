@@ -101,13 +101,13 @@ docs, QA, build). They're held back from announcements until launch week.
 | 5 | ✅ **AI Chat Experience** (block, built 2026-09-14) | Message, Message Scroller, Prompt Composer, Suggestions, Reasoning Stream, Tool Call Group, Inline Citations and Agent Presence composed into one working assistant screen. The hero demo for launch. |
 
 ### Content and site
-- [ ] Commit pending work: Prompt Composer, browse-card thumbnails.
-- [ ] Apply the thumbnail treatment to the homepage previews.
-- [ ] Homepage rewrite around the positioning line above, with the before / during / after
+- [x] Commit pending work: Prompt Composer, browse-card thumbnails.
+- [x] Apply the thumbnail treatment to the homepage previews.
+- [x] Homepage rewrite around the positioning line above, with the before / during / after
   structure and one hero demo (AI Chat Experience).
-- [ ] **"Beta" badge** in the header and a one-paragraph "What beta means" note on `/docs`.
-- [ ] **Changelog page** (`/changelog`) — one entry per drop, dated, with a link to each component.
-- [ ] **"New" badge** in the sidebar for components added in the last two drops.
+- [x] **"Beta" badge** in the header and a one-paragraph "What beta means" note on `/docs`.
+- [x] **Changelog page** (`/changelog`) — one entry per drop, dated, with a link to each component.
+- [x] **"New" badge** in the sidebar (and browse cards) for components added in the last two drops.
 - [ ] Per-component social image (title + thumbnail) for link previews.
 
 ### Quality gate
