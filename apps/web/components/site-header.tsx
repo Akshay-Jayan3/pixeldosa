@@ -12,6 +12,9 @@ export function SiteHeader() {
             className="inline-block size-4 rounded-full bg-primary shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
           />
           PixelDosa
+          <span className="rounded-full border px-1.5 py-px text-[0.625rem] font-medium uppercase tracking-wider text-muted-foreground">
+            Beta
+          </span>
         </Link>
 
         <nav className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -20,6 +23,9 @@ export function SiteHeader() {
           </Link>
           <Link href="/docs/components" className="hover:text-foreground">
             Components
+          </Link>
+          <Link href="/docs/ai" className="hidden hover:text-foreground sm:inline">
+            Build with AI
           </Link>
         </nav>
 

@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "PixelDosa — components for design engineers",
+    default: "PixelDosa — the trust layer for AI products",
     template: "%s — PixelDosa",
   },
   description:
-    "Production-ready components, crafted by a Design Engineer — for developers who want beautiful, accessible interfaces, and for AI agents that need to build them correctly.",
+    "React components for the moments people decide whether to trust an agent: before it runs, while it works, and when they review what it did. No SDK lock-in, installable by you or your coding agent.",
 };
 
 /**
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <footer className="border-t py-8">
           <div className="mx-auto max-w-6xl px-4 text-sm text-muted-foreground sm:px-6">
-            PixelDosa — a design engineering system. Core, AI and Motion under one roof.
+            PixelDosa (beta). The trust layer for AI products, crafted by a design engineer.
           </div>
         </footer>
       </body>
