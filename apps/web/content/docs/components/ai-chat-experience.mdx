@@ -1,0 +1,115 @@
+---
+title: AI Chat Experience
+description: A complete assistant screen — conversation, reasoning, tool calls, code, sources, follow-ups and composer — with the orchestration decided for you.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AIChatExperience } from "@/components/blocks/ai-chat-experience";
+
+<AIChatExperience
+  className="h-dvh"
+  turns={turns}
+  onSend={({ text }) => send(text)}
+  onStop={abort}
+  onRetry={retry}
+  onContinue={resume}
+  onRegenerate={regenerate}
+  renderText={(text) => <Markdown>{text}</Markdown>}
+  empty={{ title: "What are we working on?", suggestions: starters }}
+/>
+```
+
+## Why it exists
+
+Every part of an assistant screen exists as a component. What teams get wrong is how the parts behave
+**together**: two spinners at once, reasoning that keeps ticking under the answer, stale
+follow-ups from three questions ago, a Stop button that disappears, or a screen reader that
+reads every token. This block makes those decisions once.
+
+## What it decides
+
+- **One busy signal at a time.** Agent Presence covers the gap before anything else exists.
+  Then the reasoning trace or the running tool call says what's happening, and once the answer
+  starts, the message's cursor takes over.
+- **Reasoning stops when the answer starts,** whatever the stream says.
+- **Send becomes Stop** exactly while the latest answer streams. You can still type the next question.
+- **Follow-ups belong to the latest finished answer.** Older ones disappear. In `fill` mode
+  a follow-up lands in the composer to edit.
+- **Code is safe mid-stream.** Fenced code becomes Code Blocks, and Copy waits for the fence to close.
+- **Sources sit under the answer,** or inline if you use `content` with `<Cite>`.
+- **Screen readers hear each answer once,** when it finishes.
+- **Nothing is thrown away.** Failed and stopped turns keep their text, with Retry or Continue.
+
+## Turn data
+
+Your stream updates the latest assistant turn. Everything is plain data:
+
+```tsx
+type ChatTurn = {
+  id: string;
+  role: "user" | "assistant";
+  text?: string;               // fenced code becomes Code Blocks
+  content?: ReactNode;         // replaces text, e.g. with <Cite> markup
+  status?: "streaming" | "done" | "failed" | "stopped";
+  error?: string;
+  reasoning?: { steps: string[]; streaming?: boolean; durationMs?: number };
+  toolCalls?: ToolCall[];
+  sources?: CitationSource[];
+  suggestions?: Suggestion[];
+};
+```
+
+## Examples
+
+Mapping stream events, whatever your runtime:
+
+```tsx
+on("reasoning", (step) => patch(id, (t) => ({ reasoning: { steps: [...(t.reasoning?.steps ?? []), step] } })));
+on("tool-start", (call) => patch(id, (t) => ({ toolCalls: [...(t.toolCalls ?? []), { ...call, status: "running" }] })));
+on("text", (chunk) => patch(id, (t) => ({ text: (t.text ?? "") + chunk })));
+on("finish", () => patch(id, { status: "done" }));
+on("error", (error) => patch(id, { status: "failed", error: error.message }));
+```
+
+With structured controls in the composer:
+
+```tsx
+<AIChatExperience
+  turns={turns}
+  controls={[{ id: "tone", label: "Tone", options: ["Neutral", "Friendly"], defaultValue: "Neutral" }]}
+  onSend={({ text, values }) => send(text, values)}
+/>
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `turns` | `ChatTurn[]` | Required. |
+| `onSend` | `({ text, values, attachments }) => void` | Required. |
+| `onStop` | `() => void` | Shown as Stop while the latest turn streams. |
+| `onRetry` / `onContinue` / `onRegenerate` | `(turnId) => void` | |
+| `onApplyCode` | `(code, language) => void \| Promise<void>` | Adds Apply to code blocks. |
+| `suggestionMode` | `"fill" \| "send"` | Defaults to `"fill"`. |
+| `renderText` | `(text) => ReactNode` | Your markdown renderer. |
+| `assistantName` | `string` | Defaults to `"Assistant"`. |
+| `empty` | `{ title, description?, suggestions? }` | Shown before the first turn. |
+| `controls`, `attachments`, `onAttachFiles`, `onRemoveAttachment`, `placeholder` | | Passed to the composer. |
+| `onLoadOlder` | `() => void` | Near the top of the history. |
+
+## Accessibility
+
+- The screen is a labelled section, and the conversation is a focusable, scrollable region.
+- Each turn is an article, and turns are busy while streaming.
+- One polite announcement per finished, failed or stopped answer.
+- Everything else is inherited from the components it composes.
+
+## When not to use
+
+For one agent run with questions and approvals rather than a conversation, use `Thinking
+Experience`. For generating a single artifact, use `Prompt Composer` with the result
+shown directly.

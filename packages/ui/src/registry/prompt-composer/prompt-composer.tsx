@@ -49,6 +49,9 @@ export interface PromptComposerProps extends Omit<React.ComponentPropsWithoutRef
   label?: string;
   /** Clear the text after sending. Controls keep their values either way. */
   clearOnSubmit?: boolean;
+  /** Controlled text, for filling the composer from outside (e.g. a follow-up suggestion). */
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
 const optionValue = (option: ComposerOption) => (typeof option === "string" ? option : option.value);
@@ -85,10 +88,17 @@ function PromptComposer({
   submitLabel = "Generate",
   label = "Request",
   clearOnSubmit = true,
+  value,
+  onValueChange,
   className,
   ...props
 }: PromptComposerProps) {
-  const [text, setText] = React.useState("");
+  const [ownText, setOwnText] = React.useState("");
+  const text = value ?? ownText;
+  const setText = (next: string) => {
+    if (value === undefined) setOwnText(next);
+    onValueChange?.(next);
+  };
   const [values, setValues] = React.useState<Record<string, string>>(() =>
     Object.fromEntries(controls.map((control) => [control.id, control.defaultValue]))
   );

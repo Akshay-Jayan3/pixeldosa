@@ -24,6 +24,11 @@ export interface MessageProps extends Omit<React.ComponentPropsWithoutRef<"artic
   onRetry?: () => void;
   /** Offered on a stopped message, to pick up where it left off. */
   onContinue?: () => void;
+  /**
+   * The end-of-stream cursor while streaming. Turn it off while something else already
+   * shows progress (a reasoning trace, a running tool), so there's one busy signal at a time.
+   */
+  showCursor?: boolean;
 }
 
 /**
@@ -52,6 +57,7 @@ function Message({
   error,
   onRetry,
   onContinue,
+  showCursor = true,
   className,
   children,
   ...props
@@ -86,7 +92,7 @@ function Message({
           )}
         >
           {children}
-          {streaming ? <StreamingCursor /> : null}
+          {streaming && showCursor ? <StreamingCursor /> : null}
         </div>
 
         {!isUser && status === "failed" ? (

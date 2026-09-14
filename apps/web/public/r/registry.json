@@ -207,6 +207,44 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "ai-chat-experience",
+      "title": "AI Chat Experience",
+      "description": "A complete assistant conversation, orchestrated from shipped PixelDosa components: Message Scroller, Message, Prompt Composer, Suggestions, Code Block, Reasoning Stream, Tool Call Group, Inline Citations, Agent Presence and AI Action Toolbar. Takes `turns` as data. Each turn has a `role`, `text` (fenced code becomes Code Blocks) or custom `content`, and for assistant turns a caller-owned `status`, `reasoning`, `toolCalls`, `sources`, `suggestions` and `error`. Handlers are `onSend`, `onStop`, `onRetry`, `onContinue`, `onRegenerate` and `onApplyCode`, with an optional `renderText` for your markdown renderer, an `empty` state with starter suggestions, composer `controls` and attachments. The value is the orchestration a team would otherwise re-derive. Only one busy signal shows at a time: Agent Presence until reasoning or a tool call appears, then that trace, then the streaming cursor once text arrives. Reasoning stops streaming when the answer starts. Send becomes Stop exactly while the latest turn streams, and the composer stays editable. Follow-ups show only on the latest finished answer, and in `fill` mode they land in the composer. Unclosed code fences stream safely. Finished answers are announced once. Failed and stopped turns keep their content with Retry or Continue. Use it as the main assistant screen of a product.",
+      "type": "registry:block",
+      "categories": [
+        "ai-assisted",
+        "application",
+        "block"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/message",
+        "@pixeldosa/message-scroller",
+        "@pixeldosa/prompt-composer",
+        "@pixeldosa/suggestions",
+        "@pixeldosa/code-block",
+        "@pixeldosa/reasoning-stream",
+        "@pixeldosa/tool-call-card",
+        "@pixeldosa/inline-citations",
+        "@pixeldosa/agent-presence",
+        "@pixeldosa/ai-action-toolbar"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/ai-chat-experience/ai-chat-experience.tsx",
+          "target": "components/blocks/ai-chat-experience.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Installs the whole chat stack it composes. Keep `turns` in your state and update the latest assistant turn as your stream reports reasoning, tool calls, text and completion. Pass your markdown renderer as `renderText`.",
+      "meta": {
+        "engineeringNotes": "A Block, so an orchestration rather than new UI: every element is an existing component, and the contribution is the rules for combining them. Busy signals are exclusive. `presenceFor` shows Agent Presence only in the gaps where nothing else reports progress (before reasoning or tools exist, or between the last tool and the first token). A streaming reasoning trace or running tool call already says what is happening, and once text exists the Message's quantized cursor takes over, because two simultaneous 'working' indicators read as noise and make neither trustworthy. Reasoning is forced to stop streaming once answer text arrives, regardless of what the reasoning data says, since a ticking trace under a streaming answer misreports what the model is doing. `busy` derives from the latest assistant turn alone, so Send becomes Stop for exactly that window. The composer is controlled by the block, which lets a `fill` suggestion write into it while the user keeps editing during a stream. Suggestions render only on the latest assistant turn in 'done' status, and older turns' suggestions are hidden, so stale follow-ups never compete with current ones. Text goes through `splitCodeFences`, so an unclosed fence streams as a Code Block. Screen reader announcements are derived by diffing each turn's previous status: a transition out of 'streaming' produces one message (replied with a summary, failed, or stopped) and never a token stream. Turn data is plain objects, so it maps from any runtime (AI SDK, LangGraph, a custom SSE stream) without a dependency.",
+        "motionNotes": "Inherited, not invented. The block adds no motion of its own. Agent Presence's line form moves while the agent thinks or works. Reasoning Stream and Tool Call Group shimmer only their verbs while running. The Message cursor pulses on the shared cell keyframe while text streams. Suggestions arrive with their staggered fade once an answer is done. The Message Scroller follows instantly while pinned and scrolls smoothly only on 'Jump to latest'. Because each part applies the same tokens and the turn-taking grammar, the whole screen has one rhythm: motion while the machine works, stillness when it's the user's turn. Every part handles prefers-reduced-motion itself, so the block needs no separate fallback."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "ai-context-surface",
       "title": "AI Context / Provenance Surface",
       "description": "A collapsed-by-default 'Why this?' disclosure showing an AI-produced value's explanation, sources, and model metadata — the folded-together answer to Citation Card, Source Viewer, and Thinking Indicator, none of which make sense without a chat thread. Takes optional explanation (plain-language reasoning text), sources (an array of { label, url?, snippet? }, rendered as a numbered list, each a link when a url is supplied), model (a string name), and generatedAt (a string or Date, formatted as a relative time within 24 hours or an absolute date otherwise). Renders nothing if none of these props are supplied. The trigger is a small, muted button; expanding it reveals a quiet bg-muted panel with the explanation first, sources second, and a model/timestamp footer line last. Use anywhere an AI-influenced value needs transparency available on demand without competing with the content it explains — a Smart Field proposal, a table cell, a classification result from Selection Actions. Not for a full chat/conversation transcript, and not for a single short provenance caption (Smart Field already has its own inline provenance prop for that).",

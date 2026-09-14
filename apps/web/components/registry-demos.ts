@@ -5,6 +5,7 @@ import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-prev
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
 import ToolCallCardDemo from "@pixeldosa/ui/registry/tool-call-card/tool-call-card.demo";
+import AIChatExperienceDemo from "@pixeldosa/ui/registry/ai-chat-experience/ai-chat-experience.demo";
 import SuggestionsDemo from "@pixeldosa/ui/registry/suggestions/suggestions.demo";
 import CodeBlockDemo from "@pixeldosa/ui/registry/code-block/code-block.demo";
 import MessageScrollerDemo from "@pixeldosa/ui/registry/message-scroller/message-scroller.demo";
@@ -192,6 +193,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "ai-chat-experience": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Ask a starter question: the agent reasons, searches and reads, then streams a cited answer with code.",
+      render: AIChatExperienceDemo,
     },
   ],
   suggestions: [

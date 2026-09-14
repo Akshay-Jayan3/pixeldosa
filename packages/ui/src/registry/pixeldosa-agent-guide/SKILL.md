@@ -38,6 +38,7 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 |---|---|
 | An agent panel showing a run: status, reasoning, questions, approvals, result | `thinking-experience` |
 | AI filling in a form the user reviews field by field | `ai-form-fill` |
+| A full assistant chat screen: conversation, reasoning, tools, code, sources, follow-ups, composer | `ai-chat-experience` |
 
 ## Pick the right component
 

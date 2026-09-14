@@ -98,7 +98,7 @@ docs, QA, build). They're held back from announcements until launch week.
 | 2 | ✅ **Message Scroller** (built 2026-09-14) | Stick to bottom only while the reader is at the bottom; "Jump to latest" with an unread count when they've scrolled up; no jump when older messages load above; a live region that announces completed messages, not every token. Reuses the scroll anchoring proven in Reasoning Stream. |
 | 3 | ✅ **Code Block** (built 2026-09-14) | Safe with partial streaming (an unclosed fence doesn't break layout); copy with confirmation; optional Apply / Insert action; language label; long lines scroll; no dependency on a heavy highlighter (pluggable). |
 | 4 | ✅ **Suggestions** (built 2026-09-14) | Follow-up chips after an answer; fill the composer or send (the caller chooses and it's labelled); keyboard navigable; never shown while streaming. |
-| 5 | **AI Chat Experience** (block) | Message, Message Scroller, Prompt Composer, Suggestions, Reasoning Stream, Tool Call Group, Inline Citations and Agent Presence composed into one working assistant screen. The hero demo for launch. |
+| 5 | ✅ **AI Chat Experience** (block, built 2026-09-14) | Message, Message Scroller, Prompt Composer, Suggestions, Reasoning Stream, Tool Call Group, Inline Citations and Agent Presence composed into one working assistant screen. The hero demo for launch. |
 
 ### Content and site
 - [ ] Commit pending work: Prompt Composer, browse-card thumbnails.
