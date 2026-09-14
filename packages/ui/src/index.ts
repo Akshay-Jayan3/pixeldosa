@@ -99,6 +99,7 @@ export {
   type AgentPlanProps,
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
+export { Suggestions, type SuggestionsProps, type Suggestion } from "./registry/suggestions/suggestions";
 // `splitCodeFences` is deliberately not re-exported here, like `agentPresenceStates`: the
 // docs site spreads this module into its MDX component map, which only accepts
 // components. Import it from the component file.

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "suggestions",
+  "title": "Suggestions",
+  "description": "Follow-up suggestions after an AI answer, where what a tap does is always clear. `Suggestions` takes `items` (strings, or `{ id, label, prompt? }` when the visible label differs from what gets asked), `onSelect(prompt, item)`, a `mode` of 'fill' (put the text in the composer to edit, the default) or 'send' (ask immediately), `streaming` (hides them while an answer is still arriving), and a `layout` of 'chips' (wrapping pills) or 'list' (full-width rows for longer questions). Fill and send look different, with a pencil or an arrow, and are named differently for screen readers ('Edit before asking: …' vs 'Ask: …'), so a tap never commits someone to words they didn't expect to send. The group is one tab stop, and arrow keys, Home and End move between items. Items arrive with a short staggered fade and then hold still. Use it under assistant messages and in empty states. Not for autocomplete while typing. Use Ghost Input for that.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "actions"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/suggestions/suggestions.tsx",
+      "target": "components/ui/suggestions.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Default to `mode=\"fill\"`. Use `send` only when the suggestions are exactly what the user would type. Pass `streaming` from the message status.",
+  "meta": {
+    "engineeringNotes": "Most suggestion chips hide their most important property: whether tapping one sends a message. Sending words the user didn't write can't be taken back in a conversation, so the component makes mode explicit in three places: the trailing glyph (pencil for fill, arrow for send), the accessible name ('Edit before asking:' vs 'Ask:'), and the default, which is the safer `fill`. Items accept a separate `prompt`, so a short visible label can expand into a fuller question. Suggestions render nothing while `streaming`, because a follow-up to an unfinished answer is premature and often wrong once the answer completes. Keyboard behaviour follows the toolbar pattern already used in AI Action Toolbar: one tab stop with roving tabindex, arrows in both axes (so it works for wrapping chips and stacked lists), and Home and End. The active index resets if the list shrinks. Chips extend their hit area vertically with a transparent pseudo-element, and list rows are 44px tall.",
+    "motionNotes": "One entrance, then stillness, because choosing a follow-up is the user's turn. Items fade in with the shared `pd-fade-in` at `--pd-duration-base` on the decelerate curve, staggered 40ms per item so the row reads left to right rather than popping in as a block. There's no slide or scale, so text is readable from the first frame. Hover colour runs at `--pd-duration-instant`. Nothing shimmers or pulses. Under prefers-reduced-motion the entrance is removed and items appear immediately."
+  }
+}

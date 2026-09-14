@@ -1,0 +1,73 @@
+---
+title: Suggestions
+description: Follow-up questions after an answer, where it's always clear whether a tap fills the composer or sends right away.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { Suggestions } from "@/components/ui/suggestions";
+
+<Suggestions
+  items={["Which teams didn't finish setup?", "Draft an onboarding email"]}
+  streaming={message.status === "streaming"}
+  onSelect={(prompt) => composer.fill(prompt)}
+/>
+```
+
+## Why it exists
+
+Suggestion chips usually hide the one thing that matters: **does tapping this send a
+message?** Sending words someone didn't write can't be undone in a conversation. Here the
+mode is a choice you make, and it's visible.
+
+## Features
+
+- **Fill or send, visibly.** A pencil means the text goes into the composer to edit. An arrow means it's asked immediately.
+  Screen readers hear "Edit before asking:" or "Ask:".
+- **Safe by default.** `mode="fill"` unless you choose otherwise.
+- **Not mid-stream.** Hidden while the answer is still arriving.
+- **Chips or list.** Wrapping pills for short prompts, full-width rows for longer questions.
+- **Label and prompt can differ.** Show "Compare with July" and ask the full question.
+- **One tab stop.** Arrow keys, Home and End move between suggestions.
+
+## Examples
+
+Send mode, for prompts that are exactly what the user would type:
+
+```tsx
+<Suggestions mode="send" layout="list" items={followUps} onSelect={(prompt) => send(prompt)} />
+```
+
+A short label that asks a fuller question:
+
+```tsx
+<Suggestions
+  items={[{ id: "july", label: "Compare with July", prompt: "Compare August churn with July, by plan." }]}
+  onSelect={fill}
+/>
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `items` | `(string \| { id, label, prompt? })[]` | Required. |
+| `onSelect` | `(prompt, item) => void` | Required. |
+| `mode` | `"fill" \| "send"` | Defaults to `"fill"`. |
+| `streaming` | `boolean` | Hides the suggestions. |
+| `layout` | `"chips" \| "list"` | Defaults to `"chips"`. |
+| `label` | `string` | Group name. Defaults to `"Suggested follow-ups"`. |
+
+## Accessibility
+
+- A named group with a single tab stop and arrow-key movement.
+- Each item's name says what a tap does.
+- List rows are 44px tall, and chips extend their hit area vertically.
+
+## When not to use
+
+This isn't autocomplete. For completing text as someone types, use `Ghost Input`. For suggestions
+inside the composer before the first message, use `Prompt Composer`'s `suggestions`.
