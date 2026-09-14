@@ -1,0 +1,84 @@
+---
+title: Autonomy Control
+description: How much the agent does without asking, explained through its real actions. Users can make it more careful per action, never less careful than the risk allows.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AutonomyControl } from "@/components/ui/autonomy-control";
+
+<AutonomyControl
+  level={settings.level}
+  onLevelChange={(level) => save({ level })}
+  alwaysAsk={settings.alwaysAsk}
+  onAlwaysAskChange={(alwaysAsk) => save({ alwaysAsk })}
+  actions={[
+    { id: "label", label: "Label and archive email", risk: "low" },
+    { id: "calendar", label: "Accept meeting invites", risk: "medium" },
+    { id: "send", label: "Send email for you", risk: "high" },
+  ]}
+/>
+```
+
+## Why it exists
+
+People ask agents to be *less* autonomous, and to have an off switch. Most products offer
+a slider from "cautious" to "autonomous", which tells nobody what will happen to their
+inbox. This control explains every level through the agent's actual actions.
+
+## Features
+
+- **Concrete outcomes.** Every action reads "Asks first" or "Does it, tells you" for the
+  chosen level.
+- **A floor you can raise, never lower.** Pin any action to **Always ask**. High-risk
+  actions ask at every level. That isn't a setting, on purpose.
+- **Announced changes.** "Does 2 of 5 without asking" updates politely when the level
+  changes, because every row changed with it.
+- **Native radios**, so arrow keys and form semantics work without extra code.
+
+## The policy
+
+| Risk | Ask me first | Ask when it matters | Act, then tell me |
+| --- | --- | --- | --- |
+| `low` | Asks first | Does it, tells you | Does it, tells you |
+| `medium` | Asks first | Asks first | Does it, tells you |
+| `high` | Asks first | Asks first | Asks first |
+
+## Examples
+
+Deciding whether to show an approval, with the same rule the control displays:
+
+```tsx
+function needsApproval(action, { level, alwaysAsk }) {
+  if (action.risk === "high" || alwaysAsk.includes(action.id)) return true;
+  if (level === "ask") return true;
+  return level === "balanced" && action.risk === "medium";
+}
+
+{needsApproval(action, settings) ? <AIApprovalGate {...gate} /> : execute(action)}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `level` | `"ask" \| "balanced" \| "act"` | Required. |
+| `onLevelChange` | `(level) => void` | Required. |
+| `actions` | `{ id, label, risk }[]` | Required. Real actions, in the user's words. |
+| `alwaysAsk` | `string[]` | Action ids pinned to asking. |
+| `onAlwaysAskChange` | `(ids) => void` | Shows the Always ask checkboxes. |
+| `label` | `string` | The fieldset legend. |
+
+## Accessibility
+
+- Levels are a `<fieldset>` of native radios with a legend.
+- Each Always ask checkbox is named after its action ("Always ask before: Draft replies").
+- The live count is a polite status region.
+
+## When not to use
+
+This isn't the approval itself. That's `AI Approval Gate`, and this control decides when
+to show one. It also doesn't enforce anything: apply the same policy on the server.

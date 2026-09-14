@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-memory",
+  "title": "Agent Memory",
+  "description": "What an agent remembers about someone, where they can read it, correct it, or make it forget. Takes `memories`, each with `text`, an `origin` of 'stated' (the user said it) or 'inferred' (the agent picked it up) and an optional `source` ('Noticed across 6 conversations'). Handlers are `onEdit`, `onForget`, and optionally `onRestore`, `onForgetAll`, plus `paused` with `onPausedChange`. What the user said and what the agent guessed are listed separately, and inferred memories are framed as guesses worth checking, because a wrong inference quietly skews every later answer. Edits happen inline (Enter saves, Escape cancels). Forget fires immediately, while the row stays in place, struck through, with Undo, and focus moves to it. Pausing is described exactly: it stops new memories and doesn't erase old ones. Forget all needs a second confirming step that says it can't be undone. Use it in agent settings or a 'what do you know about me' panel. Not a chat history or a data export.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "forms", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/agent-memory/agent-memory.tsx",
+      "target": "components/ui/agent-memory.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. `onForget` should really delete. The component keeps its own copy for Undo. When a user edits an inferred memory, store it as `stated`, because they have now said it.",
+  "meta": {
+    "engineeringNotes": "Built around the difference between stated and inferred memory. From the model side, an inferred preference that is wrong is worse than no memory, because it shapes answers without the user ever seeing why. So origin is a required field, the two kinds are listed in separate sections (the inferred list has a dashed border and reads 'Guesses from how you work'), and each memory can carry its source. Forgetting is honest about timing. `onForget` fires at once, so the caller can really delete it, and the component keeps a local snapshot with the original position so the row stays in place, struck through, with Undo. Focus moves to Undo after a forget and back to Forget after a restore, so keyboard users never lose their place. Pausing uses a real `role=\"switch\"`, and its note says exactly what pausing does and doesn't do, because 'paused' is widely misread as 'deleted'. Forget all is the only irreversible action. It opens an inline confirmation with focus on Cancel and uses the destructive intent. A polite live region announces forgets and restores by content.",
+    "motionNotes": "Still, apart from direct feedback. It is the user's turn, so nothing moves unless the user acts. The pause switch thumb slides and its track colour changes at `--pd-duration-fast` on the standard curve. Hover colour changes run at `--pd-duration-instant`. Forgetting doesn't collapse or fade the row. It swaps to its struck-through state instantly and keeps its height, so the list doesn't shift under the pointer and Undo appears exactly where the user clicked. Everything is instant under prefers-reduced-motion."
+  }
+}

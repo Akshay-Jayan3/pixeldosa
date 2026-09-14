@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "autonomy-control",
+  "title": "Autonomy Control",
+  "description": "How much an agent may do without asking, as a setting people can actually read. Takes a `level`: 'ask' (propose everything), 'balanced' (handle small reversible things, ask before bigger ones) or 'act' (act, then report). It also takes the agent's real `actions`, each with a `risk` of low, medium or high, and optional `alwaysAsk` ids with `onAlwaysAskChange`. Instead of an abstract cautious-to-autonomous slider, each level is explained through those actions, and every row reads 'Asks first' or 'Does it, tells you', so choosing a level means choosing concrete outcomes. Risk sets a floor the user can raise but never lower: any action can be pinned to 'Always ask', and high-risk actions ask at every level. A live count ('Does 2 of 5 without asking') announces what a level change did. Use it in agent settings and onboarding. Not an approval prompt — that's AI Approval Gate, which this decides when to show.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "forms", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/autonomy-control/autonomy-control.tsx",
+      "target": "components/ui/autonomy-control.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. List real actions in the user's words, and put anything irreversible or external at `risk: \"high\"`. Enforce the same rule server-side: this control shows the policy, it doesn't enforce it.",
+  "meta": {
+    "engineeringNotes": "Research on agent products keeps finding people asking for lower automation and an off switch, while the 'match autonomy to risk' principle has no UI anywhere. Most autonomy settings fail because they are abstract. A slider labelled cautious-to-autonomous doesn't tell anyone what will happen to their inbox. So each level is explained through the agent's actual actions, with the outcome for each in words. The policy is a pure function of level and risk: 'ask' asks for everything, 'balanced' acts only on low risk, 'act' acts on low and medium. High risk asks at every level, and that is deliberately not configurable, because a setting that can turn off the approval for an irreversible send is a trap with a friendly label. User overrides only move in the safe direction: 'Always ask' pins an action to asking, and nothing un-pins the floor. Levels are native radios in a fieldset, so arrow keys, labels and form semantics come for free. The 'Does N of M without asking' count sits in a polite live region, because changing the level silently changes every row below it.",
+    "motionNotes": "Still. This is a settings surface and the user's turn, so nothing animates on its own. Selection and hover change background and border colour at `--pd-duration-instant`. Row outcomes swap text instantly when the level changes, not with a transition, so the new policy can be read the moment it applies. The focus ring follows the radio via `has-[:focus-visible]`. Under prefers-reduced-motion the colour transitions become instant."
+  }
+}

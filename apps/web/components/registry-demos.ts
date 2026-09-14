@@ -5,6 +5,8 @@ import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-prev
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
 import ToolCallCardDemo from "@pixeldosa/ui/registry/tool-call-card/tool-call-card.demo";
+import AutonomyControlDemo from "@pixeldosa/ui/registry/autonomy-control/autonomy-control.demo";
+import AgentMemoryDemo from "@pixeldosa/ui/registry/agent-memory/agent-memory.demo";
 import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
 import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
@@ -184,6 +186,22 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "autonomy-control": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "An email agent's five actions, re-explained for each level. Sending always asks.",
+      render: AutonomyControlDemo,
+    },
+  ],
+  "agent-memory": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Two things you told it, three it guessed. Edit, forget with Undo, or pause.",
+      render: AgentMemoryDemo,
     },
   ],
   "tool-call-card": [

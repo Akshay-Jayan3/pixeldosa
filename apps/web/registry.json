@@ -33,6 +33,34 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-memory",
+      "title": "Agent Memory",
+      "description": "What an agent remembers about someone, where they can read it, correct it, or make it forget. Takes `memories`, each with `text`, an `origin` of 'stated' (the user said it) or 'inferred' (the agent picked it up) and an optional `source` ('Noticed across 6 conversations'). Handlers are `onEdit`, `onForget`, and optionally `onRestore`, `onForgetAll`, plus `paused` with `onPausedChange`. What the user said and what the agent guessed are listed separately, and inferred memories are framed as guesses worth checking, because a wrong inference quietly skews every later answer. Edits happen inline (Enter saves, Escape cancels). Forget fires immediately, while the row stays in place, struck through, with Undo, and focus moves to it. Pausing is described exactly: it stops new memories and doesn't erase old ones. Forget all needs a second confirming step that says it can't be undone. Use it in agent settings or a 'what do you know about me' panel. Not a chat history or a data export.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-memory/agent-memory.tsx",
+          "target": "components/ui/agent-memory.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. `onForget` should really delete. The component keeps its own copy for Undo. When a user edits an inferred memory, store it as `stated`, because they have now said it.",
+      "meta": {
+        "engineeringNotes": "Built around the difference between stated and inferred memory. From the model side, an inferred preference that is wrong is worse than no memory, because it shapes answers without the user ever seeing why. So origin is a required field, the two kinds are listed in separate sections (the inferred list has a dashed border and reads 'Guesses from how you work'), and each memory can carry its source. Forgetting is honest about timing. `onForget` fires at once, so the caller can really delete it, and the component keeps a local snapshot with the original position so the row stays in place, struck through, with Undo. Focus moves to Undo after a forget and back to Forget after a restore, so keyboard users never lose their place. Pausing uses a real `role=\"switch\"`, and its note says exactly what pausing does and doesn't do, because 'paused' is widely misread as 'deleted'. Forget all is the only irreversible action. It opens an inline confirmation with focus on Cancel and uses the destructive intent. A polite live region announces forgets and restores by content.",
+        "motionNotes": "Still, apart from direct feedback. It is the user's turn, so nothing moves unless the user acts. The pause switch thumb slides and its track colour changes at `--pd-duration-fast` on the standard curve. Hover colour changes run at `--pd-duration-instant`. Forgetting doesn't collapse or fade the row. It swaps to its struck-through state instantly and keeps its height, so the list doesn't shift under the pointer and Undo appears exactly where the user clicked. Everything is instant under prefers-reduced-motion."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "agent-plan",
       "title": "Agent Plan",
       "description": "An agent's plan laid out for agreement before anything runs — the user can reorder steps, remove one, or add their own, then run the plan as edited. Takes `steps` (each with a `title`, optional `detail`, and an optional `needsApproval` flag for steps with external effects), an optional `title`, `onRun`, which receives the final ordered steps, an optional `onCancel`, and `allowAdd` to permit user-added steps. Steps that will stop for approval are labelled 'Asks for approval', and the header counts them, so the user knows before running where the agent will pause. Removing a step never deletes it outright: it stays in place struck through with an Undo, because a plan edit that cannot be seen or reversed is exactly the silent change the system exists to prevent. Reordering uses explicit move-up and move-down controls rather than drag, so it works identically by keyboard, touch and pointer, and every edit is announced through a live region. The run button reads 'Run edited plan' once anything changed. Plans are where an agent's misunderstanding becomes visible while it is still free to fix — once execution starts, a wrong step costs a tool call, a side effect, or a cancel and restart. This component is the agreement; execution belongs to Task Plan Runner. Composes AI Action Toolbar. Holds still, since it is the user's turn. Use it before multi-step runs, especially ones that touch external systems. Not for showing progress through a running plan.",
@@ -265,6 +293,34 @@
       "meta": {
         "engineeringNotes": "Built in direct response to the audit burden: AI now produces changes faster than people can check them, and every earlier component in this system enables review without reducing it, which at volume turns the user into a full-time auditor. Triage reduces review in three ways. It orders by attention rather than by arrival — low confidence first, high confidence collapsed — so effort lands where errors are likely. It collapses what the AI left unchanged into a count, since confirming that nothing happened is otherwise the most tedious part of reviewing a batch. And it states consequences at the point of commitment ('Apply 5', 'not reviewed will stay as they are'). The hard boundary is that it must not become Accept-all by another name. Bulk acceptance is limited to the high-confidence group, and gated on that group having been opened — tracked as an explicit inspected set, with the reason stated in text rather than hidden behind a disabled button. Decisions are staged rather than committed, so every row's Undo is simply removing a staged decision, with no undo timer to manage. Collapsed groups use the house grid-template-rows pattern with overflow-hidden, and are marked inert while closed: a 0fr row hides content visually but otherwise leaves its buttons focusable and exposed to assistive technology.",
         "motionNotes": "Deliberately quiet: this is a user-turn surface, so nothing moves on its own and nothing shimmers. Groups expand and collapse through the house grid-template-rows transition at `--pd-duration-fast`, the disclosure chevrons rotate at `--pd-duration-instant`, and a decided row fades to reduced opacity over `--pd-duration-fast` so the eye moves on to what remains without the row disappearing — its Undo stays reachable. Action colours transition through the composed AI Action Toolbar. There is no entrance animation and no motion tied to counts changing, since numbers updating in a review surface should read as information rather than event. Under prefers-reduced-motion every transition drops to instant and the grouping, counts and decided-state opacity still carry all the information."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "autonomy-control",
+      "title": "Autonomy Control",
+      "description": "How much an agent may do without asking, as a setting people can actually read. Takes a `level`: 'ask' (propose everything), 'balanced' (handle small reversible things, ask before bigger ones) or 'act' (act, then report). It also takes the agent's real `actions`, each with a `risk` of low, medium or high, and optional `alwaysAsk` ids with `onAlwaysAskChange`. Instead of an abstract cautious-to-autonomous slider, each level is explained through those actions, and every row reads 'Asks first' or 'Does it, tells you', so choosing a level means choosing concrete outcomes. Risk sets a floor the user can raise but never lower: any action can be pinned to 'Always ask', and high-risk actions ask at every level. A live count ('Does 2 of 5 without asking') announces what a level change did. Use it in agent settings and onboarding. Not an approval prompt — that's AI Approval Gate, which this decides when to show.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "forms",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/autonomy-control/autonomy-control.tsx",
+          "target": "components/ui/autonomy-control.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. List real actions in the user's words, and put anything irreversible or external at `risk: \"high\"`. Enforce the same rule server-side: this control shows the policy, it doesn't enforce it.",
+      "meta": {
+        "engineeringNotes": "Research on agent products keeps finding people asking for lower automation and an off switch, while the 'match autonomy to risk' principle has no UI anywhere. Most autonomy settings fail because they are abstract. A slider labelled cautious-to-autonomous doesn't tell anyone what will happen to their inbox. So each level is explained through the agent's actual actions, with the outcome for each in words. The policy is a pure function of level and risk: 'ask' asks for everything, 'balanced' acts only on low risk, 'act' acts on low and medium. High risk asks at every level, and that is deliberately not configurable, because a setting that can turn off the approval for an irreversible send is a trap with a friendly label. User overrides only move in the safe direction: 'Always ask' pins an action to asking, and nothing un-pins the floor. Levels are native radios in a fieldset, so arrow keys, labels and form semantics come for free. The 'Does N of M without asking' count sits in a polite live region, because changing the level silently changes every row below it.",
+        "motionNotes": "Still. This is a settings surface and the user's turn, so nothing animates on its own. Selection and hover change background and border colour at `--pd-duration-instant`. Row outcomes swap text instantly when the level changes, not with a transition, so the new policy can be read the moment it applies. The focus ring follows the radio via `has-[:focus-visible]`. Under prefers-reduced-motion the colour transitions become instant."
       }
     },
     {

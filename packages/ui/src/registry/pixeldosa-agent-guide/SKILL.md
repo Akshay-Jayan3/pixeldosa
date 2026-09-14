@@ -51,6 +51,8 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | Confirm how the agent read the request before a costly run | `intent-preview` | a "Are you sure?" dialog |
 | Let the user edit the steps before a run starts | `agent-plan` | a read-only checklist |
 | Redirect a running agent without stopping it | `agent-steer` | a chat input that silently queues |
+| Let users set how much the agent does without asking | `autonomy-control` | a cautious/autonomous slider |
+| Show and edit what the agent remembers about the user | `agent-memory` | a hidden memory store |
 | Show what the agent actually read, searched, or changed | `tool-call-card` (`ToolCallGroup` for a run) | a raw event log |
 | Review many AI changes at once, riskiest first | `ai-triage-table` | an "Accept all" button |
 | Actions on an AI result: apply, regenerate, explain, report | `ai-action-toolbar` | loose buttons |

@@ -643,9 +643,16 @@ trust breaks, and where nothing here existed.
 - **Idea parked (2026-09-14):** a "Using PixelDosa with your own tokens" recipe (e.g.
   Escala Tokens `variables.css` → shadcn vars) and an a11y/contrast checklist in the agent
   guide — see competitive scan note on Escala Tokens (neighbour layer, not a competitor).
-- [ ] **Autonomy & Memory Controls** — "be less autonomous with me" and "here's what I
-  remember about you, edit or forget it". Users explicitly ask for off switches and lower
-  automation defaults; the skill's "match autonomy to risk" rule has no UI anywhere.
+- [x] **Autonomy & Memory Controls** — **shipped 2026-09-14** as two components.
+  **Autonomy Control:** three levels (Ask me first / Ask when it matters / Act, then tell
+  me) explained through the agent's real actions, each row "Asks first" or "Does it,
+  tells you". Risk is a floor users can raise ("Always ask" per action) but never lower —
+  high risk asks at every level, not configurable. Live "Does N of M without asking"
+  count. **Agent Memory:** stated vs inferred memories in separate lists (inferred framed
+  as guesses worth checking, with source); inline edit (an edited guess becomes stated);
+  forget is immediate with in-place Undo and focus handoff; pause switch says it doesn't
+  erase; Forget all needs a confirm with focus on Cancel. Verified policy table at all
+  levels, focus return after forget/undo/edit, no overflow at 420px.
 - **Design constraint on Inline Citations (B1.5):** users rarely verify sources, so
   treat citations as a comfort signal unless verification takes one click — design for
   the check actually happening.

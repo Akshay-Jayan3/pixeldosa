@@ -1,0 +1,74 @@
+---
+title: Agent Memory
+description: What the agent remembers about you, with what you said kept apart from what it guessed. Edit anything, forget anything, pause without erasing.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentMemory } from "@/components/ui/agent-memory";
+
+<AgentMemory
+  memories={memories}
+  onEdit={(id, text) => memory.update(id, { text, origin: "stated" })}
+  onForget={(id) => memory.delete(id)}
+  onRestore={(item) => memory.restore(item)}
+  onForgetAll={() => memory.clear()}
+  paused={settings.memoryPaused}
+  onPausedChange={(paused) => save({ memoryPaused: paused })}
+/>
+```
+
+## Why it exists
+
+An agent that remembers you is only trustworthy if you can see what it remembers. And
+the risky memories aren't the ones you told it. They're the ones it **inferred**. A wrong
+guess like "manages a team of eight" quietly shapes every later answer, and you never
+see why.
+
+## Features
+
+- **Stated and inferred, kept apart.** What you said sits in one list. What it picked up
+  sits in another, framed as "Guesses from how you work. Worth checking."
+- **Where it came from.** Each memory can show its source: "Noticed across 6 conversations".
+- **Edit in place.** Enter saves and Escape cancels. An edited guess becomes something you stated.
+- **Forget means now.** `onForget` fires immediately. The row stays put, struck through,
+  with **Undo**, and focus moves to it.
+- **Pause means pause.** Nothing new is remembered, and the note says so. Existing
+  memories are still used until you forget them.
+- **Forget everything** needs a second step that says it can't be undone.
+
+## Examples
+
+Only ask about inferences, for a lighter check-in:
+
+```tsx
+<AgentMemory memories={memories.filter((m) => m.origin === "inferred")} {...handlers} />
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `memories` | `{ id, text, origin: "stated" \| "inferred", source? }[]` | Required. |
+| `onEdit` | `(id, text) => void` | Required. |
+| `onForget` | `(id) => void` | Required. Really delete. The component keeps a copy for Undo. |
+| `onRestore` | `(memory) => void` | Enables Undo. |
+| `onForgetAll` | `() => void` | Shows "Forget everything…". |
+| `paused` | `boolean` | |
+| `onPausedChange` | `(paused) => void` | Shows the Remember new things switch. |
+
+## Accessibility
+
+- A labelled region, with Edit and Forget buttons named after the memory they act on.
+- The pause control is a real `role="switch"`.
+- Focus moves to Undo after forgetting, and back to Forget after restoring.
+- Forgets and restores are announced by content in a polite live region.
+- Forget all's confirmation focuses Cancel, the safe choice.
+
+## When not to use
+
+It isn't chat history, and it isn't a data export. It shows the facts the agent carries
+into future conversations. Use `Autonomy Control` for what the agent may do on its own.

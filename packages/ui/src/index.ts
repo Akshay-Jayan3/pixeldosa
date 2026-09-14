@@ -100,6 +100,19 @@ export {
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
 export {
+  AutonomyControl,
+  type AutonomyControlProps,
+  type AutonomyLevel,
+  type AutonomyAction,
+  type ActionRisk,
+} from "./registry/autonomy-control/autonomy-control";
+export {
+  AgentMemory,
+  type AgentMemoryProps,
+  type MemoryItem,
+  type MemoryOrigin,
+} from "./registry/agent-memory/agent-memory";
+export {
   ToolCallCard,
   ToolCallGroup,
   type ToolCallCardProps,
