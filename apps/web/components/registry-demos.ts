@@ -5,6 +5,7 @@ import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-prev
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
 import AgentSteerDemo from "@pixeldosa/ui/registry/agent-steer/agent-steer.demo";
 import ToolCallCardDemo from "@pixeldosa/ui/registry/tool-call-card/tool-call-card.demo";
+import InlineCitationsDemo from "@pixeldosa/ui/registry/inline-citations/inline-citations.demo";
 import AutonomyControlDemo from "@pixeldosa/ui/registry/autonomy-control/autonomy-control.demo";
 import AgentMemoryDemo from "@pixeldosa/ui/registry/agent-memory/agent-memory.demo";
 import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
@@ -186,6 +187,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A five-step plan you can reorder, trim or extend before it runs.",
       render: AgentPlanDemo,
+    },
+  ],
+  "inline-citations": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "One quoted claim, one summarised from two sources, and one with nothing behind it.",
+      render: InlineCitationsDemo,
     },
   ],
   "autonomy-control": [

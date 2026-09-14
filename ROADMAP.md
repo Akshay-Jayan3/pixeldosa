@@ -527,7 +527,17 @@ rather than a second AI Elements.
   Plan: `plans/reasoning-stream-plan.md`.
 - [ ] Retrofit scroll anchoring onto `Progressive Reveal` — the behaviour is now proven
   in `Reasoning Stream`; Progressive Reveal still auto-follows unconditionally.
-- [ ] Inline Citations — **added 2026-09-12 from the competitive scan.** Claim-level
+- [x] Inline Citations — **shipped 2026-09-14.** `CitedText` + `Cite`. Built for the
+  "users rarely verify" constraint: the supporting passage is shown in the popover beside
+  the claim (zero navigation to compare), "Open at this passage" deep-links with a URL
+  text fragment, support is a tier (quoted / paraphrased, never a score), and a `Cite`
+  with no source gets a dashed "?" so uncited claims can't borrow credibility. Numbering
+  from `sources` order (SSR-stable); popover in DOM order after its marker (Tab reaches
+  the link) but shown in the top layer via the Popover API; hover with open delay and
+  close grace, focus-visible, tap, outside-click, Escape returns focus; always-visible
+  reference list as the no-hover fallback. Verified positioning clamps at 380px, the
+  highlight clears after double open/close, text-fragment URLs encode `-` and `%`.
+  Originally: **added 2026-09-12 from the competitive scan.** Claim-level
   provenance: a superscript marker inside a sentence that resolves to its source on
   hover/focus, with the cited span highlighted. Distinct from `AI Context Surface`,
   which is answer-level ("why this?" for a whole value) — a reader checking one

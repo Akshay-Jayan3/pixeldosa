@@ -100,6 +100,14 @@ export {
   type PlanStep,
 } from "./registry/agent-plan/agent-plan";
 export {
+  CitedText,
+  Cite,
+  type CitedTextProps,
+  type CiteProps,
+  type CitationSource,
+  type CitationSupport,
+} from "./registry/inline-citations/inline-citations";
+export {
   AutonomyControl,
   type AutonomyControlProps,
   type AutonomyLevel,

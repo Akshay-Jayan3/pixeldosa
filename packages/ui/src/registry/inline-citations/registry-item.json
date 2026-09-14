@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "inline-citations",
+  "title": "Inline Citations",
+  "description": "Claim-level sources that take one step to check. `CitedText` takes the answer's `sources` (id, title, url, publisher, date), numbers them in order and renders a numbered reference list underneath. `Cite` wraps one claim, takes `source` (an id or ids), the `quote` that supports it (or one quote per source) and `support`: 'quoted' or 'paraphrased'. Each claim gets a small numbered marker. On hover, keyboard focus or tap, a popover shows the supporting passage itself next to the claim, says whether the source quotes it or the agent summarised it, and links to 'Open at this passage', which deep-links with a URL text fragment so the source opens scrolled to the highlighted words. The claim is highlighted while its source is open. A `Cite` with no source gets a dashed '?' marker and says it has nothing behind it, so unsourced statements can't pass for cited ones. Use it in AI answers, research summaries and reports. For 'why this?' about a whole answer, use AI Context Surface instead.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/inline-citations/inline-citations.tsx",
+      "target": "components/ui/inline-citations.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Pass the exact retrieved passage as `quote` — that is what makes checking take one step. Set `support=\"paraphrased\"` when the claim is the model's summary. Leave `source` off rather than attaching a loosely related source.",
+  "meta": {
+    "engineeringNotes": "Designed from one research finding: people rarely verify citations, so a numbered marker is mostly a comfort signal that makes answers look more trustworthy than they are. The design makes the check cheap enough to actually happen. The supporting passage itself appears in the popover beside the claim, so comparing the two needs no navigation. The link opens the source at that passage using a URL text fragment, with start and end words for long quotes because fragments must match exactly. Support is a tier, not a score: 'quoted' vs 'paraphrased'. A claim without a source is marked with a dashed '?' rather than left bare, because an uncited sentence sitting among cited ones borrows their credibility. Numbering comes from the order of the `sources` array rather than render-order registration, so it is identical on server and client. The popover stays in the DOM next to its marker, so Tab moves from marker into the link. It is displayed with the Popover API's top layer and fixed coordinates, which keeps it clear of overflow-hidden containers and transformed ancestors. Without Popover API support it falls back to fixed positioning. It opens on mouse hover after a short delay, with a grace period so the pointer can move into it, and on keyboard focus-visible or tap. Clicking outside dismisses it, and Escape closes it and returns focus. The always-visible reference list is the fallback where hover doesn't exist and the audit view where it does.",
+    "motionNotes": "Minimal, because reading is the user's turn. The popover fades in at `--pd-duration-fast` on the decelerate curve, with no scale or slide, so the quote is readable from its first frame. Hover opens after 180ms, so markers don't flash as the pointer crosses text, and closing waits 140ms so the pointer can travel into the popover. The claim highlight and the marker's active fill change colour at `--pd-duration-instant`. Nothing shimmers: citations describe finished content. All motion becomes instant under prefers-reduced-motion."
+  }
+}

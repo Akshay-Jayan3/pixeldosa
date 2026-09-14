@@ -1,0 +1,97 @@
+---
+title: Inline Citations
+description: Sources attached to individual claims, where checking takes one step. The supporting passage is shown beside the claim and links straight to that spot in the source.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { Cite, CitedText } from "@/components/ui/inline-citations";
+
+<CitedText sources={[{ id: "report", title: "Q3 Retention Report", url: "https://…" }]}>
+  <p>
+    <Cite source="report" quote="30-day retention rose from 41% to 47%.">
+      Retention improved by six points in Q3
+    </Cite>
+    .
+  </p>
+</CitedText>
+```
+
+## Why it exists
+
+Research on AI answers keeps finding the same thing: **people rarely check citations.**
+A little number makes an answer *look* verified without anyone verifying it. So the goal
+isn't to show sources. It's to make checking one so cheap that people actually do it.
+
+## Features
+
+- **The evidence comes to you.** The popover shows the supporting passage next to the
+  claim. No tab switch, no hunting through a PDF.
+- **Open at this passage.** The link uses a URL text fragment, so the source opens scrolled to
+  the quoted words and highlighted, in browsers that support it.
+- **Quoted or summarised.** The popover says whether the source says this or the model
+  summarised it.
+- **Unsourced claims are marked.** A `<Cite>` with no source shows a dashed `?` and says
+  so. An uncited sentence among cited ones otherwise borrows their credibility.
+- **You can see what's being cited.** The claim is highlighted while its source is open.
+- **The reference list is always there,** for readers without hover and for audits.
+
+## Examples
+
+A claim backed by two sources, each in its own words:
+
+```tsx
+<Cite
+  source={["survey", "changelog"]}
+  support="paraphrased"
+  quote={{ survey: "Respondents who used the checklist…", changelog: "4.2 introduces a checklist…" }}
+>
+  used the guided setup checklist
+</Cite>
+```
+
+Mapping retrieval results. Keep the retrieved chunk, because it *is* the quote:
+
+```tsx
+const sources = retrieved.map((doc) => ({ id: doc.id, title: doc.title, url: doc.url }));
+
+{answer.claims.map((claim) => (
+  <Cite key={claim.id} source={claim.sourceIds} quote={claim.passage}>
+    {claim.text}
+  </Cite>
+))}
+```
+
+## Props
+
+### CitedText
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `sources` | `{ id, title, url?, publisher?, date? }[]` | Required. Numbered in this order. |
+| `showReferences` | `boolean` | The reference list. Defaults to `true`. |
+
+### Cite
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `source` | `string \| string[]` | Source id or ids. Omit to mark the claim unsourced. |
+| `quote` | `string \| Record<id, string>` | The supporting passage, or one per source. |
+| `support` | `"quoted" \| "paraphrased"` | Defaults to `"quoted"`. |
+
+## Accessibility
+
+- Markers are buttons named "Source 1: Q3 Retention Report" or "No source for this claim".
+- The popover opens on keyboard focus, sits next to its marker in the DOM so Tab reaches
+  its link, and closes with Escape, which returns focus to the marker.
+- On touch, tapping a marker opens it and tapping outside closes it.
+- The reference list is a real ordered list with ordinary links.
+
+## When not to use
+
+For "why this?" about a whole answer, use `AI Context Surface`. For what the agent did
+to find things, use `Tool Call Card`. And don't attach a loosely related source to fill
+a gap. Leave `source` off.
