@@ -14,6 +14,8 @@ export type PlanStep = {
 };
 
 export interface AgentPlanProps extends Omit<React.ComponentPropsWithoutRef<"section">, "title"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /** The agent's proposed plan, in order. */
   steps: PlanStep[];
   title?: string;
@@ -73,9 +75,11 @@ function AgentPlan({
   onRun,
   onCancel,
   allowAdd = true,
+  headingLevel = 3,
   className,
   ...props
 }: AgentPlanProps) {
+  const Heading = `h${headingLevel}` as "h3";
   const [rows, setRows] = React.useState<Row[]>(steps);
   const [draft, setDraft] = React.useState("");
   const [announcement, setAnnouncement] = React.useState("");
@@ -125,9 +129,9 @@ function AgentPlan({
       {...props}
     >
       <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b p-4">
-        <h3 id={headingId} className="text-sm font-medium text-foreground">
+        <Heading id={headingId} className="text-sm font-medium text-foreground">
           {title}
-        </h3>
+        </Heading>
         <p className="text-xs text-muted-foreground tabular-nums">
           {active.length} {active.length === 1 ? "step" : "steps"}
           {approvals > 0 ? ` · ${approvals} will ask for approval` : ""}

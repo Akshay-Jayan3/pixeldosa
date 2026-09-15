@@ -21,6 +21,8 @@ export type TriageItem = {
 export type TriageDecision = "accepted" | "rejected";
 
 export interface AITriageTableProps extends React.ComponentPropsWithoutRef<"section"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   items: TriageItem[];
   /** Items the AI examined and chose not to change. Shown collapsed, so nobody scans for them. */
   unchanged?: { id: string; label: string }[];
@@ -67,9 +69,11 @@ function AITriageTable({
   unchanged = [],
   onApply,
   title = "Review proposed changes",
+  headingLevel = 3,
   className,
   ...props
 }: AITriageTableProps) {
+  const Heading = `h${headingLevel}` as "h3";
   const [decisions, setDecisions] = React.useState<Record<string, TriageDecision>>({});
   const [open, setOpen] = React.useState<Record<string, boolean>>({
     low: true,
@@ -112,9 +116,9 @@ function AITriageTable({
       {...props}
     >
       <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b p-4">
-        <h3 id={headingId} className="text-sm font-medium text-foreground">
+        <Heading id={headingId} className="text-sm font-medium text-foreground">
           {title}
-        </h3>
+        </Heading>
         <p role="status" aria-live="polite" className="text-xs text-muted-foreground tabular-nums">
           {reviewedCount} of {items.length} reviewed
           {unchanged.length > 0 ? ` · ${unchanged.length} unchanged` : ""}

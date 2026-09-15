@@ -87,6 +87,7 @@ const [pending, setPending] = React.useState<string[] | null>(null);
 | `unchanged` | `{ id, label }[]` | What the AI examined and left alone. |
 | `onApply` | `(acceptedIds: string[]) => void` | Required. The only point anything is committed. |
 | `title` | `string` | Defaults to `"Review proposed changes"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Heading level, so the component fits your page's outline. Defaults to `3`. |
 
 ## Accessibility
 

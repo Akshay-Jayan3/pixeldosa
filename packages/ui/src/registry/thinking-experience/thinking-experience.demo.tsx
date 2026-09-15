@@ -57,6 +57,7 @@ export default function ThinkingExperienceDemo() {
   return (
     <div className="w-full max-w-lg">
       <ThinkingExperience
+        headingLevel={2}
         state={phase.state}
         status={phase.status}
         detail={phase.detail}

@@ -36,7 +36,7 @@ export default function AgentPlanDemo() {
 
   return (
     <div className="w-full max-w-lg">
-      <AgentPlan steps={STEPS} onRun={setRan} onCancel={() => undefined} />
+      <AgentPlan headingLevel={2} steps={STEPS} onRun={setRan} onCancel={() => undefined} />
     </div>
   );
 }

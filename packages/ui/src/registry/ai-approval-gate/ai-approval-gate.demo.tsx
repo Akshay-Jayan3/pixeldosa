@@ -36,6 +36,7 @@ export default function AIApprovalGateDemo() {
   return (
     <div className="w-full max-w-md">
       <AIApprovalGate
+        headingLevel={2}
         action="Send the Q3 reconciliation summary to 243 contacts"
         risk="high"
         reversible={false}

@@ -15,6 +15,8 @@ export type AutonomyAction = {
 };
 
 export interface AutonomyControlProps extends Omit<React.ComponentPropsWithoutRef<"div">, "onChange"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   level: AutonomyLevel;
   onLevelChange: (level: AutonomyLevel) => void;
   /** The agent's real actions. The level is explained through these, not in the abstract. */
@@ -63,9 +65,11 @@ function AutonomyControl({
   alwaysAsk = [],
   onAlwaysAskChange,
   label = "How much the agent does on its own",
+  headingLevel = 3,
   className,
   ...props
 }: AutonomyControlProps) {
+  const Heading = `h${headingLevel}` as "h3";
   const name = React.useId();
   const headingId = React.useId();
   const pinned = new Set(alwaysAsk);
@@ -111,9 +115,9 @@ function AutonomyControl({
       {actions.length > 0 ? (
         <section aria-labelledby={headingId} className="flex flex-col gap-2">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-            <h3 id={headingId} className="text-sm font-medium text-foreground">
+            <Heading id={headingId} className="text-sm font-medium text-foreground">
               What that means
-            </h3>
+            </Heading>
             {/* Announced, because changing the level silently changes every row below. */}
             <p role="status" aria-live="polite" className="text-xs text-muted-foreground tabular-nums">
               {unaskedCount === 0

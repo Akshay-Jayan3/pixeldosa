@@ -59,6 +59,8 @@ export interface ThinkingExperienceProps extends React.ComponentPropsWithoutRef<
   resultActions?: AIAction[];
   onResultAction?: (actionId: string) => void;
   onCancel?: () => void;
+  /** Heading level for the question or approval shown during the run. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 const USER_TURN: AgentState[] = ["asking", "awaitingApproval", "suggesting"];
@@ -88,6 +90,7 @@ function ThinkingExperience({
   resultActions,
   onResultAction,
   onCancel,
+  headingLevel = 3,
   className,
   ...props
 }: ThinkingExperienceProps) {
@@ -139,6 +142,8 @@ function ThinkingExperience({
         <div className="rounded-lg ring-2 ring-ring/30">
           {state === "asking" && ask ? (
             <AgentAsk
+
+              headingLevel={headingLevel}
               source={ask.source}
               question={ask.question}
               explanation={ask.explanation}
@@ -152,6 +157,8 @@ function ThinkingExperience({
 
           {state === "awaitingApproval" && approval ? (
             <AIApprovalGate
+
+              headingLevel={headingLevel}
               action={approval.action}
               risk={approval.risk}
               reversible={approval.reversible}

@@ -13,6 +13,8 @@ export type AskField =
   | { name: string; type: "select"; label: string; options: AskFieldOption[]; required?: boolean };
 
 export interface AgentAskProps extends Omit<React.ComponentPropsWithoutRef<"form">, "onSubmit"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /** The actual question. Targeted and answerable — never "can you provide more information?". */
   question: string;
   /**
@@ -57,9 +59,11 @@ function AgentAsk({
   onDecline,
   onCancel,
   submitLabel = "Send",
+  headingLevel = 3,
   className,
   ...props
 }: AgentAskProps) {
+  const Heading = `h${headingLevel}` as "h3";
   const [values, setValues] = React.useState<Record<string, string | boolean>>({});
   const headingId = React.useId();
 
@@ -83,9 +87,9 @@ function AgentAsk({
         <p className="text-xs text-muted-foreground">
           <span className="font-medium text-foreground">{source}</span> is asking
         </p>
-        <h3 id={headingId} className="text-sm font-medium text-foreground text-pretty">
+        <Heading id={headingId} className="text-sm font-medium text-foreground text-pretty">
           {question}
-        </h3>
+        </Heading>
         {explanation ? (
           <p className="text-xs leading-relaxed text-muted-foreground text-pretty">{explanation}</p>
         ) : null}

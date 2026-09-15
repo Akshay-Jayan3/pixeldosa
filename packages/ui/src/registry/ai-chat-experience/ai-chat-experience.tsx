@@ -60,6 +60,8 @@ export interface AIChatExperienceProps extends Omit<React.ComponentPropsWithoutR
   placeholder?: string;
   /** Called near the top of the history. */
   onLoadOlder?: () => void;
+  /** Level of the empty-state title and of the Sources headings in answers (the title is gone once a conversation exists, so they share the level). Defaults to 2. */
+  headingLevel?: 2 | 3 | 4 | 5;
 }
 
 function defaultRenderText(text: string) {
@@ -122,9 +124,11 @@ function AIChatExperience({
   onRemoveAttachment,
   placeholder = "Ask anything…",
   onLoadOlder,
+  headingLevel = 2,
   className,
   ...props
 }: AIChatExperienceProps) {
+  const Heading = `h${headingLevel}` as "h2";
   const [draft, setDraft] = React.useState("");
   const [announcement, setAnnouncement] = React.useState("");
   const [copied, setCopied] = React.useState<string | null>(null);
@@ -208,7 +212,7 @@ function AIChatExperience({
       {turns.length === 0 && empty ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-10 text-center">
           <div className="flex flex-col gap-1.5">
-            <h2 className="text-lg font-semibold tracking-tight text-foreground text-balance">{empty.title}</h2>
+            <Heading className="text-lg font-semibold tracking-tight text-foreground text-balance">{empty.title}</Heading>
             {empty.description ? (
               <p className="max-w-sm text-sm text-muted-foreground text-pretty">{empty.description}</p>
             ) : null}
@@ -277,7 +281,7 @@ function AIChatExperience({
                 {turn.toolCalls?.length ? <ToolCallGroup calls={turn.toolCalls} /> : null}
                 {presence ? <AgentPresence state={presence.state} label={presence.label} form="line" size="sm" /> : null}
                 {turn.sources?.length && body ? (
-                  <CitedText sources={turn.sources}>{body}</CitedText>
+                  <CitedText sources={turn.sources} headingLevel={headingLevel}>{body}</CitedText>
                 ) : (
                   body
                 )}

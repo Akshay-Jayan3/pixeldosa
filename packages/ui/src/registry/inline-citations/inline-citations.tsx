@@ -34,6 +34,8 @@ export interface CitedTextProps extends React.ComponentPropsWithoutRef<"div"> {
   sources: CitationSource[];
   /** The numbered reference list under the text. On by default: it is the no-hover fallback. */
   showReferences?: boolean;
+  /** Level of the "Sources" heading, so it fits the page's outline. Defaults to 4. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 /**
@@ -41,7 +43,8 @@ export interface CitedTextProps extends React.ComponentPropsWithoutRef<"div"> {
  * claim with `<Cite>`. Renders a numbered reference list underneath, which is both the
  * audit view and the fallback where hover doesn't exist.
  */
-function CitedText({ sources, showReferences = true, className, children, ...props }: CitedTextProps) {
+function CitedText({ sources, showReferences = true, headingLevel = 4, className, children, ...props }: CitedTextProps) {
+  const Heading = `h${headingLevel}` as "h4";
   const headingId = React.useId();
   return (
     <CitationsContext.Provider value={{ sources }}>
@@ -49,9 +52,9 @@ function CitedText({ sources, showReferences = true, className, children, ...pro
         <div className="text-sm leading-relaxed text-foreground">{children}</div>
         {showReferences && sources.length > 0 ? (
           <section aria-labelledby={headingId} className="flex flex-col gap-1.5 border-t pt-3">
-            <h4 id={headingId} className="text-xs font-medium text-muted-foreground">
+            <Heading id={headingId} className="text-xs font-medium text-muted-foreground">
               Sources
-            </h4>
+            </Heading>
             <ol className="flex flex-col gap-1">
               {sources.map((source, index) => (
                 <li key={source.id} id={`${headingId}-${source.id}`} className="flex gap-2 text-xs">
@@ -183,9 +186,16 @@ function CitationMarker({ source, number, quote, support, onActiveChange }: Mark
     };
   }, [open, place, setOpenState]);
 
+  // Set while Escape hands focus back to the marker, so the marker's open-on-focus doesn't
+  // immediately reopen what the user just closed.
+  const returningFocus = React.useRef(false);
+
   const close = (returnFocus: boolean) => {
     setOpenState(false);
-    if (returnFocus) buttonRef.current?.focus();
+    if (!returnFocus) return;
+    returningFocus.current = true;
+    buttonRef.current?.focus();
+    returningFocus.current = false;
   };
 
   const label = source ? `Source ${number}: ${source.title}` : "No source for this claim";
@@ -214,7 +224,7 @@ function CitationMarker({ source, number, quote, support, onActiveChange }: Mark
         aria-controls={open ? popoverId : undefined}
         onClick={() => setOpenState(!open)}
         onFocus={(event) => {
-          if (event.currentTarget.matches(":focus-visible")) setOpenState(true);
+          if (!returningFocus.current && event.currentTarget.matches(":focus-visible")) setOpenState(true);
         }}
         className={cn(
           // Visible enough to invite a check: a marker nobody notices is a marker nobody opens.

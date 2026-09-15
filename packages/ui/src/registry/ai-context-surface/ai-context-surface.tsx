@@ -69,7 +69,9 @@ function AIContextSurface({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-muted-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40"
+        // The visible trigger is 16px tall; the transparent ::after brings the target to 28px
+        // (WCAG 2.5.8 asks for 24) without changing the layout.
+        className="relative inline-flex w-fit items-center gap-1.5 text-xs font-medium text-muted-foreground outline-none after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40"
       >
         <svg
           aria-hidden="true"

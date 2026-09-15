@@ -17,6 +17,8 @@ export type MemoryItem = {
 };
 
 export interface AgentMemoryProps extends React.ComponentPropsWithoutRef<"div"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   memories: MemoryItem[];
   onEdit: (id: string, text: string) => void;
   /** Called immediately. Forget for real — the component keeps its own copy for Undo. */
@@ -58,9 +60,12 @@ function AgentMemory({
   onForgetAll,
   paused = false,
   onPausedChange,
+  headingLevel = 3,
   className,
   ...props
 }: AgentMemoryProps) {
+  const Heading = `h${headingLevel}` as "h3";
+  const Subheading = `h${Math.min(headingLevel + 1, 6)}` as "h4";
   const [editing, setEditing] = React.useState<{ id: string; draft: string } | null>(null);
   // Forgotten this session, kept locally so the row can offer Undo after the caller has
   // really removed it. Stored with its position so it reappears where it was.
@@ -207,9 +212,9 @@ function AgentMemory({
     <div ref={rootRef} className={cn("flex flex-col gap-4", className)} aria-labelledby={titleId} role="region" {...props}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <h3 id={titleId} className="text-sm font-medium text-foreground">
+          <Heading id={titleId} className="text-sm font-medium text-foreground">
             What it remembers
-          </h3>
+          </Heading>
           <p className="text-xs text-muted-foreground tabular-nums">
             {memories.length === 0 ? "Nothing yet" : `${memories.length} ${memories.length === 1 ? "thing" : "things"}`}
           </p>
@@ -249,7 +254,7 @@ function AgentMemory({
 
       {stated.length > 0 ? (
         <section className="flex flex-col gap-1.5">
-          <h4 className="text-xs font-medium text-muted-foreground">What you told it</h4>
+          <Subheading className="text-xs font-medium text-muted-foreground">What you told it</Subheading>
           <ul className="flex flex-col divide-y rounded-md border">{stated.map(renderRow)}</ul>
         </section>
       ) : null}
@@ -257,7 +262,7 @@ function AgentMemory({
       {inferred.length > 0 ? (
         <section className="flex flex-col gap-1.5">
           <div className="flex flex-col">
-            <h4 className="text-xs font-medium text-muted-foreground">What it picked up</h4>
+            <Subheading className="text-xs font-medium text-muted-foreground">What it picked up</Subheading>
             <p className="text-xs text-muted-foreground">Guesses from how you work. Worth checking.</p>
           </div>
           <ul className="flex flex-col divide-y rounded-md border border-dashed">{inferred.map(renderRow)}</ul>

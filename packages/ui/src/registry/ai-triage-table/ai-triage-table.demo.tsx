@@ -43,6 +43,7 @@ export default function AITriageTableDemo() {
   return (
     <div className="w-full max-w-xl">
       <AITriageTable
+        headingLevel={2}
         title="Enrich 48 accounts"
         items={ITEMS}
         unchanged={UNCHANGED}

@@ -31,6 +31,7 @@ export default function AgentAskDemo() {
   return (
     <div className="w-full max-w-md">
       <AgentAsk
+        headingLevel={2}
         source="finance-db"
         question="Which quarter should I reconcile?"
         explanation="Two datasets match “Q3 revenue” and they disagree by $4,200."

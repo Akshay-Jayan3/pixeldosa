@@ -6,6 +6,7 @@ export default function InlineCitationsDemo() {
   return (
     <div className="w-full max-w-lg">
       <CitedText
+        headingLevel={2}
         sources={[
           {
             id: "report",

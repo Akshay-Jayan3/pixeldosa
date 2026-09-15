@@ -16,6 +16,8 @@ export type IntentAssumption = {
 };
 
 export interface IntentPreviewProps extends React.ComponentPropsWithoutRef<"section"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /** The request restated as the agent understood it — one plain sentence. */
   interpretation: string;
   /** The guesses the agent made to fill gaps in the request. */
@@ -50,9 +52,11 @@ function IntentPreview({
   onRephrase,
   onCancel,
   startLabel = "Start",
+  headingLevel = 3,
   className,
   ...props
 }: IntentPreviewProps) {
+  const Heading = `h${headingLevel}` as "h3";
   const [values, setValues] = React.useState<Record<string, string>>(() =>
     Object.fromEntries(assumptions.map((assumption) => [assumption.id, assumption.value]))
   );
@@ -74,9 +78,9 @@ function IntentPreview({
     >
       <div className="flex flex-col gap-1.5">
         <p className="text-xs text-muted-foreground">Here&apos;s what I&apos;ll do</p>
-        <h3 id={headingId} className="text-sm font-medium text-foreground text-pretty">
+        <Heading id={headingId} className="text-sm font-medium text-foreground text-pretty">
           {interpretation}
-        </h3>
+        </Heading>
       </div>
 
       {assumptions.length > 0 ? (

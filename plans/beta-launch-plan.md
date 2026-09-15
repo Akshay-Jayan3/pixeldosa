@@ -112,7 +112,7 @@ docs, QA, build). They're held back from announcements until launch week.
 
 ### Quality gate
 - [x] Light mode pass on every component (2026-09-15: automated contrast audit of all 40 pages in both themes, 0 failures after fixes).
-- [ ] Keyboard and screen reader smoke test on the 5 hero components.
+- [x] Keyboard and screen reader smoke test on the 5 hero components (2026-09-15: axe-core on all 35 component pages, 0 violations; real-key walk of the heroes; screen-reader tree checked. Not yet tested with a real screen reader).
 - [ ] Fresh-project install test of 5 components through the CLI and through a coding agent
   (the `/llms.txt` and agent-guide path).
 - [ ] Remove or finish anything half-done that a visitor could reach.

@@ -27,6 +27,19 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-15-keyboard",
+    date: "2026-09-15",
+    title: "Keyboard and screen readers",
+    summary:
+      "An accessibility pass on the launch components: axe-core on every component page, a real-key keyboard walk through the hero components, and a check of what screen readers announce.",
+    changes: [
+      { kind: "improved", note: "Components with a title take `headingLevel`, so they fit the heading outline of the page they're placed in: Intent Preview, Agent Plan, Agent Ask, AI Approval Gate, AI Triage Table, Autonomy Control, Agent Memory, Inline Citations, Thinking Experience and AI Chat Experience." },
+      { kind: "improved", component: "prompt-composer", note: "Shows the standard focus ring when its text area has keyboard focus, instead of only a faint border change." },
+      { kind: "fixed", component: "inline-citations", note: "Escape closes the source and returns focus to its marker. Before, returning focus reopened the popover straight away." },
+      { kind: "fixed", component: "ai-context-surface", note: "The \"Why this?\" trigger has a 28px target, up from 16px, meeting WCAG 2.5.8." },
+    ],
+  },
+  {
     id: "2026-09-15-contrast",
     date: "2026-09-15",
     title: "Readable in both themes",

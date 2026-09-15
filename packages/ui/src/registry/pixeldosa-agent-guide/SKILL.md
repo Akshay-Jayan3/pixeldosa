@@ -143,3 +143,4 @@ Components take no AI dependency — map your stack's events to props yourself.
 - [ ] Stop is visible during every working state
 - [ ] No hardcoded colours or durations
 - [ ] Works with keyboard only, and at 375px wide
+- [ ] `headingLevel` set so component titles continue the page's heading outline (e.g. `2` directly under the page's `h1`)

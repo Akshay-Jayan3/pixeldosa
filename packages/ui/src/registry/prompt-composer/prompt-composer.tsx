@@ -163,7 +163,7 @@ function PromptComposer({
         takeFiles(event.dataTransfer.files);
       }}
       className={cn(
-        "flex flex-col gap-2 rounded-lg border bg-card p-2 transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none has-[textarea:focus-visible]:border-foreground/40",
+        "flex flex-col gap-2 rounded-lg border bg-card p-2 transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none has-[textarea:focus-visible]:border-foreground/40 has-[textarea:focus-visible]:ring-[3px] has-[textarea:focus-visible]:ring-ring/40",
         dragging && "border-dashed border-foreground/60 bg-accent/40",
         className
       )}

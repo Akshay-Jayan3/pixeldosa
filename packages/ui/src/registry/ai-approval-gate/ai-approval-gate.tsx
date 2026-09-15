@@ -13,6 +13,8 @@ export type ApprovalRisk = "low" | "medium" | "high";
 export type ApprovalImpact = { label: string; value: string };
 
 export interface AIApprovalGateProps extends React.ComponentPropsWithoutRef<"section"> {
+  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /**
    * What will happen, in consequence terms the user can evaluate — "Send the Q3
    * summary to 243 contacts", never "Execute send_email".
@@ -75,9 +77,11 @@ function AIApprovalGate({
   onReject,
   onEdit,
   busy,
+  headingLevel = 3,
   className,
   ...props
 }: AIApprovalGateProps) {
+  const Heading = `h${headingLevel}` as "h3";
   const headingId = React.useId();
 
   const actions: AIAction[] = [
@@ -120,9 +124,9 @@ function AIApprovalGate({
           </span>
         </div>
 
-        <h3 id={headingId} className="text-sm font-medium text-foreground text-pretty">
+        <Heading id={headingId} className="text-sm font-medium text-foreground text-pretty">
           {action}
-        </h3>
+        </Heading>
       </div>
 
       {/* The blast radius, as countable facts. An approval without a scope is a

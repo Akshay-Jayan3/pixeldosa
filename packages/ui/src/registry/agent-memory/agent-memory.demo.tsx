@@ -19,6 +19,7 @@ export default function AgentMemoryDemo() {
   return (
     <div className="w-full max-w-md">
       <AgentMemory
+        headingLevel={2}
         memories={memories}
         paused={paused}
         onPausedChange={setPaused}

@@ -28,6 +28,7 @@ export default function IntentPreviewDemo() {
   return (
     <div className="w-full max-w-md">
       <IntentPreview
+        headingLevel={2}
         interpretation="Reconcile this quarter's flagged invoices and draft a summary of what caused the duplicate-payment warning."
         assumptions={[
           {

@@ -11,6 +11,7 @@ export default function AutonomyControlDemo() {
   return (
     <div className="w-full max-w-md">
       <AutonomyControl
+        headingLevel={2}
         level={level}
         onLevelChange={setLevel}
         alwaysAsk={alwaysAsk}
