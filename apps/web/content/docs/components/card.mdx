@@ -120,9 +120,8 @@ The default vertical composition — header, content, and a separated footer:
       <CardDescription>Serves two, ready in 12 minutes.</CardDescription>
     </CardHeader>
     <CardContent>
-      <p className="text-sm text-muted-foreground">
-        Crisp rice-and-lentil crepe, coconut chutney, and sambar on the side.
-      </p>
+      {/* Text on the same line as the tag: on its own line, MDX wraps it in a second <p>, and <p><p> breaks hydration. */}
+      <p className="text-sm text-muted-foreground">Crisp rice-and-lentil crepe, coconut chutney, and sambar on the side.</p>
     </CardContent>
     <CardFooter className="border-t">
       <Button className="w-full">Add to order</Button>
@@ -145,9 +144,7 @@ no matter how long the title runs.
       </CardAction>
     </CardHeader>
     <CardContent>
-      <p className="text-sm text-muted-foreground">
-        Delivered to 1,284 subscribers.
-      </p>
+      <p className="text-sm text-muted-foreground">Delivered to 1,284 subscribers.</p>
     </CardContent>
   </Card>
 </Preview>

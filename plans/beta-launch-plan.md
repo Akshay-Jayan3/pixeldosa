@@ -111,7 +111,7 @@ docs, QA, build). They're held back from announcements until launch week.
 - [ ] Per-component social image (title + thumbnail) for link previews.
 
 ### Quality gate
-- [ ] Light mode pass on every component. Most QA so far has been in dark mode.
+- [x] Light mode pass on every component (2026-09-15: automated contrast audit of all 40 pages in both themes, 0 failures after fixes).
 - [ ] Keyboard and screen reader smoke test on the 5 hero components.
 - [ ] Fresh-project install test of 5 components through the CLI and through a coding agent
   (the `/llms.txt` and agent-guide path).

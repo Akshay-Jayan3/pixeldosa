@@ -81,10 +81,16 @@ export const colorsLight: ColorScale = {
   secondary: "oklch(0.97 0 0)",
   "secondary-foreground": "oklch(0.205 0 0)",
   muted: "oklch(0.97 0 0)",
-  "muted-foreground": "oklch(0.556 0 0)",
+  // 0.52, not shadcn's 0.556: muted text sits on `muted` surfaces (badges, kbd hints,
+  // code chips) as often as on white, and 0.556 measured 4.35:1 there. 0.52 clears
+  // 4.5:1 on both (≈5.0 on muted, ≈5.4 on white). Found in the 2026-09-15 light audit.
+  "muted-foreground": "oklch(0.52 0 0)",
   accent: "oklch(0.97 0 0)",
   "accent-foreground": "oklch(0.205 0 0)",
-  destructive: "oklch(0.653 0.184 24)",
+  // Darker than the dark theme's red on purpose: destructive is used both as text on white
+  // ("High risk", field errors) and as a fill under white text, and 0.653 failed both
+  // (≈3.4:1). 0.55 passes both.
+  destructive: "oklch(0.55 0.22 27)",
   "destructive-foreground": "oklch(0.985 0.005 24)",
   border: "oklch(0.922 0 0)",
   input: "oklch(0.922 0 0)",
@@ -106,8 +112,11 @@ export const colorsDark: ColorScale = {
   "muted-foreground": "oklch(0.649 0.014 263)",
   accent: "oklch(0.28 0.01 252)",
   "accent-foreground": "oklch(0.978 0.003 240)",
+  // Bright enough to read as text on the dark background (≈4.8:1)…
   destructive: "oklch(0.653 0.184 24)",
-  "destructive-foreground": "oklch(0.98 0.005 24)",
+  // …which makes white text on it fail (3.3:1), so destructive fills carry dark text in
+  // dark mode (≈5.2:1). One red can't serve both roles with white text on this ground.
+  "destructive-foreground": "oklch(0.16 0.02 24)",
   border: "oklch(0.299 0.011 254)",
   input: "oklch(0.32 0.012 254)",
   ring: "oklch(0.649 0.014 263)",

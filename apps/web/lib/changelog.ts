@@ -27,6 +27,21 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-15-contrast",
+    date: "2026-09-15",
+    title: "Readable in both themes",
+    summary:
+      "A contrast audit of every page in light and dark mode. Text now meets WCAG AA contrast everywhere it was measured, and two pages that fell back to light mode after loading are fixed.",
+    changes: [
+      { kind: "improved", note: "Light theme: `muted-foreground` is slightly darker, so muted text stays readable on muted surfaces such as badges and keyboard hints." },
+      { kind: "improved", note: "Light theme: `destructive` is a deeper red that reads as text on white and under white text." },
+      { kind: "improved", note: "Dark theme: text on destructive fills is now dark, because white text on the bright red failed contrast." },
+      { kind: "improved", component: "thinking-experience", note: "While waiting on you, the agent's region steps down with muted text and faded indicators instead of dimming everything to 55% opacity." },
+      { kind: "fixed", component: "ai-context-surface", note: "The \"generated 12 minutes ago\" time is formatted in the browser, which fixes a hydration error that reset the page's theme." },
+      { kind: "fixed", note: "A nested paragraph in the Card docs broke hydration and reset the page's theme." },
+    ],
+  },
+  {
     id: "2026-09-14-chat",
     date: "2026-09-14",
     title: "Chat, done with the same care",
@@ -112,13 +127,17 @@ export const CHANGELOG: ChangelogEntry[] = [
   },
 ];
 
-/** How many of the latest entries count as "new" for badges. */
+/** How many of the latest component-adding entries count as "new" for badges. */
 const NEW_WINDOW = 2;
 
-/** Components added in the most recent entries. Drives the "New" badges. */
+/**
+ * Components added in the most recent entries that added any. Fix-only entries don't use
+ * up the window, or a polish release would quietly strip the badges from last week's drop.
+ */
 export function getNewComponents(): Set<string> {
+  const adding = CHANGELOG.filter((entry) => entry.changes.some((change) => change.kind === "new" && change.component));
   return new Set(
-    CHANGELOG.slice(0, NEW_WINDOW).flatMap((entry) =>
+    adding.slice(0, NEW_WINDOW).flatMap((entry) =>
       entry.changes.filter((change) => change.kind === "new" && change.component).map((change) => change.component!)
     )
   );

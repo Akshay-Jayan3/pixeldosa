@@ -53,6 +53,11 @@ function AIContextSurface({
 }: AIContextSurfaceProps) {
   const [open, setOpen] = React.useState(false);
   const panelId = React.useId();
+  // "12 minutes ago" depends on the viewer's clock and locale, so it can't be rendered on
+  // the server: the prerendered text never matches and React throws away the page on
+  // hydration. It's formatted after mount instead; the model name shows immediately.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   const hasContent = Boolean(explanation || (sources && sources.length > 0) || model || generatedAt);
   if (!hasContent) return null;
@@ -124,7 +129,7 @@ function AIContextSurface({
 
             {model || generatedAt ? (
               <p className="text-xs text-muted-foreground">
-                {[model, generatedAt ? formatTimestamp(generatedAt) : null].filter(Boolean).join(" · ")}
+                {[model, generatedAt && mounted ? formatTimestamp(generatedAt) : null].filter(Boolean).join(" · ")}
               </p>
             ) : null}
           </div>

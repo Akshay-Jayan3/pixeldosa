@@ -103,11 +103,15 @@ function ThinkingExperience({
     >
       {/* The machine's own account of itself. It steps down — but is never disabled —
           when control passes back: you must always be able to stop a run, including
-          one that is waiting on you. */}
+          one that is waiting on you.
+          The step-down used to be `opacity-55` on the whole region, which took its text
+          below readable contrast (2.1:1 in light mode). Emphasis now drops by role
+          instead: decorative graphics fade, and primary text falls to the muted
+          colour, which still clears 4.5:1. */}
       <div
         className={cn(
-          "flex flex-col gap-2 transition-opacity duration-[var(--pd-duration-base)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none",
-          interrupt && "opacity-55"
+          "flex flex-col gap-2 [&_*]:transition-[color,opacity] [&_*]:duration-[var(--pd-duration-base)] [&_*]:ease-[var(--pd-ease-standard)] motion-reduce:[&_*]:transition-none",
+          interrupt && "[&_[data-pd-decorative]]:opacity-40 [&_svg[aria-hidden=true]]:opacity-40 [&_.text-foreground]:text-muted-foreground"
         )}
       >
         <LiveStatusLine

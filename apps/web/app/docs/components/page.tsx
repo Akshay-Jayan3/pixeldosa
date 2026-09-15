@@ -87,7 +87,7 @@ export default function ComponentsIndexPage() {
               className="flex items-baseline gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground"
             >
               {section.label}
-              <span className="tabular-nums tracking-normal text-muted-foreground/60">{section.items.length}</span>
+              <span className="tabular-nums tracking-normal text-muted-foreground">{section.items.length}</span>
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {section.items.map((item) => (

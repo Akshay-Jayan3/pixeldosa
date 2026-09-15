@@ -118,7 +118,7 @@ export default function ChangelogPage() {
                         )}
                       >
                         {KIND_LABEL[group.kind]}
-                        <span className="ml-1.5 tabular-nums text-muted-foreground/60">{group.changes.length}</span>
+                        <span className="ml-1.5 tabular-nums text-muted-foreground">{group.changes.length}</span>
                       </h3>
                       <ul className="mt-2 flex flex-col gap-2.5">
                         {group.changes.map((change, changeIndex) => (

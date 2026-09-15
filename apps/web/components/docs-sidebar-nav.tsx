@@ -47,7 +47,7 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
         "block rounded-md px-3 py-2 text-sm transition-colors duration-[var(--pd-duration-instant)]",
         active
           ? "bg-accent text-accent-foreground"
-          : "text-foreground/40 hover:text-accent-foreground"
+          : "text-muted-foreground hover:text-accent-foreground"
       )}
     >
       {children}
@@ -106,7 +106,7 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                         "flex items-center justify-between gap-2 rounded-md py-1.5 pl-2 pr-1 text-sm transition-colors duration-[var(--pd-duration-instant)]",
                         isComponentActive
                           ? "bg-accent text-accent-foreground"
-                          : "text-foreground/40 hover:text-accent-foreground"
+                          : "text-muted-foreground hover:text-accent-foreground"
                       )}
                     >
                       <span>{item.title}</span>
@@ -124,7 +124,7 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                         "flex cursor-pointer list-none items-center justify-between gap-2 rounded-md py-1.5 pl-2 pr-1 text-sm transition-colors duration-[var(--pd-duration-instant)] [&::-webkit-details-marker]:hidden",
                         isComponentActive
                           ? "text-accent-foreground"
-                          : "text-foreground/40 hover:text-accent-foreground"
+                          : "text-muted-foreground hover:text-accent-foreground"
                       )}
                     >
                       <span>{item.title}</span>
@@ -142,7 +142,7 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                             "block rounded-md px-2 py-1.5 text-xs transition-colors duration-[var(--pd-duration-instant)]",
                             pathname === href
                               ? "bg-accent text-accent-foreground"
-                              : "text-foreground/40 hover:text-accent-foreground"
+                              : "text-muted-foreground hover:text-accent-foreground"
                           )}
                         >
                           Overview
@@ -160,7 +160,7 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                                 "block rounded-md px-2 py-1.5 text-xs transition-colors duration-[var(--pd-duration-instant)]",
                                 isActive
                                   ? "bg-accent text-accent-foreground"
-                                  : "text-foreground/40 hover:text-accent-foreground"
+                                  : "text-muted-foreground hover:text-accent-foreground"
                               )}
                             >
                               {example.title}
