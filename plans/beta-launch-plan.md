@@ -113,8 +113,7 @@ docs, QA, build). They're held back from announcements until launch week.
 ### Quality gate
 - [x] Light mode pass on every component (2026-09-15: automated contrast audit of all 40 pages in both themes, 0 failures after fixes).
 - [x] Keyboard and screen reader smoke test on the 5 hero components (2026-09-15: axe-core on all 35 component pages, 0 violations; real-key walk of the heroes; screen-reader tree checked. Not yet tested with a real screen reader).
-- [ ] Fresh-project install test of 5 components through the CLI and through a coding agent
-  (the `/llms.txt` and agent-guide path).
+- [x] Fresh-project install test of 5 components through the CLI and through a coding agent (2026-09-15: fresh Next.js 15 + shadcn project; installed, typechecked, built and ran; agent discovery via `shadcn search`, llms.txt and the agent guide checked; 5 issues fixed)
 - [ ] Remove or finish anything half-done that a visitor could reach.
 
 ### Feedback loop

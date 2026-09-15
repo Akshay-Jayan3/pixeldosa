@@ -27,6 +27,20 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-15-install",
+    date: "2026-09-15",
+    title: "Installs cleanly in a new project",
+    summary:
+      "The launch components installed by name into a fresh Next.js and shadcn project: they typecheck, build and run. The test turned up a few things that only show outside this repo, all fixed.",
+    changes: [
+      { kind: "fixed", note: "Example code on docs pages used this repo's internal import paths, so copied examples didn't compile. Code tabs and Source views now show the paths `shadcn add` installs." },
+      { kind: "fixed", note: "Examples that use more than their own component, such as Agent Steer with Live Status Line, now list what else they need, with one install command for everything." },
+      { kind: "fixed", component: "prompt-composer", note: "Re-measures its height when its width changes. A composer rendered while hidden, or a resized window, could keep an empty text area at full height." },
+      { kind: "fixed", note: "Theme: the corner radius now applies in projects that already define one." },
+      { kind: "improved", note: "Getting started explains that installing the theme directly applies PixelDosa's palette, while pulling it in as a dependency keeps a project's existing colours." },
+    ],
+  },
+  {
     id: "2026-09-15-keyboard",
     date: "2026-09-15",
     title: "Keyboard and screen readers",

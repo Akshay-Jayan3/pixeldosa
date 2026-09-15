@@ -17,6 +17,7 @@ import {
   getAdjacentComponents,
   getComponentSource,
   getComponents,
+  getExampleExtras,
   getExampleSource,
   getRegistryItem,
   installCommand,
@@ -85,6 +86,7 @@ export default async function ComponentDocPage({ params }: Params) {
   const { prev, next } = getAdjacentComponents(name);
   const markdown = buildComponentMarkdown(item, doc);
   const examples = demoExamples[name] ?? [];
+  const exampleExtras = [...new Set(examples.flatMap((example) => getExampleExtras(name, example.slug)))].sort();
 
   const headings: TocHeading[] = [
     { id: "installation", text: "Installation", level: 2 },
@@ -144,6 +146,23 @@ export default async function ComponentDocPage({ params }: Params) {
             <div className="mt-3">
               <CodeBlock code={installCommand(item.name)} language="bash" />
             </div>
+            {exampleExtras.length > 0 ? (
+              <div className="mt-4 flex flex-col gap-2">
+                <p className="text-sm text-muted-foreground text-pretty">
+                  The example above also uses{" "}
+                  {exampleExtras.map((extra, index) => (
+                    <span key={extra}>
+                      {index > 0 ? (index === exampleExtras.length - 1 ? " and " : ", ") : null}
+                      <Link href={`/docs/components/${extra}`} className="text-foreground underline underline-offset-4">
+                        {getRegistryItem(extra)?.title ?? extra}
+                      </Link>
+                    </span>
+                  ))}
+                  . To copy it as-is, install everything it needs:
+                </p>
+                <CodeBlock code={installCommand([item.name, ...exampleExtras])} language="bash" />
+              </div>
+            ) : null}
             {item.docs ? (
               <p className="mt-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground text-pretty">
                 {item.docs}

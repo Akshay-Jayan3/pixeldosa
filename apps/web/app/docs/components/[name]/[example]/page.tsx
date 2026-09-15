@@ -9,6 +9,7 @@ import { demoExamples } from "@/components/registry-demos";
 import {
   DOCUMENTED_TYPES,
   getComponents,
+  getExampleExtras,
   getExampleSource,
   getRegistryItem,
   installCommand,
@@ -82,7 +83,7 @@ export default async function ExampleDocPage({ params }: Params) {
           primitive, then copy the example below.
         </p>
         <div className="mt-3">
-          <CodeBlock code={installCommand(name)} language="bash" />
+          <CodeBlock code={installCommand([name, ...getExampleExtras(name, slug)])} language="bash" />
         </div>
       </section>
 

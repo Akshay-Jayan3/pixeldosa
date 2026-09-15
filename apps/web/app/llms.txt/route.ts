@@ -28,7 +28,7 @@ export function GET() {
   const body = [
     "# PixelDosa",
     "",
-    "> React components for AI products — AI embedded in real product interfaces, not a chat window. Plain components with no AI SDK or protocol dependency, distributed through the shadcn registry.",
+    "> The trust layer for AI products: React components for the moments people decide whether to trust an agent (before it runs, while it works, and when they review what it did), plus a complete chat stack. Plain components with no AI SDK or protocol dependency, distributed through the shadcn registry.",
     "",
     "## Install",
     "",
@@ -42,6 +42,8 @@ export function GET() {
     installCommand("pixeldosa-theme"),
     installCommand("pixeldosa-agent-guide"),
     "```",
+    "",
+    "Install `pixeldosa-theme` explicitly: as a dependency of a component it adds motion tokens but keeps colours the project already defines. Installed directly, it applies PixelDosa's WCAG AA palette.",
     "",
     "## Blocks",
     "",

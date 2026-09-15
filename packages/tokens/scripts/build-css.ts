@@ -94,8 +94,12 @@ writeFileSync(
   resolve(outDir, "theme-cssvars.json"),
   `${JSON.stringify(
     {
-      theme: themeVars,
-      light: Object.fromEntries(Object.entries(colorsLight)),
+      // `radius` goes in `light`, which shadcn writes to `:root`, not in `theme` (Tailwind's
+      // `@theme`). A fresh shadcn project already sets `--radius` in `:root`, and that
+      // unlayered value beats anything in `@theme`, so a theme-only radius never applied.
+      // Found by a fresh-project install test.
+      theme: motionVars,
+      light: { radius: radius.base, ...Object.fromEntries(Object.entries(colorsLight)) },
       dark: Object.fromEntries(Object.entries(colorsDark)),
     },
     null,

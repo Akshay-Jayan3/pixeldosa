@@ -110,13 +110,31 @@ function PromptComposer({
 
   // Grow with the text up to a cap, then scroll. Measured from scrollHeight because
   // `field-sizing: content` isn't available in every browser yet.
-  React.useLayoutEffect(() => {
+  const fitHeight = React.useCallback(() => {
     const textarea = textareaRef.current;
-    if (!textarea) return;
+    if (!textarea || textarea.clientWidth === 0) return;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, MAX_HEIGHT_PX)}px`;
     textarea.style.overflowY = textarea.scrollHeight > MAX_HEIGHT_PX ? "auto" : "hidden";
-  }, [text]);
+  }, []);
+
+  React.useLayoutEffect(fitHeight, [text, fitHeight]);
+
+  // Re-measure when the width changes too: a window resize, a rotated phone, or a
+  // composer first rendered while hidden (width 0) otherwise keeps a height measured at
+  // the wrong width. Found by a fresh-project install test: an empty composer stuck at 240px.
+  React.useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    let lastWidth = textarea.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (textarea.clientWidth === lastWidth) return;
+      lastWidth = textarea.clientWidth;
+      fitHeight();
+    });
+    observer.observe(textarea);
+    return () => observer.disconnect();
+  }, [fitHeight]);
 
   const uploading = attachments.some((attachment) => attachment.status === "uploading");
   const failed = attachments.some((attachment) => attachment.status === "failed");

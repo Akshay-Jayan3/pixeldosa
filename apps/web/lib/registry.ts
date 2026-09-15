@@ -116,7 +116,8 @@ export function getComponentSource(name: string): string | null {
   if (!file) return null;
 
   const path = resolve(process.cwd(), file.path);
-  return existsSync(path) ? readFileSync(path, "utf8") : null;
+  // Shown as the file someone gets after install, so composed imports use installed paths.
+  return existsSync(path) ? toInstalledImports(readFileSync(path, "utf8")) : null;
 }
 
 /**
@@ -124,7 +125,7 @@ export function getComponentSource(name: string): string | null {
  * directory (multi-example components like card), otherwise the component's
  * single `[name].demo.tsx` (every other component's one and only example).
  */
-export function getExampleSource(name: string, slug: string): string | null {
+function readExampleSource(name: string, slug: string): string | null {
   const examplePath = join(REGISTRY_SRC, name, "examples", `${slug}.tsx`);
   if (existsSync(examplePath)) return readFileSync(examplePath, "utf8");
 
@@ -132,6 +133,50 @@ export function getExampleSource(name: string, slug: string): string | null {
   return existsSync(demoPath) ? readFileSync(demoPath, "utf8") : null;
 }
 
-export function installCommand(name: string): string {
-  return `npx shadcn@latest add @pixeldosa/${name}`;
+const REGISTRY_IMPORT = /@\/registry\/([a-z0-9-]+)\/[a-z0-9-]+(?=["'])/g;
+
+/**
+ * Example source as someone would paste it into their own project. Demos import siblings
+ * through the monorepo's `@/registry/...` alias, which doesn't exist after install; this
+ * rewrites those to the paths `shadcn add` actually writes (`components/ui`, or
+ * `components/blocks` for blocks), the same mapping the registry build applies to
+ * component files. Found by a fresh-project install test: copied demos didn't resolve.
+ */
+export function getExampleSource(name: string, slug: string): string | null {
+  const source = readExampleSource(name, slug);
+  return source ? toInstalledImports(source) : null;
+}
+
+function toInstalledImports(source: string): string {
+  return source.replace(REGISTRY_IMPORT, (_match, imported: string) => {
+    const folder = getRegistryItem(imported)?.type === "registry:block" ? "blocks" : "ui";
+    return `@/components/${folder}/${imported}`;
+  });
+}
+
+/** Everything `shadcn add` installs for an item: its registry dependencies, transitively. */
+function installedWith(name: string, seen = new Set<string>()): Set<string> {
+  if (seen.has(name)) return seen;
+  seen.add(name);
+  for (const dependency of getRegistryItem(name)?.registryDependencies ?? []) {
+    installedWith(dependency.replace(/^@pixeldosa\//, ""), seen);
+  }
+  return seen;
+}
+
+/**
+ * Components an example imports that installing the component itself doesn't bring in —
+ * e.g. the Agent Steer demo also renders Live Status Line. Without these, a copied example
+ * fails to compile, so the docs page lists them with a single install command.
+ */
+export function getExampleExtras(name: string, slug: string): string[] {
+  const source = readExampleSource(name, slug) ?? "";
+  const installed = installedWith(name);
+  const imported = new Set([...source.matchAll(REGISTRY_IMPORT)].map((match) => match[1]!));
+  return [...imported].filter((dependency) => !installed.has(dependency) && getRegistryItem(dependency)).sort();
+}
+
+export function installCommand(name: string | string[]): string {
+  const names = Array.isArray(name) ? name : [name];
+  return `npx shadcn@latest add ${names.map((item) => `@pixeldosa/${item}`).join(" ")}`;
 }

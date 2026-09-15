@@ -833,7 +833,6 @@
       "files": [],
       "cssVars": {
         "theme": {
-          "radius": "0.75rem",
           "--pd-duration-instant": "100ms",
           "--pd-duration-fast": "200ms",
           "--pd-duration-base": "300ms",
@@ -847,6 +846,7 @@
           "--pd-stagger-loose": "100ms"
         },
         "light": {
+          "radius": "0.75rem",
           "background": "oklch(1 0 0)",
           "foreground": "oklch(0.145 0 0)",
           "card": "oklch(1 0 0)",

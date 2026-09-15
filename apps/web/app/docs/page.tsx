@@ -58,6 +58,13 @@ export default function DocsIndexPage() {
         The theme item carries the full design and motion token set as CSS custom
         properties. Install it once, before your first component.
       </p>
+      <p className="mt-2 text-sm text-muted-foreground text-pretty">
+        Run this step explicitly, even though every component lists the theme as a dependency.
+        When a component pulls it in, shadcn adds the motion tokens but keeps any colours your
+        project already defines, so an existing palette wins. Installing the theme directly
+        replaces those colours with PixelDosa&apos;s, which are tuned to meet WCAG AA contrast
+        in light and dark mode. Skip it if you want to keep your own palette.
+      </p>
       <div className="mt-3">
         <CodeBlock code="npx shadcn@latest add @pixeldosa/pixeldosa-theme" language="bash" />
       </div>
