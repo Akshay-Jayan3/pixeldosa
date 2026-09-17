@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AgentFigure, Button, type AgentPose } from "@pixeldosa/ui";
 
 import { PORTFOLIO_URL, WORK_CONTACT_URL, WORK_EMAIL_URL } from "@/lib/links";
+import { Scribble } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Work with me",
@@ -62,7 +63,7 @@ export default function WorkWithMePage() {
             Work with me
           </p>
           <h1 className="font-hand text-5xl font-bold leading-[1.05] text-balance sm:text-6xl">
-            Design engineering for AI products.
+            Design engineering for <Scribble variant="loop">AI products</Scribble>.
           </h1>
           <p className="max-w-xl text-lg text-muted-foreground text-pretty">
             I'm{" "}

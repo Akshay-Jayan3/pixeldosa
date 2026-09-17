@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
+import { SketchRule } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Getting started",
@@ -18,6 +19,7 @@ export default function DocsIndexPage() {
   return (
     <article className="mx-auto max-w-2xl">
       <h1 className="text-3xl font-semibold tracking-tight">Getting started</h1>
+      <SketchRule className="mt-2" />
       <p className="mt-3 text-muted-foreground text-pretty">
         PixelDosa is distributed with the shadcn registry protocol. Components are copied
         into your project as source you own — there is no runtime package to depend on.

@@ -18,7 +18,7 @@ Ink on paper. Light is the default: a warm off-white page, near-black ink, penci
 secondary text, and `1px` rules for depth instead of shadows. `primary` is the ink
 itself, so **contrast carries hierarchy, not colour.** The only chroma is the four
 agent markers (`agent-working` blue, `agent-waiting` orange, `agent-blocked` red,
-`agent-done` yellow) plus `destructive`, and each has exactly one job. The agent has
+`agent-done` green) plus `destructive`, and each has exactly one job. The agent has
 a body: `Agent Figure`, a hand-drawn character whose pose says what a run is doing,
 how sure it is, and when it needs the person. The whole identity reads as **a
 sketchbook, not a glowing screen**: handcrafted and a little playful, never gradients,
@@ -60,8 +60,8 @@ color:
     agent-waiting-soft: "oklch(0.949 0.031 71)"
     agent-blocked: "oklch(0.523 0.171 28)"
     agent-blocked-soft: "oklch(0.932 0.028 26)"
-    agent-done: "oklch(0.518 0.106 84)"
-    agent-done-soft: "oklch(0.957 0.046 94)"
+    agent-done: "oklch(0.516 0.119 149)"
+    agent-done-soft: "oklch(0.942 0.025 149)"
   dark:
     background: "oklch(0.198 0.004 129)"
     foreground: "oklch(0.939 0.007 97)"
@@ -88,8 +88,8 @@ color:
     agent-waiting-soft: "oklch(0.299 0.038 69)"
     agent-blocked: "oklch(0.712 0.147 26)"
     agent-blocked-soft: "oklch(0.287 0.042 25)"
-    agent-done: "oklch(0.826 0.137 92)"
-    agent-done-soft: "oklch(0.302 0.041 94)"
+    agent-done: "oklch(0.761 0.131 152)"
+    agent-done-soft: "oklch(0.296 0.043 152)"
 
 radius:
   base: 0.75rem   # --radius, everything else derives from this

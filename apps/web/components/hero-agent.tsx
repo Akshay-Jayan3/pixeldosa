@@ -5,24 +5,27 @@ import * as React from "react";
 import { AgentFigure, type AgentPose } from "@pixeldosa/ui";
 
 /** One research run, told by the agent's body. The question holds longer: it's your turn. */
-const RUN: { pose: AgentPose; note: string; ms: number }[] = [
+const RUN: { pose: AgentPose; note: string; ms: number; yourTurn?: true }[] = [
   { pose: "listening", note: "Research the top 5 competitors? On it.", ms: 2400 },
   { pose: "planning", note: "Here's my plan…", ms: 2400 },
   { pose: "searching", note: "Checking 5 sources…", ms: 2600 },
   { pose: "reading", note: "Reading pricing pages…", ms: 2600 },
-  { pose: "asking", note: "Per seat or flat? Your call.", ms: 4200 },
+  { pose: "asking", note: "Per seat or flat? Your call.", ms: 4200, yourTurn: true },
   { pose: "working", note: "Putting it together…", ms: 2600 },
-  { pose: "done", note: "Done. Here's the summary.", ms: 3600 },
+  { pose: "done", note: "Done. Here's the summary.", ms: 3600, yourTurn: true },
 ];
 
 /**
  * The homepage's hero: Agent Figure running through a research task on a loop, with the
- * handwritten note as its label. It advances on its own, so it can be paused (WCAG 2.2.2).
+ * handwritten note as its label. The dashed ring ticks round only while the agent is
+ * working and stops dead on your turn, so the hero demonstrates the system's one rule
+ * instead of describing it. It advances on its own, so it can be paused (WCAG 2.2.2).
  */
 export function HeroAgent() {
   const [step, setStep] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
   const current = RUN[step]!;
+  const busy = !current.yourTurn && !paused;
 
   React.useEffect(() => {
     if (paused) return;
@@ -32,8 +35,24 @@ export function HeroAgent() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative flex size-64 items-center justify-center rounded-full border border-dashed sm:size-72">
+      <div className="relative flex size-64 items-center justify-center sm:size-72">
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 100 100"
+          data-busy={busy}
+          className="pd-ring absolute inset-0 size-full text-border"
+        >
+          <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.6" strokeDasharray="2 3" />
+          {/* One inked tick, so the rotation is visible and reads as a dial. */}
+          <path d="M50 1 L50 6" stroke="var(--foreground)" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
         <AgentFigure pose={current.pose} size="lg" hideLabel label={current.note} className="[&_svg]:size-48" />
+        <span
+          aria-hidden="true"
+          className="absolute -right-24 top-6 hidden w-24 rotate-3 font-hand text-sm leading-tight text-muted-foreground xl:block"
+        >
+          {current.yourTurn ? "still means your turn" : "moving means it's working"}
+        </span>
       </div>
       <p className="min-h-8 text-center font-hand text-xl leading-snug text-foreground" aria-live="polite">
         {current.note}

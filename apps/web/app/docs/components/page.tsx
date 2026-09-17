@@ -7,6 +7,7 @@ import { getNewComponents } from "@/lib/changelog";
 import { getComponentDoc } from "@/lib/docs";
 import { getComponents, type RegistryItem } from "@/lib/registry";
 import { cn } from "@/lib/utils";
+import { SketchRule } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Components",
@@ -27,7 +28,7 @@ function ComponentCard({ item, wide, isNew }: { item: RegistryItem; wide: boolea
     <Link
       href={`/docs/components/${item.name}`}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-xl border bg-card outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:border-foreground/25 focus-visible:ring-[3px] focus-visible:ring-ring/40",
+        "pd-lift group flex flex-col overflow-hidden rounded-xl border bg-card outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40",
         wide && "sm:col-span-2"
       )}
     >
@@ -74,6 +75,7 @@ export default function ComponentsIndexPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="text-3xl font-semibold tracking-tight">Components</h1>
+      <SketchRule className="mt-2" />
       <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
         Every shipped component, previewed from its real demo. Open one for the install
         command, usage, props and engineering notes.

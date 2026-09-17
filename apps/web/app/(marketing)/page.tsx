@@ -1,11 +1,15 @@
+import { Fragment } from "react";
+import type * as React from "react";
 import Link from "next/link";
 
-import { AgentFigure, Button, type AgentPose } from "@pixeldosa/ui";
+import { AgentFigure, Button } from "@pixeldosa/ui";
 
+import { CastStrip } from "@/components/cast-strip";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentThumbnail } from "@/components/component-thumbnail";
 import { HeroAgent } from "@/components/hero-agent";
 import { SiteGuide, type GuideStop } from "@/components/site-guide";
+import { MarginNote, MarkerSwatch, Scribble } from "@/components/sketch";
 import { demos } from "@/components/registry-demos";
 import { isFoundation } from "@/lib/component-groups";
 import { EARLY_ACCESS_URL } from "@/lib/links";
@@ -57,33 +61,12 @@ const PRINCIPLES = [
   },
 ] as const;
 
-/** The cast: the same character, nine things a run can be doing. */
-const CAST: { pose: AgentPose; label: string; note: string }[] = [
-  { pose: "idle", label: "Idle", note: "Ready when you are." },
-  { pose: "listening", label: "Listening", note: "I'm listening…" },
-  { pose: "thinking", label: "Thinking", note: "Let me think…" },
-  { pose: "planning", label: "Planning", note: "Here's my plan…" },
-  { pose: "searching", label: "Searching", note: "Checking sources…" },
-  { pose: "working", label: "Working", note: "Putting it together…" },
-  { pose: "asking", label: "Asking", note: "I need your input." },
-  { pose: "blocked", label: "Blocked", note: "Something's in the way." },
-  { pose: "done", label: "Done", note: "All done!" },
-];
-
 const MARKERS = [
-  { name: "Blue", role: "working", body: "Progress, the step it's on, what it's reading right now.", color: "agent-working" },
-  { name: "Orange", role: "needs you", body: "A question or an approval. The only colour that asks for action.", color: "agent-waiting" },
-  { name: "Red", role: "blocked", body: "Something failed or is in the way, always with a way forward.", color: "agent-blocked" },
-  { name: "Yellow", role: "done", body: "A finished result being handed to you. Used sparingly.", color: "agent-done" },
+  { name: "Blue", role: "working", body: "Progress, the step it's on, what it's reading right now.", color: "working" },
+  { name: "Orange", role: "needs you", body: "A question or an approval. The only colour that asks for action.", color: "waiting" },
+  { name: "Red", role: "blocked", body: "Something failed or is in the way, always with a way forward.", color: "blocked" },
+  { name: "Green", role: "done", body: "A finished result being handed to you. Used sparingly.", color: "done" },
 ] as const;
-
-// Written out in full so Tailwind sees every class.
-const MARKER_SWATCH: Record<(typeof MARKERS)[number]["color"], string> = {
-  "agent-working": "border-agent-working bg-agent-working-soft",
-  "agent-waiting": "border-agent-waiting bg-agent-waiting-soft",
-  "agent-blocked": "border-agent-blocked bg-agent-blocked-soft",
-  "agent-done": "border-agent-done bg-agent-done-soft",
-};
 
 const GUIDE: GuideStop[] = [
   { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through PixelDosa. Scroll whenever you like." },
@@ -126,26 +109,17 @@ export default function HomePage() {
             </Link>
 
             <h1 className="max-w-3xl font-hand text-5xl font-bold leading-[1.05] text-balance sm:text-7xl">
-              Give your agents{" "}
-              <span className="relative whitespace-nowrap">
-                life
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 100 10"
-                  preserveAspectRatio="none"
-                  className="absolute -left-[2%] bottom-[0.02em] h-[0.2em] w-[104%] overflow-visible"
-                >
-                  <path
-                    d="M2 6 C 20 2, 40 9, 58 5 S 88 3, 98 6"
-                    fill="none"
-                    stroke="var(--agent-working)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
+              {/* The space sits outside each word: inline-blocks drop trailing whitespace. */}
+              {["Give", "your", "agents"].map((word, index) => (
+                <Fragment key={word}>
+                  <span className="pd-word" style={{ "--i": index } as React.CSSProperties}>
+                    {word}
+                  </span>{" "}
+                </Fragment>
+              ))}
+              <span className="pd-word" style={{ "--i": 3 } as React.CSSProperties}>
+                <Scribble delay={0.7}>life</Scribble>.
               </span>
-              .
             </h1>
             <p className="max-w-2xl text-lg text-muted-foreground text-pretty">
               Components, blocks and agent skills for AI products that do real work: plans people can edit, runs
@@ -173,10 +147,10 @@ export default function HomePage() {
       </section>
 
       {/* The cast */}
-      <section data-guide="cast" aria-labelledby="cast" className="mx-auto max-w-6xl px-4 pt-20 sm:px-6">
+      <section data-guide="cast" aria-labelledby="cast" className="pd-reveal mx-auto max-w-6xl px-4 pt-20 sm:px-6">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <h2 id="cast" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            An agent with a body.
+            An agent with a <Scribble variant="swoosh">body</Scribble>.
           </h2>
           <Link
             href="/docs/components/agent-figure"
@@ -189,15 +163,7 @@ export default function HomePage() {
           Its pose shows what a run is doing, how sure it is, and when it needs you. It moves while it works and
           holds still when it's your turn.
         </p>
-        <ul className="mt-8 grid grid-cols-3 border-y sm:grid-cols-5 lg:grid-cols-9">
-          {CAST.map((item) => (
-            <li key={item.pose} className="flex flex-col items-center gap-1 px-2 py-4 text-center">
-              <AgentFigure pose={item.pose} hideLabel aria-hidden="true" />
-              <span className="text-sm font-medium">{item.label}</span>
-              <span className="font-hand text-base leading-tight text-muted-foreground">{item.note}</span>
-            </li>
-          ))}
-        </ul>
+        <CastStrip />
       </section>
 
       {/* The live block */}
@@ -217,15 +183,20 @@ export default function HomePage() {
               View block →
             </Link>
           </div>
-          {HeroDemo ? <HeroDemo /> : null}
+          <div className="relative">
+            <MarginNote arrow="down-left" className="absolute -right-44 top-10 hidden xl:inline-flex">
+              pick a question and watch it work
+            </MarginNote>
+            {HeroDemo ? <HeroDemo /> : null}
+          </div>
         </div>
       </section>
 
       {/* Before / while / after */}
       <section data-guide="stages" aria-labelledby="stages" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div className="max-w-2xl">
+        <div className="pd-reveal max-w-2xl">
           <h2 id="stages" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            Trust is decided in three moments.
+            Trust is decided in <Scribble variant="loop" color="waiting">three moments</Scribble>.
           </h2>
           <p className="mt-3 text-muted-foreground text-pretty">
             A chat box covers none of them. Each moment has its own components, designed from research on where
@@ -235,7 +206,7 @@ export default function HomePage() {
 
         <div className="mt-10 grid gap-4 lg:grid-cols-3">
           {STAGES.map((stage) => (
-            <article key={stage.id} className="group flex flex-col overflow-hidden rounded-xl border bg-card">
+            <article key={stage.id} className="pd-lift pd-reveal group flex flex-col overflow-hidden rounded-xl border bg-card">
               <Link
                 href={`/docs/components/${stage.hero}`}
                 aria-label={`${titleFor(stage.hero)}: open`}
@@ -272,14 +243,14 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="max-w-2xl">
             <h2 id="grammar" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              One set of rules, in every component.
+              One set of <Scribble variant="swoosh" color="ink">rules</Scribble>, in every component.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
               Components agree with each other because they share rules. That's what makes a screen built from
               thirty of them feel like one product.
             </p>
           </div>
-          <ul className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2">
+          <ul className="pd-reveal mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {PRINCIPLES.map((principle, index) => (
               <li key={principle.title} className="flex gap-4">
                 <span aria-hidden="true" className="font-mono text-xs text-muted-foreground tabular-nums">
@@ -294,13 +265,10 @@ export default function HomePage() {
           </ul>
 
           <h3 className="mt-14 font-hand text-2xl font-bold">Four markers, four meanings. Everything else is ink.</h3>
-          <ul className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="pd-reveal mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {MARKERS.map((marker) => (
               <li key={marker.color} className="flex gap-3">
-                <span
-                  aria-hidden="true"
-                  className={`mt-0.5 size-8 shrink-0 rounded-md border-2 ${MARKER_SWATCH[marker.color]}`}
-                />
+                <MarkerSwatch color={marker.color} />
                 <div>
                   <p className="text-sm font-medium">
                     {marker.name} · {marker.role}
@@ -315,10 +283,10 @@ export default function HomePage() {
 
       {/* Build with a coding agent */}
       <section data-guide="agents" aria-labelledby="agents" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+        <div className="pd-reveal grid items-center gap-10 lg:grid-cols-2">
           <div>
             <h2 id="agents" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              Your coding agent knows how to use it.
+              Your coding agent <Scribble color="done">knows</Scribble> how to use it.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
               Install through the shadcn CLI, and add the agent guide so Claude Code, Cursor or Copilot pick the
@@ -355,14 +323,14 @@ export default function HomePage() {
       <section data-guide="next" aria-labelledby="next" className="border-t">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <h2 id="next" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            Coming next: whole products, not just parts.
+            Coming next: <Scribble variant="loop">whole products</Scribble>, not just parts.
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
             Templates are full starter apps built from PixelDosa, for AI that makes and does: an image studio, a
             video studio, a research agent, an inbox for background agents.
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
+            <div className="pd-lift pd-reveal flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
               <AgentFigure pose="asking" size="sm" hideLabel aria-hidden="true" />
               <h3 className="text-lg font-medium">Get early access, free</h3>
               <p className="text-sm text-muted-foreground text-pretty">
@@ -373,7 +341,7 @@ export default function HomePage() {
                 <a href={EARLY_ACCESS_URL}>Request early access</a>
               </Button>
             </div>
-            <div className="flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
+            <div className="pd-lift pd-reveal flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
               <AgentFigure pose="working" size="sm" hideLabel aria-hidden="true" />
               <h3 className="text-lg font-medium">Building an AI product now?</h3>
               <p className="text-sm text-muted-foreground text-pretty">

@@ -25,6 +25,7 @@ import {
 } from "@/lib/registry";
 import { extractHeadings, type TocHeading } from "@/lib/toc";
 import { mdxComponents } from "@/components/mdx-components";
+import { SketchRule } from "@/components/sketch";
 
 function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   return (
@@ -112,6 +113,7 @@ export default async function ComponentDocPage({ params }: Params) {
         </div>
 
         <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{item.title}</h1>
+        <SketchRule className="mt-2" />
         <p className="mt-3 max-w-xl text-muted-foreground text-pretty">
           {doc?.frontmatter.description || item.description}
         </p>
@@ -183,7 +185,8 @@ export default async function ComponentDocPage({ params }: Params) {
 
           {/* 5. Engineering Notes — sourced from meta.engineeringNotes, never retyped */}
           {item.meta?.engineeringNotes ? (
-            <section className="mt-12 rounded-xl border-l-2 border-l-primary bg-card p-6">
+            <section className="pd-reveal mt-12 rounded-xl border border-dashed bg-card p-6">
+              <p className="font-hand text-base text-muted-foreground">why it's built this way</p>
               <h2 id="engineering-notes" className="scroll-mt-20 text-xl font-medium tracking-tight">
                 Engineering Notes
               </h2>
@@ -195,7 +198,8 @@ export default async function ComponentDocPage({ params }: Params) {
 
           {/* 6. Motion Notes */}
           {item.meta?.motionNotes ? (
-            <section className="mt-4 rounded-xl border-l-2 border-l-accent-foreground/40 bg-card p-6">
+            <section className="pd-reveal mt-4 rounded-xl border border-dashed bg-card p-6">
+              <p className="font-hand text-base text-muted-foreground">how it moves, and when it doesn't</p>
               <h2 id="motion-notes" className="scroll-mt-20 text-xl font-medium tracking-tight">
                 Motion Notes
               </h2>

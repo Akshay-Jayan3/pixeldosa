@@ -6,6 +6,7 @@ import { Button } from "@pixeldosa/ui";
 
 import { CodeBlock } from "@/components/code-block";
 import { demoExamples } from "@/components/registry-demos";
+import { SketchRule } from "@/components/sketch";
 import {
   DOCUMENTED_TYPES,
   getComponents,
@@ -70,6 +71,7 @@ export default async function ExampleDocPage({ params }: Params) {
       </Button>
 
       <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{example.title}</h1>
+      <SketchRule className="mt-2" />
       <p className="mt-3 max-w-xl text-muted-foreground text-pretty">{example.description}</p>
 
       <section className="mt-8 flex min-h-72 items-center justify-center rounded-xl border bg-card p-8">

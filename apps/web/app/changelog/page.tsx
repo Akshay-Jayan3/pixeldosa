@@ -5,6 +5,7 @@ import { CHANGELOG, type ChangeKind, type ChangelogChange } from "@/lib/changelo
 import { getComponentDoc } from "@/lib/docs";
 import { getRegistryItem } from "@/lib/registry";
 import { cn } from "@/lib/utils";
+import { SketchRule } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Changelog",
@@ -74,6 +75,7 @@ export default function ChangelogPage() {
       <header className="max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Beta</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Changelog</h1>
+        <SketchRule color="done" className="mt-2" />
         <p className="mt-3 text-muted-foreground text-pretty">
           PixelDosa ships in small drops. During the beta, APIs can still change, and when one does it's listed here
           first, marked <span className="font-medium text-foreground">Breaking</span>.
@@ -88,7 +90,7 @@ export default function ChangelogPage() {
           })).filter((group) => group.changes.length > 0);
 
           return (
-            <li key={entry.id} id={entry.id} className="grid scroll-mt-20 gap-3 border-t py-10 sm:grid-cols-[10rem_1fr] sm:gap-8">
+            <li key={entry.id} id={entry.id} className="grid scroll-mt-20 gap-3 border-t border-dashed py-10 sm:grid-cols-[10rem_1fr] sm:gap-8">
               <div className="sm:sticky sm:top-20 sm:self-start">
                 <time dateTime={entry.date} className="text-sm text-muted-foreground tabular-nums">
                   {formatDate(entry.date)}

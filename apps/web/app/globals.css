@@ -156,6 +156,120 @@
   --font-hand: "Kalam", "Segoe Print", "Bradley Hand", cursive;
 }
 
+/* ─── The site's craft layer ─────────────────────────────────────────────────────────
+   Docs-site only (not shipped in the registry). Everything here follows the system's
+   rules: drawn rather than rendered, no glow or blur, and nothing moves under
+   prefers-reduced-motion. Content is always visible at rest; motion only adds to it. */
+
+/* Paper grain: a faint fibre texture so the page reads as paper, not a flat fill. Tiny
+   inline SVG noise, multiplied in light mode and screened in dark mode. */
+body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.dark body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* A card cut from paper: on hover it lifts off the page and casts a hard ink offset,
+   the way a sketchbook cut-out would. No blur, no glow. */
+.pd-lift {
+  transition:
+    transform var(--pd-duration-fast) var(--pd-ease-standard),
+    box-shadow var(--pd-duration-fast) var(--pd-ease-standard),
+    border-color var(--pd-duration-fast) var(--pd-ease-standard);
+}
+.pd-lift:hover,
+.pd-lift:focus-visible {
+  transform: translate(-3px, -3px);
+  box-shadow: 3px 3px 0 0 var(--foreground);
+  border-color: var(--foreground);
+}
+.pd-lift:active {
+  transform: translate(-1px, -1px);
+  box-shadow: 1px 1px 0 0 var(--foreground);
+}
+
+/* Pen strokes that draw themselves. Paths use pathLength="1", so one dash covers any
+   path. `.pd-draw` draws on load; inside `.pd-reveal`, it draws as the block scrolls in. */
+@keyframes pd-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* Uses the standalone `translate` property so it never fights .pd-lift, which owns `transform`. */
+@keyframes pd-reveal {
+  from {
+    opacity: 0.001;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+@keyframes pd-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.25em) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* The hero ring ticks round in steps, like a hand moving a dial, and only while the
+   agent is working. */
+@keyframes pd-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pd-draw path {
+    stroke-dasharray: 1;
+    animation: pd-draw 700ms steps(14, end) both;
+    animation-delay: var(--pd-draw-delay, 350ms);
+  }
+
+  .pd-word {
+    display: inline-block;
+    animation: pd-word 420ms steps(6, end) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+
+  .pd-ring[data-busy="true"] {
+    animation: pd-ring 24s steps(48, end) infinite;
+  }
+
+  /* Scroll-driven, so there's no script and nothing is hidden where it isn't supported. */
+  @supports (animation-timeline: view()) {
+    .pd-reveal {
+      animation: pd-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    .pd-reveal .pd-draw path {
+      animation: pd-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 70%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-lift,
+  .pd-lift:hover,
+  .pd-lift:focus-visible,
+  .pd-lift:active {
+    transition: none;
+    transform: none;
+  }
+}
+
 *{
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;

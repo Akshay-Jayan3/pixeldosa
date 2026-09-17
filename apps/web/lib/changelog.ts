@@ -36,6 +36,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       { kind: "new", note: "Free early access to templates (Image Studio, Video Studio, Research Agent, Run Inbox and more), requested through a short GitHub form." },
       { kind: "new", note: "Work with me: design engineering for AI products, from agent and generation interfaces to custom components and design systems." },
       { kind: "improved", note: "GitHub issue forms for component and template requests, and for bugs." },
+      { kind: "improved", note: "Theme: `agent-done` is now green instead of yellow, so finished reads as finished. It still reads as text in both themes." },
+      { kind: "improved", note: "The site feels drawn: pen underlines that draw themselves, paper cards that lift with an ink shadow, sections that ease in as you scroll, and a switch on the homepage that shows the turn-taking rule by freezing the agent. All of it stops under reduced motion." },
     ],
   },
   {
@@ -47,7 +49,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       { kind: "new", component: "agent-figure" },
       { kind: "improved", note: "Theme: a new ink-and-paper palette in light and dark. The site now opens in light mode." },
-      { kind: "new", note: "Theme: four agent marker colours, each with a soft fill: `agent-working` (blue), `agent-waiting` (orange, the only one that asks for action), `agent-blocked` (red) and `agent-done` (yellow). All four read as text in both themes." },
+      { kind: "new", note: "Theme: four agent marker colours, each with a soft fill: `agent-working` (blue), `agent-waiting` (orange, the only one that asks for action), `agent-blocked` (red) and `agent-done` (green). All four read as text in both themes." },
       { kind: "improved", note: "No more blur, glow or gradient fades: Command Menu and Overlay use a plain paper scrim, Generation Placeholder's sweep is a drawn edge on a flat wash, and Code Block's \"Show all\" sits on a solid strip." },
       { kind: "improved", component: "reasoning-stream", note: "The collapsed ticker shows the last two lines, cropped rather than faded." },
       { kind: "improved", component: "agent-presence", note: "`form=\"orb\"` is deprecated and will be removed in a later drop. It still renders. Use `field`, or Agent Figure for a visible agent." },

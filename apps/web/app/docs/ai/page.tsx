@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
 import { SITE_URL } from "@/lib/docs";
+import { SketchRule } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Build with AI",
@@ -47,6 +48,7 @@ export default function BuildWithAIPage() {
   return (
     <article className="mx-auto max-w-2xl">
       <h1 className="text-3xl font-semibold tracking-tight">Build with AI</h1>
+      <SketchRule color="done" className="mt-2" />
       <p className="mt-3 text-muted-foreground text-pretty">
         Most teams will meet PixelDosa through a coding agent. Finding and installing
         components is the easy part — agents can already do that. The part that matters is
