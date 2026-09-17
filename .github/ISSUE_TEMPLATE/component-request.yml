@@ -1,0 +1,40 @@
+name: Component or template request
+description: Something you're building an AI product with and can't find in PixelDosa.
+labels: ["request"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to build?
+      description: The product and the moment in it. For example, "users wait two minutes for a video and don't know if it's stuck".
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of AI product is it?
+      options:
+        - Agent that takes actions
+        - Background or scheduled agents
+        - Image generation
+        - Video generation
+        - Voice or audio
+        - Chat assistant
+        - Generative UI (the model renders components)
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: What do you use today?
+      description: Another library, something hand-built, or nothing yet.
+  - type: dropdown
+    id: size
+    attributes:
+      label: Team size
+      options:
+        - Just me
+        - 2–10
+        - 11–50
+        - More than 50

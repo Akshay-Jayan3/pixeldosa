@@ -117,7 +117,7 @@ docs, QA, build). They're held back from announcements until launch week.
 - [ ] Remove or finish anything half-done that a visitor could reach.
 
 ### Feedback loop
-- [ ] GitHub issue templates: "Component request" and "Bug".
+- [x] GitHub issue templates: "Component or template request" and "Bug" (2026-09-17).
 - [ ] One place to follow drops (X/LinkedIn plus the changelog). A newsletter can come later.
 - [ ] Basic analytics on docs page views and install-command copies, to rank what's used.
 

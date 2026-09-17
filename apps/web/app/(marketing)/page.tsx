@@ -8,6 +8,7 @@ import { HeroAgent } from "@/components/hero-agent";
 import { SiteGuide, type GuideStop } from "@/components/site-guide";
 import { demos } from "@/components/registry-demos";
 import { isFoundation } from "@/lib/component-groups";
+import { EARLY_ACCESS_URL } from "@/lib/links";
 import { getComponents, getRegistryItem, isBlock } from "@/lib/registry";
 
 const STAGES = [
@@ -91,6 +92,7 @@ const GUIDE: GuideStop[] = [
   { id: "stages", pose: "planning", text: "Trust gets decided before, during and after a run. Each moment has its own pieces." },
   { id: "rules", pose: "thinking", text: "Four colours, four rules. Orange is the only one that asks you for something." },
   { id: "agents", pose: "reading", text: "Your coding agent can install all of this by name." },
+  { id: "next", pose: "asking", text: "Templates are next, and early access is free. Want one?" },
   { id: "beta", pose: "done", text: "That's the tour. New pieces land every week." },
 ];
 
@@ -146,9 +148,9 @@ export default function HomePage() {
               .
             </h1>
             <p className="max-w-2xl text-lg text-muted-foreground text-pretty">
-              The trust layer for AI products: React components with character, presence and control, for the
-              moments people decide whether to trust an agent. Pure components, no SDK lock-in, installable by you
-              or your coding agent.
+              Components, blocks and agent skills for AI products that do real work: plans people can edit, runs
+              they can steer, approvals that say what can't be undone, and an agent they can read. Pure React, no
+              SDK lock-in, installable by you or your coding agent.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -346,6 +348,43 @@ export default function HomePage() {
             </div>
           </div>
           <CodeBlock code={AGENT_SETUP} language="bash" />
+        </div>
+      </section>
+
+      {/* What's next: free early access, and sprints */}
+      <section data-guide="next" aria-labelledby="next" className="border-t">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <h2 id="next" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            Coming next: whole products, not just parts.
+          </h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
+            Templates are full starter apps built from PixelDosa, for AI that makes and does: an image studio, a
+            video studio, a research agent, an inbox for background agents.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <div className="flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
+              <AgentFigure pose="asking" size="sm" hideLabel aria-hidden="true" />
+              <h3 className="text-lg font-medium">Get early access, free</h3>
+              <p className="text-sm text-muted-foreground text-pretty">
+                Tell us what you're building and which templates you'd use. The first ones will be shaped by the
+                answers.
+              </p>
+              <Button asChild className="mt-auto">
+                <a href={EARLY_ACCESS_URL}>Request early access</a>
+              </Button>
+            </div>
+            <div className="flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
+              <AgentFigure pose="working" size="sm" hideLabel aria-hidden="true" />
+              <h3 className="text-lg font-medium">Building an AI product now?</h3>
+              <p className="text-sm text-muted-foreground text-pretty">
+                An agent UX sprint: a review against the problems people hit with AI, then the fixes, built in your
+                codebase.
+              </p>
+              <Button asChild variant="outline" className="mt-auto">
+                <Link href="/sprint">About the sprint</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 

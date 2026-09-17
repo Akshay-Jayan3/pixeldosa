@@ -27,6 +27,18 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-17-next",
+    date: "2026-09-17",
+    title: "What's next, and how to help shape it",
+    summary:
+      "Templates are coming: full starter apps for AI that makes and does. Early access is free, and what you tell us decides which ones come first.",
+    changes: [
+      { kind: "new", note: "Free early access to templates (Image Studio, Video Studio, Research Agent, Run Inbox and more), requested through a short GitHub form." },
+      { kind: "new", note: "Agent UX sprints for AI startups: a review against the problems people hit with AI, then the fixes, built in your codebase." },
+      { kind: "improved", note: "GitHub issue forms for component and template requests, and for bugs." },
+    ],
+  },
+  {
     id: "2026-09-16-ink",
     date: "2026-09-16",
     title: "Ink on paper, and an agent you can see",

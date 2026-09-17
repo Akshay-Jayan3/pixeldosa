@@ -29,6 +29,9 @@ export function SiteHeader() {
           <Link href="/changelog" className="hidden hover:text-foreground sm:inline">
             Changelog
           </Link>
+          <Link href="/sprint" className="hidden hover:text-foreground md:inline">
+            Work with me
+          </Link>
         </nav>
 
         <div className="ml-auto">

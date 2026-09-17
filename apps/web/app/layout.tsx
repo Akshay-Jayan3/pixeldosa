@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 
 import { SiteHeader } from "@/components/site-header";
 
@@ -8,11 +9,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "PixelDosa — the trust layer for AI products",
+    default: "PixelDosa — give your agents life",
     template: "%s — PixelDosa",
   },
   description:
-    "React components for the moments people decide whether to trust an agent: before it runs, while it works, and when they review what it did. No SDK lock-in, installable by you or your coding agent.",
+    "Components, blocks and agent skills for AI products that do real work: editable plans, steerable runs, approvals that state consequences, and an agent people can read. Pure React, no SDK lock-in.",
 };
 
 /**
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             PixelDosa (beta). The trust layer for AI products, crafted by a design engineer.
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );

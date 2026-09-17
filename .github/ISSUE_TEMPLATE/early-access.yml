@@ -1,0 +1,41 @@
+name: Template early access
+description: Get free early access to PixelDosa templates while they're in progress.
+title: "Early access: "
+labels: ["early-access"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Templates are full starter apps built from PixelDosa. Early access is free. Tell us what you're building so the first templates fit real products.
+  - type: checkboxes
+    id: templates
+    attributes:
+      label: Which templates would you use?
+      options:
+        - label: Image Studio (prompt, variations, compare, inpaint)
+        - label: Video Studio (long-running jobs, shot list, extend)
+        - label: Research Agent (plan, steps, sources, report)
+        - label: Run Inbox (background agents, approvals, activity trail)
+        - label: Support Agent Console (handoff to a person)
+        - label: Voice Studio (script, takes, direction)
+  - type: textarea
+    id: building
+    attributes:
+      label: What are you building?
+      description: One or two sentences is plenty.
+    validations:
+      required: true
+  - type: dropdown
+    id: size
+    attributes:
+      label: Team size
+      options:
+        - Just me
+        - 2–10
+        - 11–50
+        - More than 50
+  - type: input
+    id: contact
+    attributes:
+      label: Where should we reach you when it's ready? (optional)
+      description: Your GitHub notifications work too. This issue is public, so only share what you're happy to show.
