@@ -18,6 +18,11 @@ export interface LiveStatusLineProps extends React.ComponentPropsWithoutRef<"div
    */
   startedAt?: number | Date;
   onCancel?: () => void;
+  /**
+   * The indicator before the status. `mark` (default) is the agent's drawn head, whose
+   * face follows the state; `line` is three dots, for the densest rows.
+   */
+  indicator?: "mark" | "line";
 }
 
 function formatElapsed(ms: number): string {
@@ -42,6 +47,7 @@ function LiveStatusLine({
   detail,
   startedAt,
   onCancel,
+  indicator = "mark",
   className,
   ...props
 }: LiveStatusLineProps) {
@@ -74,8 +80,8 @@ function LiveStatusLine({
           Two announcement channels disagreeing is worse than either one alone. */}
       <AgentPresence
         state={state}
-        form="line"
-        size="sm"
+        form={indicator}
+        size={indicator === "mark" ? "default" : "sm"}
         hideLabel
         label={detail ? `${status} ${detail}` : status}
         className="shrink-0"

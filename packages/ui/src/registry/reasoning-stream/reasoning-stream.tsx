@@ -126,16 +126,16 @@ function ReasoningStream({
         )}
       </button>
 
-      {/* Ticker: the last couple of lines, older ones masked out above. Reads as a
-          process rather than a document, which is what it is while it's still running. */}
+      {/* Ticker: the last two lines, anything taller cropped above. Reads as a process
+          rather than a document, which is what it is while it's still running. */}
       {showTicker ? (
         <div
           id={panelId}
-          className="relative max-h-11 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_60%)]"
+          className="relative max-h-11 overflow-hidden"
         >
           <div className="flex flex-col justify-end">
-            {steps.slice(-3).map((step, index) => (
-              <Step key={`${steps.length - 3 + index}`} text={step} />
+            {steps.slice(-2).map((step, index) => (
+              <Step key={`${steps.length - 2 + index}`} text={step} />
             ))}
           </div>
         </div>

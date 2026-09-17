@@ -102,6 +102,7 @@ export default function AIChatExperienceDemo() {
     <div className="w-full max-w-2xl">
       <AIChatExperience
         className="h-[560px]"
+        expression="full"
         turns={turns}
         empty={{
           title: "What are we fixing today?",

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { AgentFigure, type AgentPose } from "@/registry/agent-figure/agent-figure";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,7 +24,33 @@ export type AgentState =
   | "asking"
   | "awaitingApproval";
 
-export type AgentPresenceForm = "field" | "orb" | "line";
+/**
+ * `figure` draws the agent (Agent Figure) and `mark` draws only its head, for inline use.
+ * `field` and `line` are the abstract forms. `orb` is deprecated: a glowing sphere reads
+ * as a mind rather than as work, which is the opposite of this system's direction. It still
+ * renders so existing screens don't break, and will be removed in a later drop.
+ */
+export type AgentPresenceForm = "figure" | "mark" | "field" | "orb" | "line";
+
+/**
+ * Which pose the drawn forms take for each state. Poses that belong to the person's turn
+ * hold still inside Agent Figure, so the turn-taking grammar carries over unchanged.
+ */
+const POSE: Record<AgentState, AgentPose> = {
+  queued: "listening",
+  thinking: "thinking",
+  deciding: "comparing",
+  working: "working",
+  streaming: "working",
+  done: "done",
+  failed: "blocked",
+  cancelled: "idle",
+  suggesting: "confident",
+  asking: "asking",
+  awaitingApproval: "asking",
+};
+
+const FIGURE_SIZE = { sm: "sm", default: "md", lg: "lg" } as const;
 
 type StateConfig = {
   /** Whose turn it is. Drives the single most important visual decision. */
@@ -101,8 +128,8 @@ function spherePoints(count: number, radius: number) {
  * busy; stillness means it is your turn — so a user learns in about three interactions
  * to read "am I needed?" without reading a word.
  *
- * Three forms share one state vocabulary: `field` (cell matrix, the system's
- * signature), `orb` (a true Fibonacci sphere, for hero surfaces), and `line` (inline,
+ * The forms share one state vocabulary: `figure` (the drawn agent, for panels and empty
+ * states), `mark` (its head, inline), `field` (a cell matrix), and `line` (three dots,
  * for status bars and table rows).
  */
 function AgentPresence({
@@ -127,7 +154,19 @@ function AgentPresence({
     [form, dims.points, dims.px, dims.dot]
   );
 
-  const indicator = (
+  const drawn = form === "figure" || form === "mark";
+
+  const indicator = drawn ? (
+    <span aria-hidden="true" data-turn={config.turn} data-state={state} className="inline-flex shrink-0">
+      <AgentFigure
+        pose={POSE[state]}
+        variant={form === "mark" ? "mark" : "figure"}
+        size={FIGURE_SIZE[size]}
+        hideLabel
+        label={text}
+      />
+    </span>
+  ) : (
     <span
       aria-hidden="true"
       data-turn={config.turn}
@@ -255,4 +294,9 @@ function AgentPresence({
   );
 }
 
-export { AgentPresence, STATES as agentPresenceStates };
+/** The Agent Figure pose for a state, for blocks that draw the figure themselves. */
+function agentPoseFor(state: AgentState): AgentPose {
+  return POSE[state];
+}
+
+export { AgentPresence, STATES as agentPresenceStates, agentPoseFor };

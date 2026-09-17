@@ -154,13 +154,13 @@ function CodeBlock({
         </div>
 
         {collapsed ? (
-          <div className="absolute inset-x-0 bottom-0 flex h-16 items-end justify-center bg-gradient-to-t from-background/90 to-transparent pb-2">
+          <div className="absolute inset-x-0 bottom-0 flex justify-center border-t border-dashed bg-background py-2">
             <button
               type="button"
               aria-expanded={false}
               aria-controls={regionId}
               onClick={() => setExpanded(true)}
-              className="relative rounded-full border bg-popover px-3 py-1 text-xs font-medium text-popover-foreground shadow-sm outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] motion-reduce:transition-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40"
+              className="relative rounded-full border bg-popover px-3 py-1 text-xs font-medium text-popover-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] motion-reduce:transition-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40"
             >
               Show all <span className="tabular-nums">{lines.length}</span> lines
             </button>

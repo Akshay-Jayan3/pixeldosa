@@ -33,6 +33,34 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-figure",
+      "title": "Agent Figure",
+      "description": "A hand-drawn agent character whose pose shows what a run is doing, how sure it is, and when it needs the person. Takes a `pose` from a fourteen-value vocabulary: work poses (`listening`, `thinking`, `planning`, `searching`, `reading`, `comparing`, `working`), hand-off poses (`idle`, `asking`, `blocked`, `done`), and three result poses (`confident`, `probable`, `unsure`) that must be driven by the system's real confidence. `variant` is `figure` (the whole character) or `mark` (the head alone, for inline status and avatars); `size` is `sm`, `md` or `lg`. A visible `label` sits beside or below the figure by default, because the words are the real signal; `hideLabel` turns the drawing into a labelled image instead, and `announce` adds a polite live region. Motion follows the turn-taking grammar: on the agent's turn the pen lines re-draw slightly (a line boil) and small parts move in steps; on the person's turn every line holds still. Drawn in code as seeded SVG strokes, coloured only by theme tokens (ink, card, muted ink and the four agent markers), so it themes, stays small and renders identically on server and client. Use it for onboarding, empty states, run panels and consumer products where an agent should feel present. Not a replacement for status text (pair it with Live Status Line or a label), and not for dense tables — use Agent Presence's `line` form there.",
+      "type": "registry:ui",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-figure/agent-figure.tsx",
+          "target": "components/ui/agent-figure.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils` and the agent marker colours (`--agent-working`, `--agent-waiting`, `--agent-blocked`, `--agent-done` and their `-soft` fills) from @pixeldosa/pixeldosa-theme.",
+      "meta": {
+        "engineeringNotes": "The character is generated, not illustrated: each stroke is a polyline pushed off its true path by a seeded wobble and smoothed with Catmull-Rom curves. Seeds come from the pose, the stroke name and the frame, so the server and client render byte-identical paths and there is no hydration mismatch, and a new pose costs a few coordinates rather than an asset. Every colour is a theme token, so the figure follows light and dark mode and a host's palette. Poses map to things a run actually does, never to feelings: 'blocked' is a state, 'sad' is not, and the three result poses exist so confidence can be shown honestly rather than always looking pleased. The frame clock runs only while the pose is on the agent's turn, the figure is on screen (IntersectionObserver), and the tab is visible; otherwise nothing ticks.",
+        "motionNotes": "Two kinds of motion, both stepped at 280ms rather than eased, so the figure reads as drawn rather than rendered: the line boil (strokes re-seed every second frame) and a few discrete prop movements — eyes scanning a page, a key press, the thought bubble filling in. Both stop completely when the pose is the person's turn (`idle`, `asking`, `blocked`, `done` and the result poses), which is the system's rule that stillness means it's your turn. `still` holds the lines on the agent's turn too. Under `prefers-reduced-motion` nothing animates and each pose remains a distinct static drawing, so no information is lost."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "agent-memory",
       "title": "Agent Memory",
       "description": "What an agent remembers about someone, where they can read it, correct it, or make it forget. Takes `memories`, each with `text`, an `origin` of 'stated' (the user said it) or 'inferred' (the agent picked it up) and an optional `source` ('Noticed across 6 conversations'). Handlers are `onEdit`, `onForget`, and optionally `onRestore`, `onForgetAll`, plus `paused` with `onPausedChange`. What the user said and what the agent guessed are listed separately, and inferred memories are framed as guesses worth checking, because a wrong inference quietly skews every later answer. Edits happen inline (Enter saves, Escape cancels). Forget fires immediately, while the row stays in place, struck through, with Undo, and focus moves to it. Pausing is described exactly: it stops new memories and doesn't erase old ones. Forget all needs a second confirming step that says it can't be undone. Use it in agent settings or a 'what do you know about me' panel. Not a chat history or a data export.",
@@ -92,7 +120,7 @@
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "agent-presence",
       "title": "Agent Presence",
-      "description": "An agent's live state, expressed visually rather than described in text. Takes a `state` from an eleven-value vocabulary grounded in real protocol events — eight machine states (`queued`, `thinking`, `deciding`, `working`, `streaming`, `done`, `failed`, `cancelled`) and three hand-off states (`suggesting`, `asking`, `awaitingApproval`) — plus an optional `label` that overrides the state's default text, and an `onCancel` shown throughout the machine's turn. The organising rule is a turn-taking grammar: motion means the machine is busy, stillness means it is the user's turn. Machine states animate; hand-off states stop completely and sit brighter and heavier, so a user learns to read 'am I needed?' without reading a word. Three forms share the one vocabulary: `field` renders a cell matrix (the system's signature), `orb` renders a true Fibonacci-distributed sphere in CSS 3D for hero surfaces, and `line` renders three inline dots for status bars and table rows. The text label is the real signal and is announced through an `aria-live` region; the indicator itself is `aria-hidden` and supplementary. Purely presentational: it does not fetch, does not own the agent run, and does not interpret protocol events for you — map your stream's events to a state and pass it in. Use it anywhere an agent's activity needs to be visible in ordinary product UI. Not for showing the reasoning text itself (that is Reasoning Stream), not for a per-artifact generation progress bar (that is Generation Placeholder), and not for the post-result action strip (that is AI Action Toolbar).",
+      "description": "An agent's live state, expressed visually rather than described in text. Takes a `state` from an eleven-value vocabulary grounded in real protocol events — eight machine states (`queued`, `thinking`, `deciding`, `working`, `streaming`, `done`, `failed`, `cancelled`) and three hand-off states (`suggesting`, `asking`, `awaitingApproval`) — plus an optional `label` that overrides the state's default text, and an `onCancel` shown throughout the machine's turn. The organising rule is a turn-taking grammar: motion means the machine is busy, stillness means it is the user's turn. Machine states animate; hand-off states stop completely and sit brighter and heavier, so a user learns to read 'am I needed?' without reading a word. The forms share the one vocabulary: `figure` draws the agent with Agent Figure (each state maps to a pose, and person's-turn poses hold still), `mark` draws only its head for inline use, `field` renders a cell matrix, `line` renders three inline dots for status bars and table rows, and the deprecated `orb` (a CSS 3D sphere, kept only so existing screens keep working; use Agent Figure for a visible agent). The text label is the real signal and is announced through an `aria-live` region; the indicator itself is `aria-hidden` and supplementary. Purely presentational: it does not fetch, does not own the agent run, and does not interpret protocol events for you — map your stream's events to a state and pass it in. Use it anywhere an agent's activity needs to be visible in ordinary product UI. Not for showing the reasoning text itself (that is Reasoning Stream), not for a per-artifact generation progress bar (that is Generation Placeholder), and not for the post-result action strip (that is AI Action Toolbar).",
       "type": "registry:ui",
       "categories": [
         "ai-assisted",
@@ -101,7 +129,8 @@
       ],
       "dependencies": [],
       "registryDependencies": [
-        "@pixeldosa/pixeldosa-theme"
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/agent-figure"
       ],
       "files": [
         {
@@ -110,7 +139,7 @@
           "type": "registry:ui"
         }
       ],
-      "docs": "Requires `cn` at `@/lib/utils` and the `pd-orb-spin` / `pd-cell-pulse` keyframes supplied by @pixeldosa/pixeldosa-theme's css block. The state vocabulary maps directly onto AG-UI events, OpenAI Responses lifecycle events, AI SDK stream parts, LangGraph interrupts and MCP elicitation — see the docs page for the mapping table.",
+      "docs": "Requires `cn` at `@/lib/utils`, @pixeldosa/agent-figure for the `figure` and `mark` forms (installed automatically), and the `pd-orb-spin` / `pd-cell-pulse` keyframes supplied by @pixeldosa/pixeldosa-theme's css block. The state vocabulary maps directly onto AG-UI events, OpenAI Responses lifecycle events, AI SDK stream parts, LangGraph interrupts and MCP elicitation — see the docs page for the mapping table.",
       "meta": {
         "engineeringNotes": "The load-bearing decision is that the eleven states split into two classes with opposite visual treatments rather than into eleven variations of one treatment. Every surveyed implementation renders 'thinking' and 'waiting for your approval' in the same register — something moving plus a line of text — but those are opposites: one means relax, the other means nothing proceeds until you act. Encoding that as motion-versus-stillness makes the most important question on the surface ('is it my turn?') answerable pre-attentively. The vocabulary itself is taken from protocol events rather than invented: `deciding` exists because AG-UI streams TOOL_CALL_ARGS before execution, so choosing an action is distinguishable from performing it; `queued` exists because OpenAI Responses emits it and accepted-but-not-started is not the same as working; `asking` maps to MCP elicitation and `awaitingApproval` to LangGraph's interrupt(). The orb uses a Fibonacci spiral distribution rather than the flat ring of dots most AI orbs use, which is what makes it read as a volume rather than a circle, and it is rendered with CSS 3D transforms inside a preserve-3d container so perspective supplies depth scaling for free — no per-frame JavaScript and no canvas. All three forms animate via CSS keyframes with per-element negative delays rather than a requestAnimationFrame loop; an earlier component in this system was rebuilt for exactly this reason, since re-rendering hundreds of React nodes per frame to nudge a transform is what makes these indicators stutter.",
         "motionNotes": "Rotation speed is the state: 24s per revolution when queued, 12s thinking, 7s deciding, 4s working — so the same object communicates urgency through tempo rather than through a different animation per state, which is what lets states morph rather than cut. Terminal machine states (`done`, `failed`, `cancelled`) drop rotation entirely and settle to a smaller resting scale. Hand-off states stop dead: no keyframe is applied at all, and the dots transition to full scale and full opacity over `--pd-duration-slow`, so the arrival of the user's turn is a settling rather than a switch. Only `transform` and `opacity` animate, so every form composites on the GPU regardless of point count. Under `prefers-reduced-motion` every keyframe is disabled and each state still holds a visually distinct static configuration — differing scale and opacity per state — so the grammar survives with zero movement; the reduced-motion state is the same information without the motion, not a removal of the signal."
@@ -228,7 +257,8 @@
         "@pixeldosa/tool-call-card",
         "@pixeldosa/inline-citations",
         "@pixeldosa/agent-presence",
-        "@pixeldosa/ai-action-toolbar"
+        "@pixeldosa/ai-action-toolbar",
+        "@pixeldosa/agent-figure"
       ],
       "files": [
         {
@@ -847,46 +877,62 @@
         },
         "light": {
           "radius": "0.75rem",
-          "background": "oklch(1 0 0)",
-          "foreground": "oklch(0.145 0 0)",
-          "card": "oklch(1 0 0)",
-          "card-foreground": "oklch(0.145 0 0)",
-          "popover": "oklch(1 0 0)",
-          "popover-foreground": "oklch(0.145 0 0)",
-          "primary": "oklch(0.145 0 0)",
-          "primary-foreground": "oklch(0.985 0 0)",
-          "secondary": "oklch(0.97 0 0)",
-          "secondary-foreground": "oklch(0.205 0 0)",
-          "muted": "oklch(0.97 0 0)",
-          "muted-foreground": "oklch(0.52 0 0)",
-          "accent": "oklch(0.97 0 0)",
-          "accent-foreground": "oklch(0.205 0 0)",
+          "background": "oklch(0.975 0.005 106)",
+          "foreground": "oklch(0.231 0.004 264)",
+          "card": "oklch(0.993 0.003 106)",
+          "card-foreground": "oklch(0.231 0.004 264)",
+          "popover": "oklch(0.993 0.003 106)",
+          "popover-foreground": "oklch(0.231 0.004 264)",
+          "primary": "oklch(0.231 0.004 264)",
+          "primary-foreground": "oklch(0.993 0.003 106)",
+          "secondary": "oklch(0.948 0.008 99)",
+          "secondary-foreground": "oklch(0.231 0.004 264)",
+          "muted": "oklch(0.948 0.008 99)",
+          "muted-foreground": "oklch(0.493 0.008 268)",
+          "accent": "oklch(0.948 0.008 99)",
+          "accent-foreground": "oklch(0.231 0.004 264)",
           "destructive": "oklch(0.55 0.22 27)",
           "destructive-foreground": "oklch(0.985 0.005 24)",
-          "border": "oklch(0.922 0 0)",
-          "input": "oklch(0.922 0 0)",
-          "ring": "oklch(0.556 0 0)"
+          "border": "oklch(0.909 0.008 99)",
+          "input": "oklch(0.850 0.011 101)",
+          "ring": "oklch(0.493 0.008 268)",
+          "agent-working": "oklch(0.506 0.182 265)",
+          "agent-working-soft": "oklch(0.937 0.024 268)",
+          "agent-waiting": "oklch(0.532 0.137 50)",
+          "agent-waiting-soft": "oklch(0.949 0.031 71)",
+          "agent-blocked": "oklch(0.523 0.171 28)",
+          "agent-blocked-soft": "oklch(0.932 0.028 26)",
+          "agent-done": "oklch(0.518 0.106 84)",
+          "agent-done-soft": "oklch(0.957 0.046 94)"
         },
         "dark": {
-          "background": "oklch(0.139 0.003 246)",
-          "foreground": "oklch(0.978 0.003 240)",
-          "card": "oklch(0.172 0.003 248)",
-          "card-foreground": "oklch(0.978 0.003 240)",
-          "popover": "oklch(0.139 0.003 243)",
-          "popover-foreground": "oklch(0.978 0.003 240)",
-          "primary": "oklch(0.978 0.003 240)",
-          "primary-foreground": "oklch(0.139 0.003 246)",
-          "secondary": "oklch(0.24 0.006 250)",
-          "secondary-foreground": "oklch(0.978 0.003 240)",
-          "muted": "oklch(0.24 0.006 250)",
-          "muted-foreground": "oklch(0.649 0.014 263)",
-          "accent": "oklch(0.28 0.01 252)",
-          "accent-foreground": "oklch(0.978 0.003 240)",
+          "background": "oklch(0.198 0.004 129)",
+          "foreground": "oklch(0.939 0.007 97)",
+          "card": "oklch(0.233 0.004 129)",
+          "card-foreground": "oklch(0.939 0.007 97)",
+          "popover": "oklch(0.233 0.004 129)",
+          "popover-foreground": "oklch(0.939 0.007 97)",
+          "primary": "oklch(0.939 0.007 97)",
+          "primary-foreground": "oklch(0.198 0.004 129)",
+          "secondary": "oklch(0.279 0.006 122)",
+          "secondary-foreground": "oklch(0.939 0.007 97)",
+          "muted": "oklch(0.279 0.006 122)",
+          "muted-foreground": "oklch(0.711 0.010 100)",
+          "accent": "oklch(0.285 0.006 122)",
+          "accent-foreground": "oklch(0.939 0.007 97)",
           "destructive": "oklch(0.653 0.184 24)",
           "destructive-foreground": "oklch(0.16 0.02 24)",
-          "border": "oklch(0.299 0.011 254)",
-          "input": "oklch(0.32 0.012 254)",
-          "ring": "oklch(0.649 0.014 263)"
+          "border": "oklch(0.311 0.005 122)",
+          "input": "oklch(0.381 0.007 118)",
+          "ring": "oklch(0.711 0.010 100)",
+          "agent-working": "oklch(0.731 0.122 267)",
+          "agent-working-soft": "oklch(0.289 0.052 266)",
+          "agent-waiting": "oklch(0.779 0.127 63)",
+          "agent-waiting-soft": "oklch(0.299 0.038 69)",
+          "agent-blocked": "oklch(0.712 0.147 26)",
+          "agent-blocked-soft": "oklch(0.287 0.042 25)",
+          "agent-done": "oklch(0.826 0.137 92)",
+          "agent-done-soft": "oklch(0.302 0.041 94)"
         }
       },
       "css": {
@@ -1169,7 +1215,8 @@
         "@pixeldosa/reasoning-stream",
         "@pixeldosa/agent-ask",
         "@pixeldosa/ai-approval-gate",
-        "@pixeldosa/ai-action-toolbar"
+        "@pixeldosa/ai-action-toolbar",
+        "@pixeldosa/agent-figure"
       ],
       "files": [
         {

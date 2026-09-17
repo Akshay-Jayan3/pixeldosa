@@ -243,15 +243,14 @@ function GenerationPlaceholder({
           ) : form === "sweep" ? (
             /**
              * A develop frontier: everything behind it is settled, everything ahead is
-             * empty, and the edge itself is a soft gradient rather than a hard line —
-             * which is what makes it read as developing rather than as a progress bar
-             * wearing a costume. The frontier sits exactly at `progress`, so the visual
+             * empty, and the edge itself is a drawn ink line with a flat wash behind it,
+             * so it reads as a page being filled in rather than as a glowing bar. The frontier sits exactly at `progress`, so the visual
              * and the number can never disagree.
              */
             <div className="absolute inset-0 overflow-hidden rounded-md">
               <div
                 className={cn(
-                  "absolute inset-y-0 left-0 bg-gradient-to-r from-foreground/[0.06] via-foreground/[0.10] to-foreground/25",
+                  "absolute inset-y-0 left-0 bg-foreground/[0.08]",
                   determinate
                     ? "transition-[width] duration-[var(--pd-duration-fast)] ease-linear motion-reduce:transition-none"
                     : "w-full animate-[pd-sweep_2.4s_ease-in-out_infinite] motion-reduce:animate-none motion-reduce:opacity-40"
@@ -260,7 +259,7 @@ function GenerationPlaceholder({
               />
               {determinate ? (
                 <div
-                  className="absolute inset-y-0 w-16 -translate-x-1/2 bg-gradient-to-r from-transparent via-foreground/30 to-transparent transition-[left] duration-[var(--pd-duration-fast)] ease-linear motion-reduce:transition-none"
+                  className="absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-foreground/60 transition-[left] duration-[var(--pd-duration-fast)] ease-linear motion-reduce:transition-none"
                   style={{ left: `${Math.round(clamped * 1000) / 10}%` }}
                 />
               ) : null}
@@ -305,7 +304,7 @@ function GenerationPlaceholder({
       {/* Failure takes the whole surface. A dimmed field with a red caption reads as
           "still working, but sad"; a stopped state should visibly stop. */}
       {status === "failed" ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/80 p-6 text-center backdrop-blur-sm">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/95 p-6 text-center">
           <span
             aria-hidden="true"
             className="flex size-9 items-center justify-center rounded-full border border-destructive/40 text-destructive"
@@ -348,7 +347,7 @@ function GenerationPlaceholder({
               <button
                 type="button"
                 onClick={onCancel}
-                className="relative rounded-md border border-input bg-background/80 px-2 py-1 text-xs font-medium text-foreground outline-none backdrop-blur transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] after:absolute after:inset-x-0 after:-inset-y-2.5 after:content-[''] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                className="relative rounded-md border border-input bg-background px-2 py-1 text-xs font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] after:absolute after:inset-x-0 after:-inset-y-2.5 after:content-[''] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40"
               >
                 Cancel
               </button>
@@ -358,7 +357,7 @@ function GenerationPlaceholder({
                 it gets a surface of its own rather than sitting inline with the label.
                 tabular-nums keeps the pill from resizing as digits change. */}
             {determinate ? (
-              <span className="rounded-full border bg-background/80 px-2.5 py-1 text-sm font-semibold text-foreground tabular-nums backdrop-blur">
+              <span className="rounded-full border bg-background px-2.5 py-1 text-sm font-semibold text-foreground tabular-nums">
                 {Math.round(clamped * 100)}%
               </span>
             ) : null}

@@ -103,7 +103,7 @@ const OverlayScrim = React.forwardRef<HTMLDivElement, OverlayScrimProps>(functio
       animate="visible"
       exit="exit"
       transition={reduced ? reducedMotion : undefined}
-      className={cn("fixed inset-0 z-50 bg-background/70 backdrop-blur-sm", className)}
+      className={cn("fixed inset-0 z-50 bg-background/85", className)}
       {...props}
     />
   );

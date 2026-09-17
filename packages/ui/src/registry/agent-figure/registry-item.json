@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-figure",
+  "title": "Agent Figure",
+  "description": "A hand-drawn agent character whose pose shows what a run is doing, how sure it is, and when it needs the person. Takes a `pose` from a fourteen-value vocabulary: work poses (`listening`, `thinking`, `planning`, `searching`, `reading`, `comparing`, `working`), hand-off poses (`idle`, `asking`, `blocked`, `done`), and three result poses (`confident`, `probable`, `unsure`) that must be driven by the system's real confidence. `variant` is `figure` (the whole character) or `mark` (the head alone, for inline status and avatars); `size` is `sm`, `md` or `lg`. A visible `label` sits beside or below the figure by default, because the words are the real signal; `hideLabel` turns the drawing into a labelled image instead, and `announce` adds a polite live region. Motion follows the turn-taking grammar: on the agent's turn the pen lines re-draw slightly (a line boil) and small parts move in steps; on the person's turn every line holds still. Drawn in code as seeded SVG strokes, coloured only by theme tokens (ink, card, muted ink and the four agent markers), so it themes, stays small and renders identically on server and client. Use it for onboarding, empty states, run panels and consumer products where an agent should feel present. Not a replacement for status text (pair it with Live Status Line or a label), and not for dense tables — use Agent Presence's `line` form there.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/agent-figure/agent-figure.tsx",
+      "target": "components/ui/agent-figure.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils` and the agent marker colours (`--agent-working`, `--agent-waiting`, `--agent-blocked`, `--agent-done` and their `-soft` fills) from @pixeldosa/pixeldosa-theme.",
+  "meta": {
+    "engineeringNotes": "The character is generated, not illustrated: each stroke is a polyline pushed off its true path by a seeded wobble and smoothed with Catmull-Rom curves. Seeds come from the pose, the stroke name and the frame, so the server and client render byte-identical paths and there is no hydration mismatch, and a new pose costs a few coordinates rather than an asset. Every colour is a theme token, so the figure follows light and dark mode and a host's palette. Poses map to things a run actually does, never to feelings: 'blocked' is a state, 'sad' is not, and the three result poses exist so confidence can be shown honestly rather than always looking pleased. The frame clock runs only while the pose is on the agent's turn, the figure is on screen (IntersectionObserver), and the tab is visible; otherwise nothing ticks.",
+    "motionNotes": "Two kinds of motion, both stepped at 280ms rather than eased, so the figure reads as drawn rather than rendered: the line boil (strokes re-seed every second frame) and a few discrete prop movements — eyes scanning a page, a key press, the thought bubble filling in. Both stop completely when the pose is the person's turn (`idle`, `asking`, `blocked`, `done` and the result poses), which is the system's rule that stillness means it's your turn. `still` holds the lines on the agent's turn too. Under `prefers-reduced-motion` nothing animates and each pose remains a distinct static drawing, so no information is lost."
+  }
+}

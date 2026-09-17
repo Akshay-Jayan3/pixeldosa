@@ -37,12 +37,13 @@ export default function AgentPresenceDemo() {
       <AgentPresence
         state={current.state}
         label={current.label}
-        form="orb"
+        form="figure"
         size="lg"
         onCancel={() => undefined}
       />
 
       <div className="flex w-full flex-col gap-4 border-t pt-6">
+        <AgentPresence state={current.state} label={current.label} form="mark" />
         <AgentPresence state={current.state} label={current.label} form="field" />
         <AgentPresence state={current.state} label={current.label} form="line" size="sm" />
       </div>

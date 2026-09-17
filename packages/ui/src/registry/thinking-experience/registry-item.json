@@ -4,7 +4,11 @@
   "title": "Thinking Experience",
   "description": "A complete agent run, orchestrated — the first Level 2 Block in this system, and the composed surface the AI-tier components exist to be assembled into. Takes one `state` from the agent vocabulary plus a `status` line, optional `reasoning` steps, an optional `ask` request, an optional `approval` request, and a terminal `result` with its action strip, then decides which of those surfaces belongs on screen at each moment. The value over rendering the same components yourself is entirely the orchestration: a consumer wiring Live Status Line, Reasoning Stream, Agent Ask and AI Approval Gate together has to re-derive when each appears, when reasoning should stop streaming, when the elapsed counter should freeze, and what happens to the machine's own surfaces while a human is being asked something — and that last question is the one most implementations get wrong. This block applies the turn-taking grammar at the level of the whole panel rather than a single indicator: when control passes back to the user, the machine's status and reasoning visibly step down in emphasis and whatever needs an answer takes a ring, while remaining fully interactive so a run can always be stopped even while it waits on you. Composes Live Status Line, Reasoning Stream, Agent Ask, AI Approval Gate and AI Action Toolbar, which transitively pulls in Agent Presence, Confidence Meter and AI Context Surface. Use it as the agent panel in a product — a sidebar, a drawer, an inline run surface. Not a chat thread and not a transcript: it shows one run in progress, not a history of turns.",
   "type": "registry:block",
-  "categories": ["ai-assisted", "application", "block"],
+  "categories": [
+    "ai-assisted",
+    "application",
+    "block"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@pixeldosa/pixeldosa-theme",
@@ -12,7 +16,8 @@
     "@pixeldosa/reasoning-stream",
     "@pixeldosa/agent-ask",
     "@pixeldosa/ai-approval-gate",
-    "@pixeldosa/ai-action-toolbar"
+    "@pixeldosa/ai-action-toolbar",
+    "@pixeldosa/agent-figure"
   ],
   "files": [
     {

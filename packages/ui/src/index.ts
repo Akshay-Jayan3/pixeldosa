@@ -210,3 +210,8 @@ export {
   type GenerationStatus,
   type GenerationForm,
 } from "./registry/generation-placeholder/generation-placeholder";
+export {
+  AgentFigure,
+  type AgentFigureProps,
+  type AgentPose,
+} from "./registry/agent-figure/agent-figure";

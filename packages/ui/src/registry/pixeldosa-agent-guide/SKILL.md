@@ -46,6 +46,7 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 |---|---|---|
 | Show what an agent is doing right now (indicator) | `agent-presence` | a spinner |
 | One line of current activity in a toolbar, footer, or table row | `live-status-line` | a toast |
+| A visible agent character in onboarding, empty states or a run panel (pose from the real run state; always with a label) | `agent-figure` (`variant="mark"` for inline) | a mascot image, a glowing orb |
 | Show the model's reasoning while it thinks | `reasoning-stream` | streaming the reasoning into the answer |
 | Agent needs structured input to continue | `agent-ask` | a chat message asking a question |
 | Agent wants to do something consequential | `ai-approval-gate` | a confirm() dialog |

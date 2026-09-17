@@ -76,7 +76,7 @@ const CommandMenu = React.forwardRef<HTMLDivElement, CommandMenuProps>(function 
             <div
               data-state={visible ? "open" : "closed"}
               className={cn(
-                "fixed inset-0 z-50 bg-background/70 backdrop-blur-sm",
+                "fixed inset-0 z-50 bg-background/85",
                 "opacity-0 transition-opacity duration-[var(--pd-duration-fast)] ease-[var(--pd-ease-standard)]",
                 "data-[state=open]:opacity-100",
                 "motion-reduce:transition-none"

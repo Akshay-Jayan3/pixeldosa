@@ -3,7 +3,8 @@
 import * as React from "react";
 
 import { AgentAsk, type AskField } from "@/registry/agent-ask/agent-ask";
-import type { AgentState } from "@/registry/agent-presence/agent-presence";
+import { AgentFigure } from "@/registry/agent-figure/agent-figure";
+import { agentPoseFor, type AgentState } from "@/registry/agent-presence/agent-presence";
 import { AIActionToolbar, type AIAction } from "@/registry/ai-action-toolbar/ai-action-toolbar";
 import {
   AIApprovalGate,
@@ -61,6 +62,12 @@ export interface ThinkingExperienceProps extends React.ComponentPropsWithoutRef<
   onCancel?: () => void;
   /** Heading level for the question or approval shown during the run. Defaults to 3. */
   headingLevel?: 2 | 3 | 4 | 5 | 6;
+  /**
+   * How much of the agent shows. `full` draws the whole figure beside the run, for
+   * onboarding and consumer products; `subtle` (default) keeps only its head in the
+   * status line; `off` uses plain dots, for dense professional tools.
+   */
+  expression?: "full" | "subtle" | "off";
 }
 
 const USER_TURN: AgentState[] = ["asking", "awaitingApproval", "suggesting"];
@@ -91,6 +98,7 @@ function ThinkingExperience({
   onResultAction,
   onCancel,
   headingLevel = 3,
+  expression = "subtle",
   className,
   ...props
 }: ThinkingExperienceProps) {
@@ -111,28 +119,43 @@ function ThinkingExperience({
           below readable contrast (2.1:1 in light mode). Emphasis now drops by role
           instead: decorative graphics fade, and primary text falls to the muted
           colour, which still clears 4.5:1. */}
-      <div
-        className={cn(
-          "flex flex-col gap-2 [&_*]:transition-[color,opacity] [&_*]:duration-[var(--pd-duration-base)] [&_*]:ease-[var(--pd-ease-standard)] motion-reduce:[&_*]:transition-none",
-          interrupt && "[&_[data-pd-decorative]]:opacity-40 [&_svg[aria-hidden=true]]:opacity-40 [&_.text-foreground]:text-muted-foreground"
-        )}
-      >
-        <LiveStatusLine
-          state={state}
-          status={status}
-          detail={detail}
-          startedAt={terminal ? undefined : startedAt}
-          onCancel={onCancel}
-        />
+      <div className="flex items-start gap-3">
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col gap-2 [&_*]:transition-[color,opacity] [&_*]:duration-[var(--pd-duration-base)] [&_*]:ease-[var(--pd-ease-standard)] motion-reduce:[&_*]:transition-none",
+            interrupt && "[&_[data-pd-decorative]]:opacity-40 [&_svg[aria-hidden=true]]:opacity-40 [&_.text-foreground]:text-muted-foreground"
+          )}
+        >
+          <LiveStatusLine
+            state={state}
+            status={status}
+            detail={detail}
+            startedAt={terminal ? undefined : startedAt}
+            onCancel={onCancel}
+            indicator={expression === "off" ? "line" : "mark"}
+          />
 
-        {reasoning && reasoning.length > 0 ? (
-          <div className="pl-[22px]">
-            <ReasoningStream
-              steps={reasoning}
-              isStreaming={!terminal && !userTurn}
-              durationMs={reasoningMs}
-            />
-          </div>
+          {reasoning && reasoning.length > 0 ? (
+            // Lines the trace up with the status text, past the indicator and its gap.
+            <div className={expression === "off" ? "pl-[22px]" : "pl-[34px]"}>
+              <ReasoningStream
+                steps={reasoning}
+                isStreaming={!terminal && !userTurn}
+                durationMs={reasoningMs}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        {/* The drawn agent, outside the region that steps down: when it's your turn, it's
+            the one asking, so it keeps full ink. Its label is the status line above. */}
+        {expression === "full" ? (
+          <AgentFigure
+            pose={agentPoseFor(state)}
+            hideLabel
+            aria-hidden="true"
+            className="hidden shrink-0 sm:inline-flex"
+          />
         ) : null}
       </div>
 

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { AgentFigure, type AgentPose } from "@/registry/agent-figure/agent-figure";
 import { AgentPresence, type AgentState } from "@/registry/agent-presence/agent-presence";
 import { AIActionToolbar } from "@/registry/ai-action-toolbar/ai-action-toolbar";
 import { CodeBlock, splitCodeFences } from "@/registry/code-block/code-block";
@@ -62,6 +63,23 @@ export interface AIChatExperienceProps extends Omit<React.ComponentPropsWithoutR
   onLoadOlder?: () => void;
   /** Level of the empty-state title and of the Sources headings in answers (the title is gone once a conversation exists, so they share the level). Defaults to 2. */
   headingLevel?: 2 | 3 | 4 | 5;
+  /**
+   * How much of the agent shows. `full` adds its drawn head as the assistant's avatar,
+   * with a face that follows the turn; `subtle` (default) shows the head only beside
+   * "Thinking"; `off` uses plain dots.
+   */
+  expression?: "full" | "subtle" | "off";
+}
+
+/** The avatar's face for a turn. Only the latest finished answer looks pleased. */
+function avatarPose(turn: ChatTurn, isLatest: boolean): AgentPose {
+  const status = turn.status ?? "done";
+  if (status === "failed") return "blocked";
+  if (status === "stopped") return "idle";
+  if (status === "done") return isLatest ? "done" : "idle";
+  if (turn.toolCalls?.some((call) => call.status === "running")) return "searching";
+  if (!turn.text && !turn.content) return "thinking";
+  return "working";
 }
 
 function defaultRenderText(text: string) {
@@ -125,6 +143,7 @@ function AIChatExperience({
   placeholder = "Ask anything…",
   onLoadOlder,
   headingLevel = 2,
+  expression = "subtle",
   className,
   ...props
 }: AIChatExperienceProps) {
@@ -250,6 +269,11 @@ function AIChatExperience({
                 key={turn.id}
                 role="assistant"
                 author={assistantName}
+                avatar={
+                  expression === "full" ? (
+                    <AgentFigure variant="mark" pose={avatarPose(turn, isLatest)} hideLabel aria-hidden="true" />
+                  ) : undefined
+                }
                 status={status}
                 error={turn.error}
                 onRetry={onRetry ? () => onRetry(turn.id) : undefined}
@@ -279,7 +303,12 @@ function AIChatExperience({
                   />
                 ) : null}
                 {turn.toolCalls?.length ? <ToolCallGroup calls={turn.toolCalls} /> : null}
-                {presence ? <AgentPresence state={presence.state} label={presence.label} form="line" size="sm" /> : null}
+                {presence ? <AgentPresence
+                    state={presence.state}
+                    label={presence.label}
+                    form={expression === "off" ? "line" : "mark"}
+                    size={expression === "off" ? "sm" : "default"}
+                  /> : null}
                 {turn.sources?.length && body ? (
                   <CitedText sources={turn.sources} headingLevel={headingLevel}>{body}</CitedText>
                 ) : (

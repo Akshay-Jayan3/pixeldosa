@@ -14,15 +14,15 @@ rationale, so any agent (not only Claude Code) can pick this up and stay consist
 
 ## 1. Identity, in one paragraph
 
-Pure monochrome. No brand hue anywhere in the neutral or primary roles — `primary` is
-foreground-on-background inverted (near-black on white in light, near-white on
-near-black in dark), the same move Linear's secondary/default UI and Vercel/Geist make:
-**contrast carries hierarchy, not colour.** `destructive` is the one token that keeps
-real chroma, because "this is dangerous" is a signal a grayscale UI still needs to
-send. Depth comes from `1px` borders, not heavy shadows. Corners are soft
-(`--radius: 0.75rem` base) but not playful. The whole identity reads as **restrained,
-not decorative** — closer to Linear/Framer's dark mode and shadcn's own neutral light
-scale than to any "premium SaaS" gradient-and-glow aesthetic.
+Ink on paper. Light is the default: a warm off-white page, near-black ink, pencil-grey
+secondary text, and `1px` rules for depth instead of shadows. `primary` is the ink
+itself, so **contrast carries hierarchy, not colour.** The only chroma is the four
+agent markers (`agent-working` blue, `agent-waiting` orange, `agent-blocked` red,
+`agent-done` yellow) plus `destructive`, and each has exactly one job. The agent has
+a body: `Agent Figure`, a hand-drawn character whose pose says what a run is doing,
+how sure it is, and when it needs the person. The whole identity reads as **a
+sketchbook, not a glowing screen**: handcrafted and a little playful, never gradients,
+glass, orbs or glow. Dark mode is the same drawing in reverse, not a separate brand.
 
 If a screen would look identical as a static Figma frame — no real state, no
 manipulation, no motion earning its place — it is not on-brand for this system. See
@@ -35,45 +35,61 @@ manipulation, no motion earning its place — it is not on-brand for this system
 ```yaml
 color:
   light:
-    background: "oklch(1 0 0)"
-    foreground: "oklch(0.145 0 0)"
-    card: "oklch(1 0 0)"
-    card-foreground: "oklch(0.145 0 0)"
-    popover: "oklch(1 0 0)"
-    popover-foreground: "oklch(0.145 0 0)"
-    primary: "oklch(0.145 0 0)"
-    primary-foreground: "oklch(0.985 0 0)"
-    secondary: "oklch(0.97 0 0)"
-    secondary-foreground: "oklch(0.205 0 0)"
-    muted: "oklch(0.97 0 0)"
-    muted-foreground: "oklch(0.52 0 0)"
-    accent: "oklch(0.97 0 0)"
-    accent-foreground: "oklch(0.205 0 0)"
+    background: "oklch(0.975 0.005 106)"
+    foreground: "oklch(0.231 0.004 264)"
+    card: "oklch(0.993 0.003 106)"
+    card-foreground: "oklch(0.231 0.004 264)"
+    popover: "oklch(0.993 0.003 106)"
+    popover-foreground: "oklch(0.231 0.004 264)"
+    primary: "oklch(0.231 0.004 264)"
+    primary-foreground: "oklch(0.993 0.003 106)"
+    secondary: "oklch(0.948 0.008 99)"
+    secondary-foreground: "oklch(0.231 0.004 264)"
+    muted: "oklch(0.948 0.008 99)"
+    muted-foreground: "oklch(0.493 0.008 268)"
+    accent: "oklch(0.948 0.008 99)"
+    accent-foreground: "oklch(0.231 0.004 264)"
     destructive: "oklch(0.55 0.22 27)"
     destructive-foreground: "oklch(0.985 0.005 24)"
-    border: "oklch(0.922 0 0)"
-    input: "oklch(0.922 0 0)"
-    ring: "oklch(0.556 0 0)"
+    border: "oklch(0.909 0.008 99)"
+    input: "oklch(0.850 0.011 101)"
+    ring: "oklch(0.493 0.008 268)"
+    agent-working: "oklch(0.506 0.182 265)"
+    agent-working-soft: "oklch(0.937 0.024 268)"
+    agent-waiting: "oklch(0.532 0.137 50)"
+    agent-waiting-soft: "oklch(0.949 0.031 71)"
+    agent-blocked: "oklch(0.523 0.171 28)"
+    agent-blocked-soft: "oklch(0.932 0.028 26)"
+    agent-done: "oklch(0.518 0.106 84)"
+    agent-done-soft: "oklch(0.957 0.046 94)"
   dark:
-    background: "oklch(0.139 0.003 246)"
-    foreground: "oklch(0.978 0.003 240)"
-    card: "oklch(0.172 0.003 248)"
-    card-foreground: "oklch(0.978 0.003 240)"
-    popover: "oklch(0.139 0.003 243)"
-    popover-foreground: "oklch(0.978 0.003 240)"
-    primary: "oklch(0.978 0.003 240)"
-    primary-foreground: "oklch(0.139 0.003 246)"
-    secondary: "oklch(0.24 0.006 250)"
-    secondary-foreground: "oklch(0.978 0.003 240)"
-    muted: "oklch(0.24 0.006 250)"
-    muted-foreground: "oklch(0.649 0.014 263)"
-    accent: "oklch(0.28 0.01 252)"
-    accent-foreground: "oklch(0.978 0.003 240)"
+    background: "oklch(0.198 0.004 129)"
+    foreground: "oklch(0.939 0.007 97)"
+    card: "oklch(0.233 0.004 129)"
+    card-foreground: "oklch(0.939 0.007 97)"
+    popover: "oklch(0.233 0.004 129)"
+    popover-foreground: "oklch(0.939 0.007 97)"
+    primary: "oklch(0.939 0.007 97)"
+    primary-foreground: "oklch(0.198 0.004 129)"
+    secondary: "oklch(0.279 0.006 122)"
+    secondary-foreground: "oklch(0.939 0.007 97)"
+    muted: "oklch(0.279 0.006 122)"
+    muted-foreground: "oklch(0.711 0.010 100)"
+    accent: "oklch(0.285 0.006 122)"
+    accent-foreground: "oklch(0.939 0.007 97)"
     destructive: "oklch(0.653 0.184 24)"
     destructive-foreground: "oklch(0.16 0.02 24)"
-    border: "oklch(0.299 0.011 254)"
-    input: "oklch(0.32 0.012 254)"
-    ring: "oklch(0.649 0.014 263)"
+    border: "oklch(0.311 0.005 122)"
+    input: "oklch(0.381 0.007 118)"
+    ring: "oklch(0.711 0.010 100)"
+    agent-working: "oklch(0.731 0.122 267)"
+    agent-working-soft: "oklch(0.289 0.052 266)"
+    agent-waiting: "oklch(0.779 0.127 63)"
+    agent-waiting-soft: "oklch(0.299 0.038 69)"
+    agent-blocked: "oklch(0.712 0.147 26)"
+    agent-blocked-soft: "oklch(0.287 0.042 25)"
+    agent-done: "oklch(0.826 0.137 92)"
+    agent-done-soft: "oklch(0.302 0.041 94)"
 
 radius:
   base: 0.75rem   # --radius, everything else derives from this
@@ -270,12 +286,12 @@ Full vocabulary, protocol mappings, and component set:
 - **When in doubt, ask what Linear, Vercel, Raycast, or Notion would ship** — not
   what would look impressive in a screenshot. Reference points are structural
   inspiration only; never copy an asset.
-- **Machine-native over organic.** Where a state needs a visual presence, prefer a
-  form that reads as computation (cells, grids, structured point fields) over one that
-  reads as biology (a breathing orb, a pulsing blob). An orb pretends to have a mind;
-  a field shows work being done. The same honesty rule as §3.3's no-fake-typing, one
-  layer up. The orb *form* is not banned — it's a legitimate showcase rendering — but
-  it must express real states, never stand in for a spinner.
+- **Drawn, not rendered.** Where a state needs a visual presence, draw it: pen lines,
+  flat marker fills, a character whose pose maps to a real run state. No glow, glass,
+  gradients or 3D. The drawing never pretends to have feelings: "blocked" is a state,
+  "sad" is not, and a result pose (`confident`, `probable`, `unsure`) must match the
+  system's real confidence. The older orb form of `Agent Presence` is being retired
+  for the same reason.
 - **States morph, they never cut.** A transition between two agent states is a
   continuous reconfiguration of the same elements, not a swap between two animations.
   This is the hardest thing in the system to fake and the clearest available signal of
