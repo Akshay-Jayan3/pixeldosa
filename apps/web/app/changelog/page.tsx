@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Changelog",
-  description: "Every PixelDosa release during the beta: new components, improvements, fixes and anything that changed an API.",
+  description: "Every Pixel Dosa release during the beta: new components, improvements, fixes and anything that changed an API.",
 };
 
 const KIND_ORDER: ChangeKind[] = ["breaking", "new", "improved", "fixed"];
@@ -75,7 +75,7 @@ export default function ChangelogPage() {
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Beta</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Changelog</h1>
         <p className="mt-3 text-muted-foreground text-pretty">
-          PixelDosa ships in small drops. During the beta, APIs can still change, and when one does it's listed here
+          Pixel Dosa ships in small drops. During the beta, APIs can still change, and when one does it's listed here
           first, marked <span className="font-medium text-foreground">Breaking</span>.
         </p>
       </header>

@@ -1,4 +1,4 @@
-# PixelDosa — DESIGN.md
+# Pixel Dosa — DESIGN.md
 
 A design engineering system for AI startups. This file is the standing reference for
 **visual identity, UI/UX rules, and taste** — check it before generating or reviewing

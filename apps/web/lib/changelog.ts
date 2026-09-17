@@ -43,7 +43,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-09-16",
     title: "Ink on paper, and an agent you can see",
     summary:
-      "PixelDosa now looks like a sketchbook instead of a glowing screen: a light paper theme by default, near-black ink, and four marker colours that each mean one thing. And the agent gets a body: a hand-drawn character whose pose shows what it's doing, how sure it is, and when it needs you.",
+      "Pixel Dosa now looks like a sketchbook instead of a glowing screen: a light paper theme by default, near-black ink, and four marker colours that each mean one thing. And the agent gets a body: a hand-drawn character whose pose shows what it's doing, how sure it is, and when it needs you.",
     changes: [
       { kind: "new", component: "agent-figure" },
       { kind: "improved", note: "Theme: a new ink-and-paper palette in light and dark. The site now opens in light mode." },
@@ -69,7 +69,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       { kind: "fixed", note: "Examples that use more than their own component, such as Agent Steer with Live Status Line, now list what else they need, with one install command for everything." },
       { kind: "fixed", component: "prompt-composer", note: "Re-measures its height when its width changes. A composer rendered while hidden, or a resized window, could keep an empty text area at full height." },
       { kind: "fixed", note: "Theme: the corner radius now applies in projects that already define one." },
-      { kind: "improved", note: "Getting started explains that installing the theme directly applies PixelDosa's palette, while pulling it in as a dependency keeps a project's existing colours." },
+      { kind: "improved", note: "Getting started explains that installing the theme directly applies Pixel Dosa's palette, while pulling it in as a dependency keeps a project's existing colours." },
     ],
   },
   {
@@ -142,7 +142,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       { kind: "new", component: "agent-steer" },
       { kind: "new", component: "ai-triage-table" },
       { kind: "new", component: "ai-form-fill" },
-      { kind: "new", note: "Agent guide, /llms.txt and per-component markdown, so coding agents can find and use PixelDosa correctly." },
+      { kind: "new", note: "Agent guide, /llms.txt and per-component markdown, so coding agents can find and use Pixel Dosa correctly." },
       { kind: "fixed", note: "Collapsed panels in Reasoning Stream and AI Context Surface no longer take keyboard focus." },
     ],
   },

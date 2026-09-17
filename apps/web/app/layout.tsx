@@ -10,8 +10,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "PixelDosa — give your agents life",
-    template: "%s — PixelDosa",
+    default: "Pixel Dosa — give your agents life",
+    template: "%s — Pixel Dosa",
   },
   description:
     "Components, blocks and agent skills for AI products that do real work: editable plans, steerable runs, approvals that state consequences, and an agent people can read. Pure React, no SDK lock-in.",
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <footer className="border-t py-8">
           <div className="mx-auto max-w-6xl px-4 text-sm text-muted-foreground sm:px-6">
-            PixelDosa (beta). Designed and built by{" "}
+            Pixel Dosa (beta). Designed and built by{" "}
             <a href={PORTFOLIO_URL} className="text-foreground underline underline-offset-4 hover:no-underline">
               Akshay Jayan
             </a>

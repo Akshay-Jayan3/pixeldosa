@@ -1,11 +1,11 @@
 ---
 name: pixeldosa
-description: Build AI product interfaces with PixelDosa components. Use whenever adding AI features to a React app — agent status, reasoning, approvals, AI-filled forms, generated media, AI suggestions in fields or documents. Covers which component fits which job, how to compose them, and the UX rules that make AI interfaces trustworthy.
+description: Build AI product interfaces with Pixel Dosa components. Use whenever adding AI features to a React app — agent status, reasoning, approvals, AI-filled forms, generated media, AI suggestions in fields or documents. Covers which component fits which job, how to compose them, and the UX rules that make AI interfaces trustworthy.
 ---
 
-# Building with PixelDosa
+# Building with Pixel Dosa
 
-PixelDosa is the trust layer for AI products: components for the moments people decide
+Pixel Dosa is the trust layer for AI products: components for the moments people decide
 whether to trust an agent, plus a complete chat stack. Components are plain React: props in, callbacks out. No AI SDK,
 provider, or protocol is required. Wire your own model or agent events to the props.
 
@@ -20,7 +20,7 @@ Add the registry to `components.json`:
 "registries": { "@pixeldosa": "https://pixeldosa.akshayjayan.com/r/{name}.json" }
 ```
 
-Install the theme once, explicitly, then any component. Dependencies install automatically, but a theme pulled in as a dependency keeps the colours the project already has; only a direct install applies the PixelDosa palette.
+Install the theme once, explicitly, then any component. Dependencies install automatically, but a theme pulled in as a dependency keeps the colours the project already has; only a direct install applies the Pixel Dosa palette.
 
 ```bash
 npx shadcn@latest add @pixeldosa/pixeldosa-theme
@@ -123,7 +123,7 @@ Foundation: `button`, `card`, `field`, `overlay`, `command-menu`.
 
 Components take no AI dependency — map your stack's events to props yourself.
 
-| Your event | PixelDosa |
+| Your event | Pixel Dosa |
 |---|---|
 | Request accepted, not started | `state="queued"` |
 | Reasoning tokens / reasoning part | `state="thinking"`, `reasoning-stream` steps |

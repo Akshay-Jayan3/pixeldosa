@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/docs";
 
 export const metadata: Metadata = {
   title: "Build with AI",
-  description: "Set up Claude Code, Cursor, or any coding agent to find, install and build with PixelDosa correctly.",
+  description: "Set up Claude Code, Cursor, or any coding agent to find, install and build with Pixel Dosa correctly.",
 };
 
 const mcpConfig = `{
@@ -48,7 +48,7 @@ export default function BuildWithAIPage() {
     <article className="mx-auto max-w-2xl">
       <h1 className="text-3xl font-semibold tracking-tight">Build with AI</h1>
       <p className="mt-3 text-muted-foreground text-pretty">
-        Most teams will meet PixelDosa through a coding agent. Finding and installing
+        Most teams will meet Pixel Dosa through a coding agent. Finding and installing
         components is the easy part — agents can already do that. The part that matters is
         the agent knowing <em>how</em> to use them: that nothing an AI proposes gets saved
         without review, that an approval states whether it can be undone, that the thing
@@ -64,7 +64,7 @@ export default function BuildWithAIPage() {
 
       <Step n={2} title="Install the agent guide">
         <p>
-          This puts PixelDosa&apos;s component guide and UX rules into your repo, where your
+          This puts Pixel Dosa&apos;s component guide and UX rules into your repo, where your
           agent reads them on every task. It installs as a Claude Code skill at{" "}
           <code className="font-mono text-foreground">.claude/skills/pixeldosa/SKILL.md</code>.
           For Cursor, Copilot or other agents, reference that file from your rules or{" "}
@@ -133,7 +133,7 @@ export default function BuildWithAIPage() {
       <section className="mt-12 rounded-lg border-l-2 border-l-primary bg-card p-5">
         <h2 className="text-base font-medium tracking-tight">No AI stack required</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground text-pretty">
-          PixelDosa components are plain React. They don&apos;t depend on the AI SDK, A2UI,
+          Pixel Dosa components are plain React. They don&apos;t depend on the AI SDK, A2UI,
           LangGraph, MCP or any provider — your agent wires its own events to props. Each
           component page shows how common agent events map on.{" "}
           <Link href="/docs/components/agent-presence" className="text-foreground underline underline-offset-4">
