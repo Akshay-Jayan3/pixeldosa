@@ -34,7 +34,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       "Templates are coming: full starter apps for AI that makes and does. Early access is free, and what you tell us decides which ones come first.",
     changes: [
       { kind: "new", note: "Free early access to templates (Image Studio, Video Studio, Research Agent, Run Inbox and more), requested through a short GitHub form." },
-      { kind: "new", note: "Agent UX sprints for AI startups: a review against the problems people hit with AI, then the fixes, built in your codebase." },
+      { kind: "new", note: "Work with me: design engineering for AI products, from agent and generation interfaces to custom components and design systems." },
       { kind: "improved", note: "GitHub issue forms for component and template requests, and for bugs." },
     ],
   },

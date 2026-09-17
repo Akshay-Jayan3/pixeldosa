@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
 import { SiteHeader } from "@/components/site-header";
+import { PORTFOLIO_URL } from "@/lib/links";
 
 import "@fontsource/kalam/400.css";
 import "@fontsource/kalam/700.css";
@@ -42,7 +43,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <footer className="border-t py-8">
           <div className="mx-auto max-w-6xl px-4 text-sm text-muted-foreground sm:px-6">
-            PixelDosa (beta). The trust layer for AI products, crafted by a design engineer.
+            PixelDosa (beta). Designed and built by{" "}
+            <a href={PORTFOLIO_URL} className="text-foreground underline underline-offset-4 hover:no-underline">
+              Akshay Jayan
+            </a>
+            , design engineer.
           </div>
         </footer>
         <Analytics />

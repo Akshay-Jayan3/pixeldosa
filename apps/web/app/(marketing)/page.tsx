@@ -351,7 +351,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What's next: free early access, and sprints */}
+      {/* What's next: free early access, and working with me */}
       <section data-guide="next" aria-labelledby="next" className="border-t">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <h2 id="next" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
@@ -377,11 +377,11 @@ export default function HomePage() {
               <AgentFigure pose="working" size="sm" hideLabel aria-hidden="true" />
               <h3 className="text-lg font-medium">Building an AI product now?</h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                An agent UX sprint: a review against the problems people hit with AI, then the fixes, built in your
-                codebase.
+                I build interfaces for agents and generation features, custom components on PixelDosa, and the
+                design systems underneath.
               </p>
               <Button asChild variant="outline" className="mt-auto">
-                <Link href="/sprint">About the sprint</Link>
+                <Link href="/work-with-me">Work with me</Link>
               </Button>
             </div>
           </div>

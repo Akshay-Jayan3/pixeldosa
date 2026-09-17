@@ -3,15 +3,18 @@ import Link from "next/link";
 import { AgentFigure } from "@pixeldosa/ui";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { PORTFOLIO_URL } from "@/lib/links";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background">
-      <div className="flex h-14 items-center gap-6 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+      {/* Three columns so the nav sits in the true centre, whatever the widths of the logo and
+          the right-hand controls. */}
+      <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
+        <Link href="/" className="flex items-center gap-2 justify-self-start font-semibold tracking-tight">
           <AgentFigure variant="mark" size="md" pose="idle" hideLabel aria-hidden="true" />
           PixelDosa
-          <span className="rounded-full border px-1.5 py-px text-[0.625rem] font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="hidden rounded-full border px-1.5 py-px sm:inline text-[0.625rem] font-medium uppercase tracking-wider text-muted-foreground">
             Beta
           </span>
         </Link>
@@ -29,12 +32,18 @@ export function SiteHeader() {
           <Link href="/changelog" className="hidden hover:text-foreground sm:inline">
             Changelog
           </Link>
-          <Link href="/sprint" className="hidden hover:text-foreground md:inline">
+          <Link href="/work-with-me" className="hidden hover:text-foreground md:inline">
             Work with me
           </Link>
         </nav>
 
-        <div className="ml-auto">
+        <div className="flex items-center gap-3 justify-self-end">
+          <a
+            href={PORTFOLIO_URL}
+            className="hidden text-sm text-muted-foreground hover:text-foreground lg:inline"
+          >
+            Akshay Jayan ↗
+          </a>
           <ThemeToggle />
         </div>
       </div>
