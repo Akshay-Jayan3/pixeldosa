@@ -3,7 +3,6 @@ import Link from "next/link";
 import { AgentFigure } from "@pixeldosa/ui";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { PORTFOLIO_URL } from "@/lib/links";
 
 export function SiteHeader() {
   return (
@@ -37,13 +36,7 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3 justify-self-end">
-          <a
-            href={PORTFOLIO_URL}
-            className="hidden text-sm text-muted-foreground hover:text-foreground lg:inline"
-          >
-            Akshay Jayan ↗
-          </a>
+        <div className="justify-self-end">
           <ThemeToggle />
         </div>
       </div>
