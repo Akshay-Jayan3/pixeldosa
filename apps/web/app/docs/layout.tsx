@@ -38,8 +38,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex">
-      <aside className="hidden w-52 shrink-0 border-r border-border md:block">
-        <nav className="sticky top-14 h-[calc(100svh-3.5rem)] overflow-y-auto p-3">
+      <aside aria-label="Docs sidebar" className="hidden w-52 shrink-0 border-r border-border md:block">
+        <nav aria-label="Docs" className="sticky top-14 h-[calc(100svh-3.5rem)] overflow-y-auto p-3">
           <DocsSidebarNav groups={groups} />
         </nav>
       </aside>

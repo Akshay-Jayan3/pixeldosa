@@ -12,6 +12,7 @@
     "registry:build": "tsx scripts/build-registry.ts && shadcn build --output public/r && tsx scripts/postprocess-registry.ts"
   },
   "dependencies": {
+    "@fontsource/kalam": "^5.3.0",
     "@pixeldosa/tokens": "workspace:*",
     "@pixeldosa/ui": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.23",

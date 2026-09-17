@@ -101,6 +101,7 @@ a stopwatch:
 | `detail` | `string` | — | What it's acting on. Truncates before the verb. |
 | `startedAt` | `number \| Date` | — | Drives the live elapsed counter. |
 | `onCancel` | `() => void` | — | Shown while the agent is active. |
+| `indicator` | `"mark" \| "line"` | `"mark"` | The agent's drawn head, or three dots for the densest rows. |
 
 All other props forward to the wrapping `<div>`.
 

@@ -27,6 +27,26 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-16-ink",
+    date: "2026-09-16",
+    title: "Ink on paper, and an agent you can see",
+    summary:
+      "PixelDosa now looks like a sketchbook instead of a glowing screen: a light paper theme by default, near-black ink, and four marker colours that each mean one thing. And the agent gets a body: a hand-drawn character whose pose shows what it's doing, how sure it is, and when it needs you.",
+    changes: [
+      { kind: "new", component: "agent-figure" },
+      { kind: "improved", note: "Theme: a new ink-and-paper palette in light and dark. The site now opens in light mode." },
+      { kind: "new", note: "Theme: four agent marker colours, each with a soft fill: `agent-working` (blue), `agent-waiting` (orange, the only one that asks for action), `agent-blocked` (red) and `agent-done` (yellow). All four read as text in both themes." },
+      { kind: "improved", note: "No more blur, glow or gradient fades: Command Menu and Overlay use a plain paper scrim, Generation Placeholder's sweep is a drawn edge on a flat wash, and Code Block's \"Show all\" sits on a solid strip." },
+      { kind: "improved", component: "reasoning-stream", note: "The collapsed ticker shows the last two lines, cropped rather than faded." },
+      { kind: "improved", component: "agent-presence", note: "`form=\"orb\"` is deprecated and will be removed in a later drop. It still renders. Use `field`, or Agent Figure for a visible agent." },
+      { kind: "improved", component: "agent-presence", note: "New `figure` and `mark` forms draw the agent with Agent Figure. Each state takes a pose, and the poses for your turn hold still." },
+      { kind: "improved", component: "live-status-line", note: "Shows the agent's drawn head by default, with a face that follows the state. `indicator=\"line\"` keeps the dots." },
+      { kind: "improved", component: "thinking-experience", note: "New `expression` prop: `full` draws the whole agent beside the run, `subtle` (default) keeps its head in the status line, `off` uses dots." },
+      { kind: "improved", component: "ai-chat-experience", note: "New `expression` prop: `full` adds the agent's head as the assistant's avatar, `subtle` (default) shows it beside \"Thinking\", `off` uses dots." },
+      { kind: "improved", note: "New homepage with the agent front and centre, and Dosa, a guide that walks you through it and can be hidden." },
+    ],
+  },
+  {
     id: "2026-09-15-install",
     date: "2026-09-15",
     title: "Installs cleanly in a new project",

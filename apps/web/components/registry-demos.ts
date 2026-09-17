@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+import AgentFigureDemo from "@pixeldosa/ui/registry/agent-figure/agent-figure.demo";
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
 import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-preview.demo";
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
@@ -313,6 +314,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A high-risk, irreversible send held for approval — scope, confidence and reasoning.",
       render: AIApprovalGateDemo,
+    },
+  ],
+  "agent-figure": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A research run where the drawn agent listens, plans, searches, asks, and hands over the result.",
+      render: AgentFigureDemo,
     },
   ],
   "live-status-line": [

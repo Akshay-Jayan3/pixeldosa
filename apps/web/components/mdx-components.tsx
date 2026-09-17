@@ -100,7 +100,8 @@ export const mdxComponents: MDXComponents = {
   pre: (props) => (
     <pre
       {...props}
-      className="mt-3 overflow-x-auto rounded-lg border bg-card p-4 text-sm [&_code]:bg-transparent [&_code]:p-0"
+      tabIndex={0}
+      className="mt-3 overflow-x-auto rounded-lg border bg-card p-4 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 [&_code]:bg-transparent [&_code]:p-0"
     />
   ),
   table: (props) => (

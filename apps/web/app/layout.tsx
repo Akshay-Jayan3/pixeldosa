@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { SiteHeader } from "@/components/site-header";
 
+import "@fontsource/kalam/400.css";
+import "@fontsource/kalam/700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,14 +18,14 @@ export const metadata: Metadata = {
 /**
  * Applied before first paint so the correct theme is already on <html> when the
  * document renders. Doing this in an effect instead produces a light-mode flash
- * on every dark-mode load. Dark is the default identity — an explicit stored
- * preference is the only thing that overrides it, system preference is not
- * consulted.
+ * on every dark-mode load. Light (ink on paper) is the default identity — an
+ * explicit stored preference is the only thing that overrides it, system preference
+ * is not consulted.
  */
 const themeScript = `
 try {
   var stored = localStorage.getItem('pd-theme');
-  var dark = stored ? stored === 'dark' : true;
+  var dark = stored === 'dark';
   document.documentElement.classList.toggle('dark', dark);
 } catch (e) {}
 `;

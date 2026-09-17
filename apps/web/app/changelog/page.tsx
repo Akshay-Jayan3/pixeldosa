@@ -110,7 +110,7 @@ export default function ChangelogPage() {
 
                 <div className="mt-6 flex flex-col gap-5">
                   {groups.map((group) => (
-                    <section key={group.kind} aria-label={KIND_LABEL[group.kind]}>
+                    <section key={group.kind} aria-label={`${KIND_LABEL[group.kind]}: ${entry.title}`}>
                       <h3
                         className={cn(
                           "text-xs font-medium uppercase tracking-wider",

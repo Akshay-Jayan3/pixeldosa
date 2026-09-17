@@ -31,9 +31,6 @@ export function AgentBar({ run }: { run: AgentRun }) {
 - **Rotation speed *is* the state** — 24s per revolution when queued, 4s when working.
   The same object communicates urgency through tempo, which is what lets states morph
   into each other rather than cut between separate animations.
-- **A real sphere, not a ring.** The orb distributes points by Fibonacci spiral inside
-  a CSS 3D container, so perspective supplies depth scaling for free. No canvas, no
-  per-frame JavaScript.
 - **The vocabulary is taken, not invented** — every state maps to a real protocol
   event. See the mapping below.
 - **Reduced motion loses nothing.** Each state holds a visually distinct static
@@ -70,14 +67,27 @@ thing that wants attention is the only thing not moving.
   <AgentPresence state="cancelled" />
 </PreviewStack>
 
-### Orb
+### Figure and mark
 
-For hero surfaces — an agent panel header, an empty state, a landing demo.
+The agent, drawn. Each state takes an Agent Figure pose, and the poses for your turn hold
+still. `mark` is the head alone, for inline use.
+
+<Preview>
+  <AgentPresence state="working" form="figure" label="Searching invoices" />
+  <AgentPresence state="awaitingApproval" form="figure" />
+</Preview>
 
 <PreviewStack>
-  <AgentPresence state="working" form="orb" size="lg" label="Working" />
-  <AgentPresence state="awaitingApproval" form="orb" size="lg" />
+  <AgentPresence state="thinking" form="mark" />
+  <AgentPresence state="asking" form="mark" />
 </PreviewStack>
+
+### Orb (deprecated)
+
+`form="orb"` still renders, so existing screens keep working, but it will be removed in
+a later drop. A glowing sphere reads as a mind rather than as work. For hero surfaces,
+empty states and agent panels, use `Agent Figure`, which draws the agent and shows what
+it's doing.
 
 ### Line
 
@@ -141,7 +151,7 @@ still announced to screen readers:
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `state` | `AgentState` | — | Required. One of the eleven states above. |
-| `form` | `"field" \| "orb" \| "line"` | `"field"` | |
+| `form` | `"figure" \| "mark" \| "field" \| "line" \| "orb"` | `"field"` | `figure` and `mark` draw the agent with Agent Figure. `orb` is deprecated. |
 | `size` | `"sm" \| "default" \| "lg"` | `"default"` | |
 | `label` | `string` | per state | Override the default. For `working`, name the tool. |
 | `hideLabel` | `boolean` | `false` | Visually hides the label; still announced. |

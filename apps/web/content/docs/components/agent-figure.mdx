@@ -1,0 +1,121 @@
+---
+title: Agent Figure
+description: A hand-drawn agent whose pose shows what a run is doing, how sure it is, and when it needs you.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentFigure } from "@/components/ui/agent-figure";
+
+<AgentFigure pose="searching" label="Checking 5 sources" />
+```
+
+Map what your run is doing to a `pose` and pass it in. The component doesn't read your
+stream or own the run.
+
+## Features
+
+- **Its body shows its state.** Every pose maps to something a run really does:
+  listening, planning, searching, reading, comparing, working, asking, blocked, done.
+  There are no moods.
+- **It shows how sure it is.** `confident`, `probable` and `unsure` are for handing
+  over a result. Drive them from your real confidence, the same tiers as
+  `Confidence Meter`. Never pick one to reassure.
+- **It's still on your turn.** While the agent works, its pen lines redraw slightly
+  and small parts move in steps. When it's waiting on you, blocked or done, every line
+  holds still.
+- **Words come first.** A visible label sits beside the figure by default. The
+  drawing supports the label; it never replaces it.
+- **Drawn in code.** Seeded strokes render the same on server and client, and every
+  colour comes from the theme, so it follows light and dark mode.
+- **Four markers, one job each.** Blue is working, orange means it needs you, red is
+  blocked, yellow is done. Everything else is ink.
+
+## Variants
+
+### The work poses
+
+<Preview>
+  <AgentFigure pose="listening" labelPosition="below" />
+  <AgentFigure pose="thinking" labelPosition="below" />
+  <AgentFigure pose="planning" labelPosition="below" />
+  <AgentFigure pose="searching" labelPosition="below" />
+  <AgentFigure pose="reading" labelPosition="below" />
+  <AgentFigure pose="comparing" labelPosition="below" />
+  <AgentFigure pose="working" labelPosition="below" />
+</Preview>
+
+### Your turn: it holds still
+
+<Preview>
+  <AgentFigure pose="idle" labelPosition="below" />
+  <AgentFigure pose="asking" labelPosition="below" />
+  <AgentFigure pose="blocked" labelPosition="below" label="A source didn't load" />
+  <AgentFigure pose="done" labelPosition="below" />
+</Preview>
+
+### How sure it is
+
+<Preview>
+  <AgentFigure pose="confident" labelPosition="below" label="Found it: 4 of 5 are per seat" />
+  <AgentFigure pose="probable" labelPosition="below" label="Probably per seat" />
+  <AgentFigure pose="unsure" labelPosition="below" label="Two pages disagree" />
+</Preview>
+
+### Mark
+
+The head alone, for a status line, an avatar or a button.
+
+<Preview>
+  <AgentFigure variant="mark" size="sm" pose="working" label="Reading invoices/2026-q3.csv" />
+  <AgentFigure variant="mark" size="md" pose="asking" label="Needs your input" />
+  <AgentFigure variant="mark" size="lg" pose="done" label="Summary ready" />
+</Preview>
+
+## Examples
+
+Beside the step a run is on, with the status text doing the talking:
+
+```tsx
+<AgentFigure pose={run.pose} size="lg" labelPosition="below" label={run.status} announce />
+```
+
+As a subtle presence in a dense tool, with only the head:
+
+```tsx
+<AgentFigure variant="mark" pose={run.pose} label={run.status} />
+```
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `pose` | `AgentPose` | required | One of the fourteen poses above. |
+| `variant` | `"figure" \| "mark"` | `"figure"` | `mark` draws the head alone. |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Figure: 48, 96 or 160px. Mark: 16, 24 or 32px. |
+| `label` | `string` | pose label | What the pose means, in words. |
+| `hideLabel` | `boolean` | `false` | Hides the visible label; the drawing then carries it as its accessible name. |
+| `labelPosition` | `"end" \| "below"` | `"end"` | Where the visible label sits. |
+| `announce` | `boolean` | `false` | Announces label changes through a polite live region. |
+| `still` | `boolean` | `false` | Holds the lines still on the agent's turn too. |
+
+## Accessibility
+
+- With a visible label, the drawing is hidden from assistive technology and the label is
+  read as ordinary text.
+- With `hideLabel`, the drawing becomes an image named by `label`.
+- `announce` is off by default. Turn it on only when nothing else on the page announces
+  the run's status, so screen reader users don't hear it twice.
+- Under `prefers-reduced-motion`, nothing moves and every pose stays a distinct drawing.
+- The frame clock stops when the figure is off screen or the tab is hidden.
+
+## When not to use
+
+- **As the only signal.** Always pair it with words: a label, `Live Status Line`, or
+  the step list it sits beside.
+- **In dense tables and toolbars.** Use `Agent Presence` in its `line` form there.
+- **To show feelings.** If a pose would make the agent look more certain, sorry or
+  pleased than the system is, don't use it.

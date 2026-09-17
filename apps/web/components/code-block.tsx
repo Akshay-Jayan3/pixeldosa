@@ -33,14 +33,16 @@ export function CodeBlock({ code, language, className, collapsible }: CodeBlockP
       <button
         type="button"
         onClick={copy}
-        className="absolute right-2 top-2 z-10 rounded-md border bg-background/80 px-2 py-1 font-mono text-xs text-muted-foreground backdrop-blur transition-colors duration-[var(--pd-duration-instant)] hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
+        className="absolute right-2 top-2 z-10 rounded-md border bg-card px-2 py-1 font-mono text-xs text-muted-foreground transition-colors duration-[var(--pd-duration-instant)] hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
       >
         {copied ? "copied" : "copy"}
       </button>
 
+      {/* Focusable so keyboard users can scroll a long or wide snippet. */}
       <pre
+        tabIndex={0}
         className={cn(
-          "overflow-x-auto p-4 text-sm leading-relaxed",
+          "overflow-x-auto p-4 text-sm leading-relaxed outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/40",
           !expanded && "max-h-80"
         )}
       >

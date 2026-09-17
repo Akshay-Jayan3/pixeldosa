@@ -60,11 +60,9 @@ export function ComponentThumbnail({ name, tall = false }: { name: string; tall?
       ref={stageRef}
       aria-hidden="true"
       className={cn(
-        "relative flex w-full items-center justify-center overflow-hidden bg-muted/40",
-        // A faint dot grid gives the stage depth without another border.
-        "bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:16px_16px]",
-        // Soft edges: anything taller than the stage fades out instead of being cut.
-        "[mask-image:linear-gradient(to_bottom,transparent,black_10%,black_88%,transparent)]",
+        // Plain paper. The demo is centred and anything taller is simply cropped, like a
+        // photo of a page; no dot grid or fade, which read as generic SaaS surface.
+        "relative flex w-full items-center justify-center overflow-hidden bg-muted/50",
         tall ? "aspect-[16/7]" : "aspect-[16/10]"
       )}
     >

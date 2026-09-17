@@ -150,14 +150,10 @@
   }
 }
 
-/* The docs site's own surface treatment — a faint warm grid that reads as
-   "engineering surface" without competing with the components on top of it. */
-.pd-grid {
-  background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
+/* Handwriting, for the site's own annotations only (notes, the guide, the hero). Never for
+   interface text: labels, buttons and body copy stay in the sans. */
+@theme {
+  --font-hand: "Kalam", "Segoe Print", "Bradley Hand", cursive;
 }
 
 *{
