@@ -86,7 +86,7 @@ const MARKER_SWATCH: Record<(typeof MARKERS)[number]["color"], string> = {
 };
 
 const GUIDE: GuideStop[] = [
-  { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through Pixel Dosa. Scroll whenever you like." },
+  { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through PixelDosa. Scroll whenever you like." },
   { id: "cast", pose: "listening", text: "This is me. Each pose matches something a real run is doing." },
   { id: "chat", pose: "working", text: "Here I'm inside a full assistant screen. Pick a question and watch." },
   { id: "stages", pose: "planning", text: "Trust gets decided before, during and after a run. Each moment has its own pieces." },
@@ -358,7 +358,7 @@ export default function HomePage() {
             Coming next: whole products, not just parts.
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
-            Templates are full starter apps built from Pixel Dosa, for AI that makes and does: an image studio, a
+            Templates are full starter apps built from PixelDosa, for AI that makes and does: an image studio, a
             video studio, a research agent, an inbox for background agents.
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -377,7 +377,7 @@ export default function HomePage() {
               <AgentFigure pose="working" size="sm" hideLabel aria-hidden="true" />
               <h3 className="text-lg font-medium">Building an AI product now?</h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                I build interfaces for agents and generation features, custom components on Pixel Dosa, and the
+                I build interfaces for agents and generation features, custom components on PixelDosa, and the
                 design systems underneath.
               </p>
               <Button asChild variant="outline" className="mt-auto">

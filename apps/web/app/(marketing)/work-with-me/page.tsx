@@ -8,16 +8,16 @@ import { PORTFOLIO_URL, WORK_CONTACT_URL, WORK_EMAIL_URL } from "@/lib/links";
 export const metadata: Metadata = {
   title: "Work with me",
   description:
-    "Design engineering for AI products: interfaces for agents and generation features, custom components on Pixel Dosa, and design systems from Figma to code.",
+    "Design engineering for AI products: interfaces for agents and generation features, custom components on PixelDosa, and design systems from Figma to code.",
 };
 
 const OFFERS = [
   {
     title: "Build your AI interface",
-    body: "The front end of your agent or generation features, from your designs or from Pixel Dosa's building blocks: plans, progress, approvals, results people can check.",
+    body: "The front end of your agent or generation features, from your designs or from PixelDosa's building blocks: plans, progress, approvals, results people can check.",
   },
   {
-    title: "Custom components on Pixel Dosa",
+    title: "Custom components on PixelDosa",
     body: "Components and blocks your product needs that the library doesn't have yet, fitted to your brand and your stack.",
   },
   {
@@ -44,7 +44,7 @@ const STEPS: { pose: AgentPose; title: string; body: string }[] = [
   {
     pose: "working",
     title: "Build it",
-    body: "In your codebase, with Pixel Dosa components where they fit and your design system around them.",
+    body: "In your codebase, with PixelDosa components where they fit and your design system around them.",
   },
   {
     pose: "done",
@@ -69,7 +69,7 @@ export default function WorkWithMePage() {
             <a href={PORTFOLIO_URL} className="text-foreground underline underline-offset-4 hover:no-underline">
               Akshay Jayan
             </a>
-            , the design engineer behind Pixel Dosa. I build interfaces for agents and generation
+            , the design engineer behind PixelDosa. I build interfaces for agents and generation
             features, and the design systems underneath them.
           </p>
           <div className="flex flex-wrap items-center gap-3">
@@ -119,7 +119,7 @@ export default function WorkWithMePage() {
           ))}
         </ol>
         <p className="font-hand text-lg text-muted-foreground">
-          The interaction rules come from Pixel Dosa, which draws on published research about how people use AI.
+          The interaction rules come from PixelDosa, which draws on published research about how people use AI.
         </p>
       </section>
 

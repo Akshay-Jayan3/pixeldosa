@@ -1,8 +1,8 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "pixeldosa-theme",
-  "title": "Pixel Dosa Theme",
-  "description": "The Pixel Dosa design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every Pixel Dosa component animates against. Install this once per project before or alongside any other Pixel Dosa component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
+  "title": "PixelDosa Theme",
+  "description": "The PixelDosa design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every PixelDosa component animates against. Install this once per project before or alongside any other PixelDosa component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
   "type": "registry:theme",
   "categories": ["core", "theme"],
   "files": [],

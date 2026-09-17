@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Components",
-  description: "Every Pixel Dosa component, browsable with a live preview.",
+  description: "Every PixelDosa component, browsable with a live preview.",
 };
 
 /**

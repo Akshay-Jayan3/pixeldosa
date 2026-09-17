@@ -12,7 +12,7 @@ export function SiteHeader() {
       <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 justify-self-start font-semibold tracking-tight">
           <AgentFigure variant="mark" size="md" pose="idle" hideLabel aria-hidden="true" />
-          Pixel Dosa
+          PixelDosa
           <span className="hidden rounded-full border px-1.5 py-px sm:inline text-[0.625rem] font-medium uppercase tracking-wider text-muted-foreground">
             Beta
           </span>

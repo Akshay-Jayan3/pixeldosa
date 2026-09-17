@@ -114,7 +114,7 @@ export function buildAgentMarkdown(
     "",
     "---",
     "",
-    `Follow the Pixel Dosa UX rules when building with this component: ${SITE_URL}/llms.txt`
+    `Follow the PixelDosa UX rules when building with this component: ${SITE_URL}/llms.txt`
   );
 
   return sections.join("\n");

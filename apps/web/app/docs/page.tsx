@@ -19,12 +19,12 @@ export default function DocsIndexPage() {
     <article className="mx-auto max-w-2xl">
       <h1 className="text-3xl font-semibold tracking-tight">Getting started</h1>
       <p className="mt-3 text-muted-foreground text-pretty">
-        Pixel Dosa is distributed with the shadcn registry protocol. Components are copied
+        PixelDosa is distributed with the shadcn registry protocol. Components are copied
         into your project as source you own — there is no runtime package to depend on.
       </p>
 
       <aside aria-label="About the beta" className="mt-6 rounded-lg border px-4 py-3 text-sm text-muted-foreground text-pretty">
-        <span className="font-medium text-foreground">Pixel Dosa is in beta.</span> Components are ready to use, and
+        <span className="font-medium text-foreground">PixelDosa is in beta.</span> Components are ready to use, and
         new ones ship weekly. Props can still change between drops. Every change is listed in the{" "}
         <Link href="/changelog" className="text-foreground underline underline-offset-4">
           changelog
@@ -37,7 +37,7 @@ export default function DocsIndexPage() {
       <p className="mt-2 text-sm text-muted-foreground">
         This creates <code className="font-mono">components.json</code> and the{" "}
         <code className="font-mono">cn</code> helper at{" "}
-        <code className="font-mono">@/lib/utils</code>, which every Pixel Dosa component
+        <code className="font-mono">@/lib/utils</code>, which every PixelDosa component
         imports.
       </p>
       <div className="mt-3">
@@ -62,7 +62,7 @@ export default function DocsIndexPage() {
         Run this step explicitly, even though every component lists the theme as a dependency.
         When a component pulls it in, shadcn adds the motion tokens but keeps any colours your
         project already defines, so an existing palette wins. Installing the theme directly
-        replaces those colours with Pixel Dosa&apos;s, which are tuned to meet WCAG AA contrast
+        replaces those colours with PixelDosa&apos;s, which are tuned to meet WCAG AA contrast
         in light and dark mode. Skip it if you want to keep your own palette.
       </p>
       <div className="mt-3">
@@ -76,7 +76,7 @@ export default function DocsIndexPage() {
 
       <h2 className="mt-10 text-xl font-medium tracking-tight">Building with an AI agent?</h2>
       <p className="mt-2 text-sm text-muted-foreground text-pretty">
-        Install the agent guide so your coding agent uses Pixel Dosa the way it&apos;s meant to
+        Install the agent guide so your coding agent uses PixelDosa the way it&apos;s meant to
         be used, then connect the shadcn MCP server.{" "}
         <Link href="/docs/ai" className="text-foreground underline underline-offset-4">
           Set up Claude Code, Cursor or any agent

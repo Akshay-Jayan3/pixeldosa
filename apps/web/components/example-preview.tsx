@@ -28,7 +28,7 @@ type ExamplePreviewProps = {
 /**
  * Inline Preview/Code tabs for a single example — the shared pattern most
  * component-library docs use (shadcn/ui, AI Elements) instead of forcing a
- * click-through to a second page just to read the code. Most Pixel Dosa
+ * click-through to a second page just to read the code. Most PixelDosa
  * components only have one example, which made the old "click the card to
  * see its own code" route pure friction.
  */
