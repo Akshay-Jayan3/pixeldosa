@@ -29,11 +29,11 @@
         "properties": {
           "state": {
             "enum": [
+              "done",
+              "failed",
               "thinking",
               "working",
               "asking",
-              "done",
-              "failed",
               "queued",
               "deciding",
               "streaming",

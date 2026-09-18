@@ -28,6 +28,7 @@
         "properties": {
           "pose": {
             "enum": [
+              "done",
               "idle",
               "listening",
               "thinking",
@@ -38,7 +39,6 @@
               "working",
               "asking",
               "blocked",
-              "done",
               "confident",
               "probable",
               "unsure"

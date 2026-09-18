@@ -1,0 +1,94 @@
+---
+title: Agent Console
+description: The screen you come back to — what changed while you were away, then every run grouped by what it needs.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentConsole } from "@/components/blocks/agent-console";
+
+<AgentConsole
+  briefing={{
+    since: "yesterday at 18:00",
+    needsYou: 2,
+    finished: 1,
+    failed: 1,
+    nextUp: "Start with the refund — it has been waiting three hours.",
+  }}
+  runs={runs}
+  selectedId={selected}
+  onSelect={setSelected}
+  detail={detail}
+  triggers={schedules}
+  onTriggerEnabledChange={toggle}
+/>
+```
+
+## Why it exists
+
+People hand a job to an agent, close the laptop, and come back later. Two products
+shipped a surface for exactly that this year, replacing "the agent's work lives in a chat
+thread you have to find" with a place designed to be returned to.
+
+The part still treated as an afterthought is the return itself. Research on agentic
+interfaces puts it plainly: the moment someone comes back after four hours is where trust
+is won or lost, and it should read as a briefing — what happened, what needs you, what to
+do next — rather than a pile the person has to reconstruct that from.
+
+## Features
+
+- **The briefing comes first**, in words: what changed since you were last here, and the
+  one thing worth doing first. It turns the waiting colour only when something genuinely
+  needs a person.
+- **Zero is stated.** "Nothing changed while you were away" is a useful answer; an empty
+  space isn't.
+- **The inbox groups by need, not time**, so a run that's been waiting three hours can't
+  sit below one that finished a minute ago.
+- **The detail answers the two real questions:** where did it get to (the plan), and who
+  let it do that (the trail, with its authority field).
+- **A person being involved comes first.** When a run is waiting for someone, the handoff
+  sits above the agent's own account of itself.
+- **What runs on its own is on the same screen**, as sentences rather than cron.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `briefing` | `{ since?, needsYou, finished, failed, nextUp? }` | The return moment. Counts are numbers; `nextUp` is your sentence. |
+| `runs` | `AgentRun[]` | Everything Run Inbox takes. |
+| `selectedId` / `onSelect` | `string` / `(id) => void` | `onSelect` required. The matching row is marked with `aria-current`. |
+| `detail` | `ConsoleRunDetail \| null` | The selected run: `steps`, `trail`, `handoff`. |
+| `onStopRun` / `onStopSelected` | `(id) => void` / `() => void` | |
+| `onRetryStep` | `(stepId) => void` | On a failed step. |
+| `onUndo` / `onExportTrail` | `(entryId) => void` / `() => void` | On the trail. |
+| `onTakeOver` / `onReturnToAgent` | `() => void` | On the handoff. |
+| `triggers` / `onTriggerEnabledChange` | `ScheduleTrigger[]` / `(id, enabled) => void` | Leave out to hide the schedule entirely. |
+| `detailEmptyLabel` / `inboxEmptyLabel` | `string` | |
+| `headingLevel` | `2 \| 3 \| 4` | Defaults to `2`. |
+
+`ConsoleRunDetail` is `{ id, title, steps?, runStatus?, trail?, handoff? }`, where
+`handoff` is `{ stage, reason?, context?, person?, waitingFor? }`.
+
+## Accessibility
+
+- One labelled section; every part inside carries its own heading one level below it, so
+  the outline never skips.
+- The open run is marked with `aria-current` as well as a background, so the pairing
+  between list and detail doesn't depend on colour.
+- Only genuinely running things animate — a running row's dot, a running step's mark.
+  The briefing never animates; a summary that moves reads as still arriving.
+- Everything stops under `prefers-reduced-motion`, and each state is also in words.
+
+## When not to use
+
+- **One agent run inside a chat:** use `Thinking Experience`.
+- **The steps of a single run, on their own:** `Agent Plan`.
+- **A notification feed:** this is a work queue, not an activity stream.
+
+## Notes
+
+Write `nextUp` as the one thing worth doing first, not a summary. It's the sentence that
+has to survive being read on a phone at a bus stop.

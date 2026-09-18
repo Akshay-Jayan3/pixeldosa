@@ -1,0 +1,90 @@
+---
+title: Image Studio
+description: A whole workspace for making images — settings that survive the prompt, results as they land, and a history you can work from.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ImageStudio } from "@/components/blocks/image-studio";
+
+<ImageStudio
+  onGenerate={({ text }) => start(text)}
+  groups={settingGroups}
+  values={settings}
+  onValueChange={(group, option) => setSettings({ ...settings, [group]: option })}
+  credits={{ remaining: "1,250 credits", allowance: "2,000 this month", used: 0.38 }}
+  run={run}
+  history={history}
+  onRecall={(id) => restore(id)}
+/>
+```
+
+## Why it exists
+
+Generation tools get described the same way: tossing prompts into a black hole. A feed
+that scrolls instead of an overview, so finding the good result from last Tuesday means
+scrolling past everything since. Settings that evaporate when you switch model, so you
+restate the palette and the framing in every prompt. And no idea what a run will cost
+until it's gone.
+
+People work around all three with a spreadsheet of prompts kept beside the tool. This
+block is the workspace that makes that spreadsheet unnecessary.
+
+## Features
+
+- **Settings sit beside the work and survive the prompt.** Picked from previews, not
+  named from memory. Changing what you're asking for doesn't lose how you wanted it.
+- **History is a grid you can recall from.** Each past run hands back its prompt *and*
+  its settings — the thing a feed of images structurally cannot do.
+- **Results appear as they land.** A finished image never waits for its siblings, and a
+  failed one says so on its own tile.
+- **The price is named before the click**, and the refund rule is stated before anything
+  fails rather than after.
+- **One place to stop.** Stop lives on the run; the composer just stops offering to start
+  a second one on top of it.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `onGenerate` | `(submission) => void` | Required. The composer's submission. |
+| `groups` / `values` / `onValueChange` | `ParameterGroup[]` / `Record<string,string>` / `(groupId, optionId) => void` | Required. The settings rail. |
+| `run` | `StudioRun \| null` | The run in progress or the one that just finished. |
+| `credits` | `CreditsMeterProps` | Everything Credits Meter takes. |
+| `history` | `StudioHistoryEntry[]` | Past runs, newest first. |
+| `onRecall` | `(entryId: string) => void` | Restore a past run's prompt **and** settings. |
+| `promptValue` / `onPromptValueChange` | `string` / `(value) => void` | Control the prompt, so Recall can fill it. |
+| `onCancel` / `onRetry` | `() => void` | On the run. |
+| `onKeptChange` / `onRegenerateRest` | `(ids: string[]) => void` | Keep the good ones, replace the rest. |
+| `onUse` / `onMore` / `onRetryItem` | `(id: string) => void` | Per result. |
+| `settingsSummary` | `string` | The current settings as a sentence. |
+| `refundNote` / `regenerateCost` | `string` | Stated before the click. |
+| `empty` | `{ title, description? }` | Before the first run. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5` | Defaults to `2`. |
+
+`StudioRun` is `{ id, prompt, status, items, keptIds?, queue?, stage?, progress?, startedAt?, cost?, error? }`.
+`StudioHistoryEntry` is `{ id, prompt, thumbnails, time?, settings?, total? }`.
+
+## Accessibility
+
+- One labelled section; the settings rail, the run and the history each carry their own
+  heading at the level below it, so the page outline never skips.
+- The settings are real radio groups in a `fieldset`, so arrow keys move between options.
+- Results are a list of buttons, not a wall of images — keyboard users move through
+  results rather than decorations.
+- Only the running job animates; it stops under `prefers-reduced-motion`, and every state
+  it carries is also in words.
+
+## When not to use
+
+- **One generation inside a chat thread:** use `Generation Job` on its own.
+- **Choosing between two images:** that's `Compare View`.
+- **A gallery of finished work:** this is a workspace for making things, not a portfolio.
+
+## Notes
+
+`onRecall` must restore both the prompt and the settings. Restoring only the prompt
+recreates the exact problem the history exists to solve.

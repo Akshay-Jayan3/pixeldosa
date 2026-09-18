@@ -39,6 +39,8 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | An agent panel showing a run: status, reasoning, questions, approvals, result | `thinking-experience` |
 | AI filling in a form the user reviews field by field | `ai-form-fill` |
 | A full assistant chat screen: conversation, reasoning, tools, code, sources, follow-ups, composer | `ai-chat-experience` |
+| A whole screen for making images or video: prompt, settings that persist, the run, results, credits, a recallable history | `image-studio` |
+| A home screen for background agents: what changed while you were away, every run grouped by what it needs, the selected run opened out, and what runs on its own | `agent-console` |
 
 ## Pick the right component
 

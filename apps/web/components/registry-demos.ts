@@ -32,6 +32,8 @@ import AutonomyControlDemo from "@pixeldosa/ui/registry/autonomy-control/autonom
 import AgentMemoryDemo from "@pixeldosa/ui/registry/agent-memory/agent-memory.demo";
 import AITriageTableDemo from "@pixeldosa/ui/registry/ai-triage-table/ai-triage-table.demo";
 import AIFormFillDemo from "@pixeldosa/ui/registry/ai-form-fill/ai-form-fill.demo";
+import AgentConsoleDemo from "@pixeldosa/ui/registry/agent-console/agent-console.demo";
+import ImageStudioDemo from "@pixeldosa/ui/registry/image-studio/image-studio.demo";
 import AIApprovalGateDemo from "@pixeldosa/ui/registry/ai-approval-gate/ai-approval-gate.demo";
 import AgentAskDemo from "@pixeldosa/ui/registry/agent-ask/agent-ask.demo";
 import AgentPresenceDemo from "@pixeldosa/ui/registry/agent-presence/agent-presence.demo";
@@ -313,6 +315,22 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "One fill request, three fields, each reviewed on its own confidence.",
       render: AIFormFillDemo,
+    },
+  ],
+  "agent-console": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "The screen you come back to — what changed while you were away, then the pile.",
+      render: AgentConsoleDemo,
+    },
+  ],
+  "image-studio": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A whole image workspace — settings that survive the prompt, results as they land, a history you can recall from.",
+      render: ImageStudioDemo,
     },
   ],
   "thinking-experience": [

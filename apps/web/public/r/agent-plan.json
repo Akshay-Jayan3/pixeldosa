@@ -78,11 +78,11 @@
               },
               "status": {
                 "enum": [
-                  "done",
-                  "pending",
                   "running",
-                  "waiting",
+                  "done",
                   "failed",
+                  "pending",
+                  "waiting",
                   "skipped"
                 ]
               },

@@ -38,8 +38,8 @@
           },
           "status": {
             "enum": [
-              "done",
               "running",
+              "done",
               "failed",
               "queued",
               "cancelled",

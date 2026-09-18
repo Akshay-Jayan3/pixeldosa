@@ -27,6 +27,8 @@ export interface RunInboxProps extends Omit<React.ComponentPropsWithoutRef<"sect
   title?: string;
   runs: AgentRun[];
   onOpen: (id: string) => void;
+  /** The run currently open beside this list, so the row it came from is marked. */
+  selectedId?: string;
   /** Shown on a run that is still going. */
   onStop?: (id: string) => void;
   emptyLabel?: string;
@@ -58,6 +60,7 @@ function RunInbox({
   title = "Runs",
   runs,
   onOpen,
+  selectedId,
   onStop,
   emptyLabel = "No runs yet. Anything you start will land here.",
   className,
@@ -99,7 +102,13 @@ function RunInbox({
               </GroupHeading>
               <ul className="flex flex-col">
                 {rows.map((run) => (
-                  <li key={run.id} className="flex items-start gap-3 border-b px-4 py-3 last:border-b-0">
+                  <li
+                    key={run.id}
+                    className={cn(
+                      "flex items-start gap-3 border-b px-4 py-3 last:border-b-0",
+                      run.id === selectedId && "bg-muted"
+                    )}
+                  >
                     <span
                       aria-hidden="true"
                       className={cn(
@@ -120,6 +129,7 @@ function RunInbox({
                       <button
                         type="button"
                         onClick={() => onOpen(run.id)}
+                        aria-current={run.id === selectedId ? "true" : undefined}
                         className={cn(
                           "relative rounded-sm text-left text-sm text-foreground outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40",
                           run.unread && "font-medium"

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "image-studio",
+  "title": "Image Studio",
+  "description": "A complete workspace for making images with a model, assembled from Prompt Composer, Parameter Panel, Generation Job, Variation Grid and Credits Meter. Takes `groups` and `values` for the settings that persist across runs, an optional `run` (status, queue, stage, measured progress, cost, per-result status), `credits`, and a `history` of past runs that each hand back their prompt *and* their settings through `onRecall`. The workspace is the design: generation tools are described as tossing prompts into a black hole, with a scrolling feed instead of an overview and settings that evaporate when you switch model, so the user ends up keeping a spreadsheet of prompts beside the tool. Here the settings sit beside the work and survive the prompt, the history is a recallable grid rather than a feed, and the price of the next run is named before the click. Presentational: you own the runs, the settings and the history. Use it as the whole screen of an image or video product. Not for a single generation in a chat thread — that is Generation Job on its own.",
+  "type": "registry:block",
+  "categories": [
+    "ai-assisted",
+    "application",
+    "block"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme",
+    "@pixeldosa/prompt-composer",
+    "@pixeldosa/parameter-panel",
+    "@pixeldosa/generation-job",
+    "@pixeldosa/variation-grid",
+    "@pixeldosa/credits-meter"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/image-studio/image-studio.tsx",
+      "target": "components/blocks/image-studio.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Format every figure yourself — costs, times and totals are strings. `onRecall` should restore both the prompt and the settings, not just the prompt; restoring one without the other is the failure this history exists to fix.",
+  "meta": {
+    "engineeringNotes": "The layout encodes the three documented failures of generation workspaces. Settings live in a rail beside the work rather than inside the prompt, because the reviewed complaint about multi-model tools is that switching model reopens every consistency problem and leaves the user restating palette and framing by hand; a rail that survives the prompt is what stops that. History is a thumbnail grid with a recall control, not a feed: comparisons of the same review task put a grid at roughly five times the density of a scrolling list, and density is the whole job when you are looking for the good one from last Tuesday. Recall returns the settings as well as the prompt, which is the part a feed of images structurally cannot do. Partial results render inside the job rather than after it, so a finished image never waits for its siblings. The composer goes busy while a run is active instead of offering a second start on top of the first, and Stop stays on the job, where the run actually is, so there is exactly one place to end it.",
+    "motionNotes": "Motion means the machine is busy, and in a workspace that has to hold across three regions at once: only the running job moves — its stage shimmers, its pulse marks the running cells in the grid — while the settings rail and the history hold completely still, because both are the user's to work with rather than the machine's to report on. The result is that the eye is drawn to the one region that is actually changing, in a screen that would otherwise have movement in every quarter. Under `prefers-reduced-motion` every part of that stops and the same states are carried by colour, position and words."
+  }
+}

@@ -104,6 +104,18 @@ export {
   type AIChatExperienceProps,
   type ChatTurn,
 } from "./registry/ai-chat-experience/ai-chat-experience";
+export {
+  AgentConsole,
+  type AgentConsoleProps,
+  type ConsoleBriefing,
+  type ConsoleRunDetail,
+} from "./registry/agent-console/agent-console";
+export {
+  ImageStudio,
+  type ImageStudioProps,
+  type StudioRun,
+  type StudioHistoryEntry,
+} from "./registry/image-studio/image-studio";
 export { Suggestions, type SuggestionsProps, type Suggestion } from "./registry/suggestions/suggestions";
 // `splitCodeFences` is deliberately not re-exported here, like `agentPresenceStates`: the
 // docs site spreads this module into its MDX component map, which only accepts

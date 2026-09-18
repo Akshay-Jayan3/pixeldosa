@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-console",
+  "title": "Agent Console",
+  "description": "The screen a person comes back to after leaving agents running, assembled from Run Inbox, Agent Plan, Activity Trail, Human Handoff and Agent Schedule. Takes a `briefing` (what changed since they were last here, as counts plus one sentence of what to do first), `runs` for the inbox, a `detail` for the selected run (its steps, its trail, and a handoff when a person is involved), and optional `triggers` for what runs on its own. The briefing is the design: two products shipped agent dashboards this year, and the part still treated as an afterthought is the return itself — research on agentic interfaces puts the moment someone comes back after four hours as where trust is won or lost, and says it should read as a briefing rather than a list the user reconstructs one from. Beneath it the inbox groups by what a run needs rather than when it happened, and the detail answers the two questions people actually ask: where did it get to, and who let it do that. Presentational: you own the runs, the selection and the history. Use it as the home screen of a product that runs background or scheduled agents. Not for a single agent run inside a chat — that is Thinking Experience.",
+  "type": "registry:block",
+  "categories": [
+    "ai-assisted",
+    "application",
+    "block"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme",
+    "@pixeldosa/run-inbox",
+    "@pixeldosa/agent-plan",
+    "@pixeldosa/activity-trail",
+    "@pixeldosa/human-handoff",
+    "@pixeldosa/agent-schedule"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/agent-console/agent-console.tsx",
+      "target": "components/blocks/agent-console.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Write `briefing.nextUp` as the one thing worth doing first, not a summary — it is the sentence that has to survive being read on a phone at a bus stop. Times and counts are formatted by you.",
+  "meta": {
+    "engineeringNotes": "The briefing sits above everything and is written in words rather than badges, because the failure of a returned-to surface is that it hands back a pile and makes the person do the triage that the system already has the data to do. It turns the waiting colour only when something actually needs a person, so the colour means the same thing here as it does on a single approval. Zero is stated rather than hidden: 'Nothing changed while you were away' is a useful answer, and an empty space is not. The two-pane split puts the inbox at a fixed width and the detail fluid, because the detail is where the reading happens; the selected row is marked with `aria-current` as well as a background, so the pairing survives without colour. A person being involved is rendered above the machine's account of itself — the handoff comes before the plan and the trail — since a run waiting on somebody is not primarily a story about what the agent did.",
+    "motionNotes": "Motion means the machine is busy, and a console is where that rule earns its keep: on a screen showing six runs, a plan, a trail and three schedules at once, only genuinely running things move — a running row's dot, a running step's mark. Everything waiting on a person is completely still in the waiting colour, so the eye lands on the one place work is actually happening and the stillness of everything else is itself information. The briefing never animates; a summary that moves reads as still arriving. Under `prefers-reduced-motion` every part of that stops and each state is carried by colour, position and words."
+  }
+}

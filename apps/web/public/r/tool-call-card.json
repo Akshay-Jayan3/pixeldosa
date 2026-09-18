@@ -42,10 +42,10 @@
           },
           "status": {
             "enum": [
-              "blocked",
-              "done",
               "running",
-              "failed"
+              "done",
+              "failed",
+              "blocked"
             ]
           },
           "name": {

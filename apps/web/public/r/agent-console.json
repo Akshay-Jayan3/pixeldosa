@@ -1,0 +1,468 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-console",
+  "title": "Agent Console",
+  "description": "The screen a person comes back to after leaving agents running, assembled from Run Inbox, Agent Plan, Activity Trail, Human Handoff and Agent Schedule. Takes a `briefing` (what changed since they were last here, as counts plus one sentence of what to do first), `runs` for the inbox, a `detail` for the selected run (its steps, its trail, and a handoff when a person is involved), and optional `triggers` for what runs on its own. The briefing is the design: two products shipped agent dashboards this year, and the part still treated as an afterthought is the return itself — research on agentic interfaces puts the moment someone comes back after four hours as where trust is won or lost, and says it should read as a briefing rather than a list the user reconstructs one from. Beneath it the inbox groups by what a run needs rather than when it happened, and the detail answers the two questions people actually ask: where did it get to, and who let it do that. Presentational: you own the runs, the selection and the history. Use it as the home screen of a product that runs background or scheduled agents. Not for a single agent run inside a chat — that is Thinking Experience.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme",
+    "@pixeldosa/run-inbox",
+    "@pixeldosa/agent-plan",
+    "@pixeldosa/activity-trail",
+    "@pixeldosa/human-handoff",
+    "@pixeldosa/agent-schedule"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/agent-console/agent-console.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { ActivityTrail, type TrailEntry } from \"@/components/ui/activity-trail\";\nimport { AgentPlan, type PlanStep } from \"@/components/ui/agent-plan\";\nimport { AgentSchedule, type ScheduleTrigger } from \"@/components/ui/agent-schedule\";\nimport {\n  HumanHandoff,\n  type HandoffFact,\n  type HandoffStage,\n} from \"@/components/ui/human-handoff\";\nimport { RunInbox, type AgentRun } from \"@/components/ui/run-inbox\";\nimport { cn } from \"@/lib/utils\";\n\nexport type ConsoleBriefing = {\n  /** When the user was last here, in words: \"since yesterday at 6pm\". */\n  since?: string;\n  /** Counts of what changed while they were away. Zero is fine and says so. */\n  needsYou: number;\n  finished: number;\n  failed: number;\n  /** The one thing worth doing first, in a sentence. */\n  nextUp?: string;\n};\n\nexport type ConsoleRunDetail = {\n  id: string;\n  /** What was asked for, in the user's words. */\n  title: string;\n  /** Where the run got to. Each step carries its own status. */\n  steps?: PlanStep[];\n  /** What's happening right now, beside the progress count. */\n  runStatus?: string;\n  /** What the agent did, who allowed it, and what came of it. */\n  trail?: TrailEntry[];\n  /** Present only when a person is involved, or is being asked to be. */\n  handoff?: {\n    stage: HandoffStage;\n    reason?: string;\n    context?: HandoffFact[];\n    person?: string;\n    waitingFor?: string;\n  };\n};\n\nexport interface AgentConsoleProps\n  extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"onSelect\"> {\n  /** Level of the console's own headings. Defaults to 2, to sit under a page `h1`. */\n  headingLevel?: 2 | 3 | 4;\n\n  /** What changed since the user was last here. The return moment, in four numbers. */\n  briefing?: ConsoleBriefing;\n\n  /** Every run, grouped by what it needs. */\n  runs: AgentRun[];\n  selectedId?: string;\n  onSelect: (id: string) => void;\n  onStopRun?: (id: string) => void;\n  inboxEmptyLabel?: string;\n\n  /** The selected run, opened out. */\n  detail?: ConsoleRunDetail | null;\n  onStopSelected?: () => void;\n  onRetryStep?: (stepId: string) => void;\n  onUndo?: (entryId: string) => void;\n  onExportTrail?: () => void;\n  onTakeOver?: () => void;\n  onReturnToAgent?: () => void;\n  /** Shown when nothing is selected. */\n  detailEmptyLabel?: string;\n\n  /** When the agent runs on its own. Omit the section entirely by leaving this out. */\n  triggers?: ScheduleTrigger[];\n  onTriggerEnabledChange?: (id: string, enabled: boolean) => void;\n  onRunTriggerNow?: (id: string) => void;\n  onEditTrigger?: (id: string) => void;\n}\n\n/** Plain-words counts. \"0 need you\" is worth saying; an empty space isn't. */\nfunction briefingLine(briefing: ConsoleBriefing): string {\n  const parts = [\n    briefing.needsYou > 0 ? `${briefing.needsYou} waiting on you` : undefined,\n    briefing.failed > 0 ? `${briefing.failed} stopped with a problem` : undefined,\n    briefing.finished > 0 ? `${briefing.finished} finished` : undefined,\n  ].filter(Boolean);\n  if (parts.length === 0) return \"Nothing changed while you were away.\";\n  return parts.join(\" · \");\n}\n\n/**\n * The screen you come back to.\n *\n * The way people work with background agents now is to hand over a job, close the laptop\n * and return later, and two products shipped a surface for exactly that this year —\n * Cursor's Agents Window and Claude Code's Agent View — both replacing \"the agent's work\n * lives in a chat thread you have to find\" with a place designed to be returned to.\n *\n * The part still treated as an afterthought is the return itself. The research on agentic\n * interfaces is blunt about it: the moment a person comes back after four hours is where\n * trust is won or lost, and it should read as a briefing — what happened, what needs you,\n * what to do next — not as a list the user has to reconstruct that from. So this console\n * opens with that briefing in four numbers and one sentence, and only then shows the pile.\n *\n * Beneath it the split is deliberate: the inbox groups by what a run *needs* rather than\n * when it happened, because chronology buries the run that has been waiting three hours;\n * and the detail beside it answers the two questions people actually ask of an agent —\n * where did it get to (the plan) and who let it do that (the trail, with its authority\n * field).\n *\n * Presentational throughout: you own the runs, the selection and the history.\n *\n * Motion means the machine is busy. Only running rows and running steps move; everything\n * waiting on a person holds completely still, in the waiting colour.\n */\nfunction AgentConsole({\n  headingLevel = 2,\n  briefing,\n  runs,\n  selectedId,\n  onSelect,\n  onStopRun,\n  inboxEmptyLabel,\n  detail,\n  onStopSelected,\n  onRetryStep,\n  onUndo,\n  onExportTrail,\n  onTakeOver,\n  onReturnToAgent,\n  detailEmptyLabel = \"Pick a run to see where it got to, and what it did.\",\n  triggers,\n  onTriggerEnabledChange,\n  onRunTriggerNow,\n  onEditTrigger,\n  className,\n  ...props\n}: AgentConsoleProps) {\n  const Heading = `h${headingLevel}` as \"h2\";\n  const partLevel = Math.min(6, headingLevel + 1) as 3;\n  const labelId = React.useId();\n\n  return (\n    <section\n      aria-labelledby={labelId}\n      className={cn(\"flex flex-col gap-5\", className)}\n      {...props}\n    >\n      <Heading id={labelId} className=\"sr-only\">\n        Agents\n      </Heading>\n\n      {/* The return moment, first and in words. Everything below it is the detail behind\n          these four numbers — but a person who reads only this line should already know\n          whether they need to do anything. */}\n      {briefing ? (\n        <div\n          className={cn(\n            \"flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 rounded-lg border p-4\",\n            briefing.needsYou > 0 ? \"border-agent-waiting bg-agent-waiting-soft\" : \"bg-card\"\n          )}\n        >\n          <div className=\"flex min-w-0 flex-col gap-0.5\">\n            <p className=\"text-sm font-medium text-foreground text-pretty\">\n              {briefingLine(briefing)}\n            </p>\n            {briefing.nextUp ? (\n              <p className=\"text-sm text-muted-foreground text-pretty\">{briefing.nextUp}</p>\n            ) : null}\n          </div>\n          {briefing.since ? (\n            <p className=\"text-xs text-muted-foreground\">Since {briefing.since}</p>\n          ) : null}\n        </div>\n      ) : null}\n\n      <div className=\"grid items-start gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]\">\n        <RunInbox\n          headingLevel={partLevel}\n          runs={runs}\n          selectedId={selectedId}\n          onOpen={onSelect}\n          onStop={onStopRun}\n          emptyLabel={inboxEmptyLabel}\n        />\n\n        <div className=\"flex min-w-0 flex-col gap-4\">\n          {detail ? (\n            <>\n              {/* A person is involved, or being asked to be: that comes before the\n                  machine's own account of itself. */}\n              {detail.handoff ? (\n                <HumanHandoff\n                  headingLevel={partLevel}\n                  title={detail.title}\n                  stage={detail.handoff.stage}\n                  reason={detail.handoff.reason}\n                  context={detail.handoff.context}\n                  person={detail.handoff.person}\n                  waitingFor={detail.handoff.waitingFor}\n                  onTakeOver={onTakeOver}\n                  onReturnToAgent={onReturnToAgent}\n                />\n              ) : null}\n\n              {detail.steps && detail.steps.length > 0 ? (\n                <AgentPlan\n                  headingLevel={partLevel}\n                  title={detail.title}\n                  steps={detail.steps}\n                  allowAdd={false}\n                  // Every step here carries a status, so the plan is always in its running\n                  // view and never offers Run; this satisfies the prop without adding a\n                  // control the console could not honour.\n                  onRun={() => {}}\n                  runStatus={detail.runStatus}\n                  onStop={onStopSelected}\n                  onRetryStep={onRetryStep}\n                />\n              ) : null}\n\n              {detail.trail && detail.trail.length > 0 ? (\n                <ActivityTrail\n                  headingLevel={partLevel}\n                  entries={detail.trail}\n                  onUndo={onUndo}\n                  onExport={onExportTrail}\n                />\n              ) : null}\n            </>\n          ) : (\n            <p className=\"rounded-lg border border-dashed p-6 text-sm text-muted-foreground text-pretty\">\n              {detailEmptyLabel}\n            </p>\n          )}\n        </div>\n      </div>\n\n      {triggers && onTriggerEnabledChange ? (\n        <AgentSchedule\n          headingLevel={partLevel}\n          triggers={triggers}\n          onEnabledChange={onTriggerEnabledChange}\n          onRunNow={onRunTriggerNow}\n          onEdit={onEditTrigger}\n        />\n      ) : null}\n    </section>\n  );\n}\n\nexport { AgentConsole };\n",
+      "type": "registry:block",
+      "target": "components/blocks/agent-console.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "The briefing sits above everything and is written in words rather than badges, because the failure of a returned-to surface is that it hands back a pile and makes the person do the triage that the system already has the data to do. It turns the waiting colour only when something actually needs a person, so the colour means the same thing here as it does on a single approval. Zero is stated rather than hidden: 'Nothing changed while you were away' is a useful answer, and an empty space is not. The two-pane split puts the inbox at a fixed width and the detail fluid, because the detail is where the reading happens; the selected row is marked with `aria-current` as well as a background, so the pairing survives without colour. A person being involved is rendered above the machine's account of itself — the handoff comes before the plan and the trail — since a run waiting on somebody is not primarily a story about what the agent did.",
+    "motionNotes": "Motion means the machine is busy, and a console is where that rule earns its keep: on a screen showing six runs, a plan, a trail and three schedules at once, only genuinely running things move — a running row's dot, a running step's mark. Everything waiting on a person is completely still in the waiting colour, so the eye lands on the one place work is actually happening and the stillness of everything else is itself information. The briefing never animates; a summary that moves reads as still arriving. Under `prefers-reduced-motion` every part of that stops and each state is carried by colour, position and words.",
+    "schema": {
+      "component": "AgentConsole",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AgentConsole",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4
+            ],
+            "description": "Level of the console's own headings. Defaults to 2, to sit under a page `h1`."
+          },
+          "briefing": {
+            "$ref": "#/$defs/ConsoleBriefing",
+            "description": "What changed since the user was last here. The return moment, in four numbers."
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/AgentRun"
+            },
+            "description": "Every run, grouped by what it needs."
+          },
+          "selectedId": {
+            "type": "string"
+          },
+          "inboxEmptyLabel": {
+            "type": "string"
+          },
+          "detail": {
+            "$ref": "#/$defs/ConsoleRunDetail",
+            "description": "The selected run, opened out."
+          },
+          "detailEmptyLabel": {
+            "type": "string",
+            "description": "Shown when nothing is selected."
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ScheduleTrigger"
+            },
+            "description": "When the agent runs on its own. Omit the section entirely by leaving this out."
+          }
+        },
+        "required": [
+          "runs"
+        ],
+        "$defs": {
+          "ConsoleBriefing": {
+            "type": "object",
+            "properties": {
+              "since": {
+                "type": "string",
+                "description": "When the user was last here, in words: \"since yesterday at 6pm\"."
+              },
+              "needsYou": {
+                "type": "number",
+                "description": "Counts of what changed while they were away. Zero is fine and says so."
+              },
+              "finished": {
+                "type": "number"
+              },
+              "failed": {
+                "type": "number"
+              },
+              "nextUp": {
+                "type": "string",
+                "description": "The one thing worth doing first, in a sentence."
+              }
+            },
+            "required": [
+              "needsYou",
+              "finished",
+              "failed"
+            ]
+          },
+          "AgentRun": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string",
+                "description": "What it was asked to do, in the user's words."
+              },
+              "state": {
+                "enum": [
+                  "needsYou",
+                  "running",
+                  "scheduled",
+                  "done",
+                  "failed"
+                ]
+              },
+              "agent": {
+                "type": "string",
+                "description": "Which agent, if you run more than one."
+              },
+              "note": {
+                "type": "string",
+                "description": "Why it needs you, what it's doing, or what it produced. One line."
+              },
+              "time": {
+                "type": "string",
+                "description": "Formatted by you: \"2 minutes ago\", \"Tomorrow at 9:00\"."
+              },
+              "unread": {
+                "type": "boolean",
+                "description": "Not looked at yet."
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "state"
+            ]
+          },
+          "ConsoleRunDetail": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string",
+                "description": "What was asked for, in the user's words."
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/PlanStep"
+                },
+                "description": "Where the run got to. Each step carries its own status."
+              },
+              "runStatus": {
+                "type": "string",
+                "description": "What's happening right now, beside the progress count."
+              },
+              "trail": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/TrailEntry"
+                },
+                "description": "What the agent did, who allowed it, and what came of it."
+              },
+              "handoff": {
+                "type": "object",
+                "properties": {
+                  "stage": {
+                    "enum": [
+                      "agentHandling",
+                      "waitingForPerson",
+                      "personHandling",
+                      "returnedToAgent"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/HandoffFact"
+                    }
+                  },
+                  "person": {
+                    "type": "string"
+                  },
+                  "waitingFor": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "stage"
+                ],
+                "description": "Present only when a person is involved, or is being asked to be."
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          },
+          "PlanStep": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "needsApproval": {
+                "type": "boolean",
+                "description": "The step has an external effect and will stop for approval when it runs."
+              },
+              "status": {
+                "enum": [
+                  "running",
+                  "done",
+                  "failed",
+                  "pending",
+                  "waiting",
+                  "skipped"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "description": "What happened, for a step that's running, waiting, failed or skipped."
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          },
+          "TrailEntry": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "time": {
+                "type": "string",
+                "description": "Formatted by you: \"14:02\", \"Yesterday 09:15\". Never recomputed here."
+              },
+              "actor": {
+                "enum": [
+                  "agent",
+                  "person",
+                  "system"
+                ]
+              },
+              "actorName": {
+                "type": "string",
+                "description": "Who exactly: \"Research agent\", \"Dana\", \"Scheduler\"."
+              },
+              "action": {
+                "type": "string",
+                "description": "The consequence, in the user's words: \"Emailed the summary to 3 people\"."
+              },
+              "target": {
+                "type": "string",
+                "description": "What it touched: a file, a record, a recipient list."
+              },
+              "authority": {
+                "type": "string",
+                "description": "Why it was allowed to do this: \"You approved it\", \"Autonomy: acts on low-risk\nthings\", \"Scheduled by Dana\". The question every log leaves out."
+              },
+              "result": {
+                "type": "string",
+                "description": "What came of it: \"Sent\", \"3 rows changed\", \"No matches\"."
+              },
+              "undoable": {
+                "type": "boolean",
+                "description": "Set when this specific action can still be reversed."
+              }
+            },
+            "required": [
+              "id",
+              "time",
+              "actor",
+              "action"
+            ]
+          },
+          "HandoffFact": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "\"Customer\", \"Order\", \"Tried already\"."
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "value"
+            ]
+          },
+          "ScheduleTrigger": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "when": {
+                "type": "string",
+                "description": "When it runs, in plain words: \"Every weekday at 9:00\", \"When an invoice arrives\nfrom a new supplier\". Never a cron string."
+              },
+              "does": {
+                "type": "string",
+                "description": "What it will do, phrased as the consequence."
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "nextRun": {
+                "type": "string",
+                "description": "Formatted by you: \"Tomorrow at 9:00\". Left out when it's off."
+              },
+              "lastRun": {
+                "type": "string",
+                "description": "How the last one went: \"Ran yesterday · 3 invoices matched\"."
+              },
+              "lastFailed": {
+                "type": "boolean",
+                "description": "Set when the last run had a problem, so an off-schedule failure is visible."
+              },
+              "asksFirst": {
+                "type": "boolean",
+                "description": "Set when a run of this will pause for approval."
+              }
+            },
+            "required": [
+              "id",
+              "when",
+              "does",
+              "enabled"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onSelect",
+          "required": true,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onStopRun",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onStopSelected",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onRetryStep",
+          "required": false,
+          "params": [
+            {
+              "name": "stepId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onUndo",
+          "required": false,
+          "params": [
+            {
+              "name": "entryId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onExportTrail",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onTakeOver",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onReturnToAgent",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onTriggerEnabledChange",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "onRunTriggerNow",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onEditTrigger",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Write `briefing.nextUp` as the one thing worth doing first, not a summary — it is the sentence that has to survive being read on a phone at a bus stop. Times and counts are formatted by you.",
+  "categories": [
+    "ai-assisted",
+    "application",
+    "block"
+  ],
+  "type": "registry:block"
+}

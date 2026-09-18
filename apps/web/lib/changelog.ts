@@ -27,6 +27,29 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-18-agent-console",
+    date: "2026-09-18",
+    title: "The screen you come back to",
+    summary:
+      "Agent Console assembles the agent-ops components into a home screen for background agents, and leads with the part everyone treats as an afterthought: the return. What changed since you were last here, in words, and the one thing worth doing first — then every run grouped by what it needs, the selected one opened out, and what runs on its own.",
+    changes: [
+      { kind: "new", component: "agent-console" },
+      {
+        kind: "improved",
+        component: "run-inbox",
+        note: "Takes `selectedId` and marks the open row with `aria-current`, so a list beside a detail pane shows which run you're reading.",
+      },
+    ],
+  },
+  {
+    id: "2026-09-18-image-studio",
+    date: "2026-09-18",
+    title: "A workspace, not a prompt box with a feed under it",
+    summary:
+      "Image Studio assembles the generation components into a whole screen: settings that sit beside the work and survive the prompt, results that appear as they land, the price named before the click, and a history you can recall from — prompt and settings together, so nobody needs a spreadsheet of prompts beside the tool.",
+    changes: [{ kind: "new", component: "image-studio" }],
+  },
+  {
     id: "2026-09-18-catalog",
     date: "2026-09-18",
     title: "Every component, described in a format a model can be held to",

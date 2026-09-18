@@ -106,8 +106,8 @@
               },
               "status": {
                 "enum": [
-                  "done",
                   "running",
+                  "done",
                   "failed"
                 ]
               },

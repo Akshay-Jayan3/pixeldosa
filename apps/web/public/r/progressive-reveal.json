@@ -35,8 +35,8 @@
           },
           "layout": {
             "enum": [
-              "stack",
-              "grid"
+              "grid",
+              "stack"
             ],
             "description": "`\"stack\"` (default) lays items in a vertical flex column; `\"grid\"` uses a CSS grid."
           }

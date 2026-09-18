@@ -363,6 +363,473 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "agent-console",
+      "title": "Agent Console",
+      "description": "The screen a person comes back to after leaving agents running, assembled from Run Inbox, Agent Plan, Activity Trail, Human Handoff and Agent Schedule. Takes a `briefing` (what changed since they were last here, as counts plus one sentence of what to do first), `runs` for the inbox, a `detail` for the selected run (its steps, its trail, and a handoff when a person is involved), and optional `triggers` for what runs on its own. The briefing is the design: two products shipped agent dashboards this year, and the part still treated as an afterthought is the return itself — research on agentic interfaces puts the moment someone comes back after four hours as where trust is won or lost, and says it should read as a briefing rather than a list the user reconstructs one from. Beneath it the inbox groups by what a run needs rather than when it happened, and the detail answers the two questions people actually ask: where did it get to, and who let it do that. Presentational: you own the runs, the selection and the history. Use it as the home screen of a product that runs background or scheduled agents. Not for a single agent run inside a chat — that is Thinking Experience.",
+      "type": "registry:block",
+      "categories": [
+        "ai-assisted",
+        "application",
+        "block"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/run-inbox",
+        "@pixeldosa/agent-plan",
+        "@pixeldosa/activity-trail",
+        "@pixeldosa/human-handoff",
+        "@pixeldosa/agent-schedule"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/agent-console/agent-console.tsx",
+          "target": "components/blocks/agent-console.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Write `briefing.nextUp` as the one thing worth doing first, not a summary — it is the sentence that has to survive being read on a phone at a bus stop. Times and counts are formatted by you.",
+      "meta": {
+        "engineeringNotes": "The briefing sits above everything and is written in words rather than badges, because the failure of a returned-to surface is that it hands back a pile and makes the person do the triage that the system already has the data to do. It turns the waiting colour only when something actually needs a person, so the colour means the same thing here as it does on a single approval. Zero is stated rather than hidden: 'Nothing changed while you were away' is a useful answer, and an empty space is not. The two-pane split puts the inbox at a fixed width and the detail fluid, because the detail is where the reading happens; the selected row is marked with `aria-current` as well as a background, so the pairing survives without colour. A person being involved is rendered above the machine's account of itself — the handoff comes before the plan and the trail — since a run waiting on somebody is not primarily a story about what the agent did.",
+        "motionNotes": "Motion means the machine is busy, and a console is where that rule earns its keep: on a screen showing six runs, a plan, a trail and three schedules at once, only genuinely running things move — a running row's dot, a running step's mark. Everything waiting on a person is completely still in the waiting colour, so the eye lands on the one place work is actually happening and the stillness of everything else is itself information. The briefing never animates; a summary that moves reads as still arriving. Under `prefers-reduced-motion` every part of that stops and each state is carried by colour, position and words.",
+        "schema": {
+          "component": "AgentConsole",
+          "element": "section",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "AgentConsole",
+            "type": "object",
+            "properties": {
+              "headingLevel": {
+                "enum": [
+                  2,
+                  3,
+                  4
+                ],
+                "description": "Level of the console's own headings. Defaults to 2, to sit under a page `h1`."
+              },
+              "briefing": {
+                "$ref": "#/$defs/ConsoleBriefing",
+                "description": "What changed since the user was last here. The return moment, in four numbers."
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/AgentRun"
+                },
+                "description": "Every run, grouped by what it needs."
+              },
+              "selectedId": {
+                "type": "string"
+              },
+              "inboxEmptyLabel": {
+                "type": "string"
+              },
+              "detail": {
+                "$ref": "#/$defs/ConsoleRunDetail",
+                "description": "The selected run, opened out."
+              },
+              "detailEmptyLabel": {
+                "type": "string",
+                "description": "Shown when nothing is selected."
+              },
+              "triggers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ScheduleTrigger"
+                },
+                "description": "When the agent runs on its own. Omit the section entirely by leaving this out."
+              }
+            },
+            "required": [
+              "runs"
+            ],
+            "$defs": {
+              "ConsoleBriefing": {
+                "type": "object",
+                "properties": {
+                  "since": {
+                    "type": "string",
+                    "description": "When the user was last here, in words: \"since yesterday at 6pm\"."
+                  },
+                  "needsYou": {
+                    "type": "number",
+                    "description": "Counts of what changed while they were away. Zero is fine and says so."
+                  },
+                  "finished": {
+                    "type": "number"
+                  },
+                  "failed": {
+                    "type": "number"
+                  },
+                  "nextUp": {
+                    "type": "string",
+                    "description": "The one thing worth doing first, in a sentence."
+                  }
+                },
+                "required": [
+                  "needsYou",
+                  "finished",
+                  "failed"
+                ]
+              },
+              "AgentRun": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "What it was asked to do, in the user's words."
+                  },
+                  "state": {
+                    "enum": [
+                      "needsYou",
+                      "running",
+                      "scheduled",
+                      "done",
+                      "failed"
+                    ]
+                  },
+                  "agent": {
+                    "type": "string",
+                    "description": "Which agent, if you run more than one."
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "Why it needs you, what it's doing, or what it produced. One line."
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "Formatted by you: \"2 minutes ago\", \"Tomorrow at 9:00\"."
+                  },
+                  "unread": {
+                    "type": "boolean",
+                    "description": "Not looked at yet."
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "state"
+                ]
+              },
+              "ConsoleRunDetail": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "What was asked for, in the user's words."
+                  },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/PlanStep"
+                    },
+                    "description": "Where the run got to. Each step carries its own status."
+                  },
+                  "runStatus": {
+                    "type": "string",
+                    "description": "What's happening right now, beside the progress count."
+                  },
+                  "trail": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/TrailEntry"
+                    },
+                    "description": "What the agent did, who allowed it, and what came of it."
+                  },
+                  "handoff": {
+                    "type": "object",
+                    "properties": {
+                      "stage": {
+                        "enum": [
+                          "agentHandling",
+                          "waitingForPerson",
+                          "personHandling",
+                          "returnedToAgent"
+                        ]
+                      },
+                      "reason": {
+                        "type": "string"
+                      },
+                      "context": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/HandoffFact"
+                        }
+                      },
+                      "person": {
+                        "type": "string"
+                      },
+                      "waitingFor": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "stage"
+                    ],
+                    "description": "Present only when a person is involved, or is being asked to be."
+                  }
+                },
+                "required": [
+                  "id",
+                  "title"
+                ]
+              },
+              "PlanStep": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "detail": {
+                    "type": "string"
+                  },
+                  "needsApproval": {
+                    "type": "boolean",
+                    "description": "The step has an external effect and will stop for approval when it runs."
+                  },
+                  "status": {
+                    "enum": [
+                      "running",
+                      "done",
+                      "failed",
+                      "pending",
+                      "waiting",
+                      "skipped"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "What happened, for a step that's running, waiting, failed or skipped."
+                  }
+                },
+                "required": [
+                  "id",
+                  "title"
+                ]
+              },
+              "TrailEntry": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "Formatted by you: \"14:02\", \"Yesterday 09:15\". Never recomputed here."
+                  },
+                  "actor": {
+                    "enum": [
+                      "agent",
+                      "person",
+                      "system"
+                    ]
+                  },
+                  "actorName": {
+                    "type": "string",
+                    "description": "Who exactly: \"Research agent\", \"Dana\", \"Scheduler\"."
+                  },
+                  "action": {
+                    "type": "string",
+                    "description": "The consequence, in the user's words: \"Emailed the summary to 3 people\"."
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": "What it touched: a file, a record, a recipient list."
+                  },
+                  "authority": {
+                    "type": "string",
+                    "description": "Why it was allowed to do this: \"You approved it\", \"Autonomy: acts on low-risk\nthings\", \"Scheduled by Dana\". The question every log leaves out."
+                  },
+                  "result": {
+                    "type": "string",
+                    "description": "What came of it: \"Sent\", \"3 rows changed\", \"No matches\"."
+                  },
+                  "undoable": {
+                    "type": "boolean",
+                    "description": "Set when this specific action can still be reversed."
+                  }
+                },
+                "required": [
+                  "id",
+                  "time",
+                  "actor",
+                  "action"
+                ]
+              },
+              "HandoffFact": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "\"Customer\", \"Order\", \"Tried already\"."
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "value"
+                ]
+              },
+              "ScheduleTrigger": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "when": {
+                    "type": "string",
+                    "description": "When it runs, in plain words: \"Every weekday at 9:00\", \"When an invoice arrives\nfrom a new supplier\". Never a cron string."
+                  },
+                  "does": {
+                    "type": "string",
+                    "description": "What it will do, phrased as the consequence."
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "nextRun": {
+                    "type": "string",
+                    "description": "Formatted by you: \"Tomorrow at 9:00\". Left out when it's off."
+                  },
+                  "lastRun": {
+                    "type": "string",
+                    "description": "How the last one went: \"Ran yesterday · 3 invoices matched\"."
+                  },
+                  "lastFailed": {
+                    "type": "boolean",
+                    "description": "Set when the last run had a problem, so an off-schedule failure is visible."
+                  },
+                  "asksFirst": {
+                    "type": "boolean",
+                    "description": "Set when a run of this will pause for approval."
+                  }
+                },
+                "required": [
+                  "id",
+                  "when",
+                  "does",
+                  "enabled"
+                ]
+              }
+            }
+          },
+          "events": [
+            {
+              "name": "onSelect",
+              "required": true,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onStopRun",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onStopSelected",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onRetryStep",
+              "required": false,
+              "params": [
+                {
+                  "name": "stepId",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onUndo",
+              "required": false,
+              "params": [
+                {
+                  "name": "entryId",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onExportTrail",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onTakeOver",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onReturnToAgent",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onTriggerEnabledChange",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                },
+                {
+                  "name": "enabled",
+                  "type": "boolean"
+                }
+              ]
+            },
+            {
+              "name": "onRunTriggerNow",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onEditTrigger",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "agent-figure",
       "title": "Agent Figure",
       "description": "A hand-drawn agent character whose pose shows what a run is doing, how sure it is, and when it needs the person. Takes a `pose` from a fourteen-value vocabulary: work poses (`listening`, `thinking`, `planning`, `searching`, `reading`, `comparing`, `working`), hand-off poses (`idle`, `asking`, `blocked`, `done`), and three result poses (`confident`, `probable`, `unsure`) that must be driven by the system's real confidence. `variant` is `figure` (the whole character) or `mark` (the head alone, for inline status and avatars); `size` is `sm`, `md` or `lg`. A visible `label` sits beside or below the figure by default, because the words are the real signal; `hideLabel` turns the drawing into a labelled image instead, and `announce` adds a polite live region. Motion follows the turn-taking grammar: on the agent's turn the pen lines re-draw slightly (a line boil) and small parts move in steps; on the person's turn every line holds still. Drawn in code as seeded SVG strokes, coloured only by theme tokens (ink, card, muted ink and the four agent markers), so it themes, stays small and renders identically on server and client. Use it for onboarding, empty states, run panels and consumer products where an agent should feel present. Not a replacement for status text (pair it with Live Status Line or a label), and not for dense tables — use Agent Presence's `line` form there.",
@@ -397,6 +864,7 @@
             "properties": {
               "pose": {
                 "enum": [
+                  "done",
                   "idle",
                   "listening",
                   "thinking",
@@ -407,7 +875,6 @@
                   "working",
                   "asking",
                   "blocked",
-                  "done",
                   "confident",
                   "probable",
                   "unsure"
@@ -689,11 +1156,11 @@
                   },
                   "status": {
                     "enum": [
-                      "done",
-                      "pending",
                       "running",
-                      "waiting",
+                      "done",
                       "failed",
+                      "pending",
+                      "waiting",
                       "skipped"
                     ]
                   },
@@ -784,11 +1251,11 @@
             "properties": {
               "state": {
                 "enum": [
+                  "done",
+                  "failed",
                   "thinking",
                   "working",
                   "asking",
-                  "done",
-                  "failed",
                   "queued",
                   "deciding",
                   "streaming",
@@ -3733,8 +4200,8 @@
               },
               "status": {
                 "enum": [
-                  "done",
                   "running",
+                  "done",
                   "failed",
                   "queued",
                   "cancelled",
@@ -4238,6 +4705,2143 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "image-studio",
+      "title": "Image Studio",
+      "description": "A complete workspace for making images with a model, assembled from Prompt Composer, Parameter Panel, Generation Job, Variation Grid and Credits Meter. Takes `groups` and `values` for the settings that persist across runs, an optional `run` (status, queue, stage, measured progress, cost, per-result status), `credits`, and a `history` of past runs that each hand back their prompt *and* their settings through `onRecall`. The workspace is the design: generation tools are described as tossing prompts into a black hole, with a scrolling feed instead of an overview and settings that evaporate when you switch model, so the user ends up keeping a spreadsheet of prompts beside the tool. Here the settings sit beside the work and survive the prompt, the history is a recallable grid rather than a feed, and the price of the next run is named before the click. Presentational: you own the runs, the settings and the history. Use it as the whole screen of an image or video product. Not for a single generation in a chat thread — that is Generation Job on its own.",
+      "type": "registry:block",
+      "categories": [
+        "ai-assisted",
+        "application",
+        "block"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/prompt-composer",
+        "@pixeldosa/parameter-panel",
+        "@pixeldosa/generation-job",
+        "@pixeldosa/variation-grid",
+        "@pixeldosa/credits-meter"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/image-studio/image-studio.tsx",
+          "target": "components/blocks/image-studio.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Format every figure yourself — costs, times and totals are strings. `onRecall` should restore both the prompt and the settings, not just the prompt; restoring one without the other is the failure this history exists to fix.",
+      "meta": {
+        "engineeringNotes": "The layout encodes the three documented failures of generation workspaces. Settings live in a rail beside the work rather than inside the prompt, because the reviewed complaint about multi-model tools is that switching model reopens every consistency problem and leaves the user restating palette and framing by hand; a rail that survives the prompt is what stops that. History is a thumbnail grid with a recall control, not a feed: comparisons of the same review task put a grid at roughly five times the density of a scrolling list, and density is the whole job when you are looking for the good one from last Tuesday. Recall returns the settings as well as the prompt, which is the part a feed of images structurally cannot do. Partial results render inside the job rather than after it, so a finished image never waits for its siblings. The composer goes busy while a run is active instead of offering a second start on top of the first, and Stop stays on the job, where the run actually is, so there is exactly one place to end it.",
+        "motionNotes": "Motion means the machine is busy, and in a workspace that has to hold across three regions at once: only the running job moves — its stage shimmers, its pulse marks the running cells in the grid — while the settings rail and the history hold completely still, because both are the user's to work with rather than the machine's to report on. The result is that the eye is drawn to the one region that is actually changing, in a screen that would otherwise have movement in every quarter. Under `prefers-reduced-motion` every part of that stops and the same states are carried by colour, position and words.",
+        "schema": {
+          "component": "ImageStudio",
+          "element": "section",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "ImageStudio",
+            "type": "object",
+            "properties": {
+              "headingLevel": {
+                "enum": [
+                  2,
+                  3,
+                  4,
+                  5
+                ],
+                "description": "Level of the section headings. Defaults to 2, to sit under a page `h1`."
+              },
+              "placeholder": {
+                "type": "string"
+              },
+              "controls": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ComposerControl"
+                },
+                "description": "Structured parts of the request that belong beside the prompt rather than in it."
+              },
+              "promptValue": {
+                "type": "string",
+                "description": "Pre-filled prompt text — set this when Recall puts a past run back."
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ParameterGroup"
+                },
+                "description": "Settings that persist across runs, as previews rather than words."
+              },
+              "values": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "settingsSummary": {
+                "type": "string",
+                "description": "The current settings as a sentence, so the choice is legible without reading the panel."
+              },
+              "credits": {
+                "$ref": "#/$defs/CreditsMeterProps",
+                "description": "The budget, always in view. Everything `CreditsMeter` takes."
+              },
+              "run": {
+                "$ref": "#/$defs/StudioRun",
+                "description": "The run in progress, or the one that just finished."
+              },
+              "regenerateCost": {
+                "type": "string"
+              },
+              "useLabel": {
+                "type": "string"
+              },
+              "refundNote": {
+                "type": "string",
+                "description": "What one more run of the current settings costs. Named before the click."
+              },
+              "notify": {
+                "type": "boolean"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/StudioHistoryEntry"
+                },
+                "description": "Past runs, newest first."
+              },
+              "recallLabel": {
+                "type": "string"
+              },
+              "empty": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "description": "Shown before the first run."
+              },
+              "aspectRatio": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "groups",
+              "values"
+            ],
+            "$defs": {
+              "ComposerControl": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "Short label shown on the pill: \"Tone\", \"Length\", \"For\"."
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "label"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "defaultValue": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "options",
+                  "defaultValue"
+                ]
+              },
+              "ParameterGroup": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "\"Style\", \"Shape\", \"How many\"."
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/ParameterOption"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "options"
+                ]
+              },
+              "ParameterOption": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "Plain words, never a branded name: \"Wide, 16:9\", not \"Cinemascope Pro\"."
+                  },
+                  "preview": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode",
+                    "description": "A small preview: a thumbnail, a shape, a swatch. Recognition beats recall."
+                  },
+                  "costNote": {
+                    "type": "string",
+                    "description": "What choosing this does to the price or the wait: \"+20 credits\"."
+                  },
+                  "detail": {
+                    "type": "string",
+                    "description": "One line of help, shown under the group when this option is chosen."
+                  }
+                },
+                "required": [
+                  "id",
+                  "label"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              },
+              "CreditsMeterProps": {
+                "type": "object",
+                "properties": {
+                  "remaining": {
+                    "type": "string",
+                    "description": "What's left, formatted by you: \"1,250 credits\", \"$18.40\"."
+                  },
+                  "allowance": {
+                    "type": "string",
+                    "description": "The full allowance, when there is one: \"2,000 credits this month\"."
+                  },
+                  "used": {
+                    "type": "number",
+                    "description": "How much of the allowance is already spent, 0–1, measured. Renders a bar; leave it\nout when you only have words. The bar draws what is *left*, so it empties as the\nfigure beside it falls."
+                  },
+                  "nextAction": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "cost": {
+                        "type": "string"
+                      },
+                      "affordable": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "cost"
+                    ],
+                    "description": "What the next action will take, named and priced: the thing reviewers say is missing\neverywhere. \"4 images · 40 credits\"."
+                  },
+                  "resets": {
+                    "type": "string",
+                    "description": "When the balance resets or expires, in plain words: \"Resets on 1 October\"."
+                  },
+                  "recent": {
+                    "type": "string",
+                    "description": "Recent movement, including refunds: \"12 refunded yesterday when a batch failed\"."
+                  },
+                  "low": {
+                    "type": "boolean",
+                    "description": "Set when the balance is low enough to say so."
+                  },
+                  "onTopUp": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "topUpLabel": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "slot": {
+                    "type": "string"
+                  },
+                  "style": {
+                    "x-type": "CSSProperties"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {}
+                    ]
+                  },
+                  "defaultChecked": {
+                    "type": "boolean"
+                  },
+                  "defaultValue": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "suppressContentEditableWarning": {
+                    "type": "boolean"
+                  },
+                  "suppressHydrationWarning": {
+                    "type": "boolean"
+                  },
+                  "accessKey": {
+                    "type": "string"
+                  },
+                  "autoCapitalize": {
+                    "anyOf": [
+                      {
+                        "const": "off"
+                      },
+                      {},
+                      {
+                        "const": "none"
+                      },
+                      {
+                        "const": "on"
+                      },
+                      {
+                        "const": "sentences"
+                      },
+                      {
+                        "const": "words"
+                      },
+                      {
+                        "const": "characters"
+                      }
+                    ]
+                  },
+                  "autoFocus": {
+                    "type": "boolean"
+                  },
+                  "className": {
+                    "type": "string"
+                  },
+                  "contentEditable": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      },
+                      {
+                        "const": "inherit"
+                      },
+                      {
+                        "const": "plaintext-only"
+                      }
+                    ]
+                  },
+                  "contextMenu": {
+                    "type": "string"
+                  },
+                  "dir": {
+                    "type": "string"
+                  },
+                  "draggable": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ]
+                  },
+                  "enterKeyHint": {
+                    "enum": [
+                      "search",
+                      "done",
+                      "next",
+                      "send",
+                      "enter",
+                      "go",
+                      "previous"
+                    ]
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string"
+                  },
+                  "nonce": {
+                    "type": "string"
+                  },
+                  "spellCheck": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ]
+                  },
+                  "tabIndex": {
+                    "type": "number"
+                  },
+                  "translate": {
+                    "enum": [
+                      "yes",
+                      "no"
+                    ]
+                  },
+                  "radioGroup": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "x-type": "AriaRole | undefined"
+                  },
+                  "about": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "datatype": {
+                    "type": "string"
+                  },
+                  "inlist": {},
+                  "prefix": {
+                    "type": "string"
+                  },
+                  "property": {
+                    "type": "string"
+                  },
+                  "rel": {
+                    "type": "string"
+                  },
+                  "resource": {
+                    "type": "string"
+                  },
+                  "rev": {
+                    "type": "string"
+                  },
+                  "typeof": {
+                    "type": "string"
+                  },
+                  "vocab": {
+                    "type": "string"
+                  },
+                  "autoCorrect": {
+                    "type": "string"
+                  },
+                  "autoSave": {
+                    "type": "string"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "itemProp": {
+                    "type": "string"
+                  },
+                  "itemScope": {
+                    "type": "boolean"
+                  },
+                  "itemType": {
+                    "type": "string"
+                  },
+                  "itemID": {
+                    "type": "string"
+                  },
+                  "itemRef": {
+                    "type": "string"
+                  },
+                  "results": {
+                    "type": "number"
+                  },
+                  "security": {
+                    "type": "string"
+                  },
+                  "unselectable": {
+                    "enum": [
+                      "off",
+                      "on"
+                    ]
+                  },
+                  "popover": {
+                    "enum": [
+                      "",
+                      "auto",
+                      "manual",
+                      "hint"
+                    ]
+                  },
+                  "popoverTargetAction": {
+                    "enum": [
+                      "toggle",
+                      "show",
+                      "hide"
+                    ]
+                  },
+                  "popoverTarget": {
+                    "type": "string"
+                  },
+                  "inert": {
+                    "type": "boolean"
+                  },
+                  "inputMode": {
+                    "enum": [
+                      "search",
+                      "text",
+                      "none",
+                      "tel",
+                      "url",
+                      "email",
+                      "numeric",
+                      "decimal"
+                    ],
+                    "description": "Hints at the type of data that might be entered by the user while editing the element or its contents"
+                  },
+                  "is": {
+                    "type": "string",
+                    "description": "Specify that a standard HTML element should behave like a defined custom built-in element"
+                  },
+                  "exportparts": {
+                    "type": "string"
+                  },
+                  "part": {
+                    "type": "string"
+                  },
+                  "aria-activedescendant": {
+                    "type": "string",
+                    "description": "Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application."
+                  },
+                  "aria-atomic": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute."
+                  },
+                  "aria-autocomplete": {
+                    "enum": [
+                      "list",
+                      "none",
+                      "inline",
+                      "both"
+                    ],
+                    "description": "Indicates whether inputting text could trigger display of one or more predictions of the user's intended value for an input and specifies how predictions would be\npresented if they are made."
+                  },
+                  "aria-braillelabel": {
+                    "type": "string",
+                    "description": "Defines a string value that labels the current element, which is intended to be converted into Braille."
+                  },
+                  "aria-brailleroledescription": {
+                    "type": "string",
+                    "description": "Defines a human-readable, author-localized abbreviated description for the role of an element, which is intended to be converted into Braille."
+                  },
+                  "aria-busy": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ]
+                  },
+                  "aria-checked": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      },
+                      {
+                        "const": "mixed"
+                      }
+                    ],
+                    "description": "Indicates the current \"checked\" state of checkboxes, radio buttons, and other widgets."
+                  },
+                  "aria-colcount": {
+                    "type": "number",
+                    "description": "Defines the total number of columns in a table, grid, or treegrid."
+                  },
+                  "aria-colindex": {
+                    "type": "number",
+                    "description": "Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid."
+                  },
+                  "aria-colindextext": {
+                    "type": "string",
+                    "description": "Defines a human readable text alternative of aria-colindex."
+                  },
+                  "aria-colspan": {
+                    "type": "number",
+                    "description": "Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid."
+                  },
+                  "aria-controls": {
+                    "type": "string",
+                    "description": "Identifies the element (or elements) whose contents or presence are controlled by the current element."
+                  },
+                  "aria-current": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "time"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      },
+                      {
+                        "const": "step"
+                      },
+                      {
+                        "const": "page"
+                      },
+                      {
+                        "const": "location"
+                      },
+                      {
+                        "const": "date"
+                      }
+                    ],
+                    "description": "Indicates the element that represents the current item within a container or set of related elements."
+                  },
+                  "aria-describedby": {
+                    "type": "string",
+                    "description": "Identifies the element (or elements) that describes the object."
+                  },
+                  "aria-description": {
+                    "type": "string",
+                    "description": "Defines a string value that describes or annotates the current element."
+                  },
+                  "aria-details": {
+                    "type": "string",
+                    "description": "Identifies the element that provides a detailed, extended description for the object."
+                  },
+                  "aria-disabled": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable."
+                  },
+                  "aria-dropeffect": {
+                    "enum": [
+                      "link",
+                      "none",
+                      "copy",
+                      "execute",
+                      "move",
+                      "popup"
+                    ],
+                    "description": "Indicates what functions can be performed when a dragged object is released on the drop target."
+                  },
+                  "aria-errormessage": {
+                    "type": "string",
+                    "description": "Identifies the element that provides an error message for the object."
+                  },
+                  "aria-expanded": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed."
+                  },
+                  "aria-flowto": {
+                    "type": "string",
+                    "description": "Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion,\nallows assistive technology to override the general default of reading in document source order."
+                  },
+                  "aria-grabbed": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates an element's \"grabbed\" state in a drag-and-drop operation."
+                  },
+                  "aria-haspopup": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "dialog"
+                      },
+                      {
+                        "const": "menu"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      },
+                      {
+                        "const": "grid"
+                      },
+                      {
+                        "const": "listbox"
+                      },
+                      {
+                        "const": "tree"
+                      }
+                    ],
+                    "description": "Indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element."
+                  },
+                  "aria-hidden": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates whether the element is exposed to an accessibility API."
+                  },
+                  "aria-invalid": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      },
+                      {
+                        "const": "grammar"
+                      },
+                      {
+                        "const": "spelling"
+                      }
+                    ],
+                    "description": "Indicates the entered value does not conform to the format expected by the application."
+                  },
+                  "aria-keyshortcuts": {
+                    "type": "string",
+                    "description": "Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element."
+                  },
+                  "aria-label": {
+                    "type": "string",
+                    "description": "Defines a string value that labels the current element."
+                  },
+                  "aria-labelledby": {
+                    "type": "string",
+                    "description": "Identifies the element (or elements) that labels the current element."
+                  },
+                  "aria-level": {
+                    "type": "number",
+                    "description": "Defines the hierarchical level of an element within a structure."
+                  },
+                  "aria-live": {
+                    "enum": [
+                      "off",
+                      "assertive",
+                      "polite"
+                    ],
+                    "description": "Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region."
+                  },
+                  "aria-modal": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates whether an element is modal when displayed."
+                  },
+                  "aria-multiline": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates whether a text box accepts multiple lines of input or only a single line."
+                  },
+                  "aria-multiselectable": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates that the user may select more than one item from the current selectable descendants."
+                  },
+                  "aria-orientation": {
+                    "enum": [
+                      "horizontal",
+                      "vertical"
+                    ],
+                    "description": "Indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous."
+                  },
+                  "aria-owns": {
+                    "type": "string",
+                    "description": "Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship\nbetween DOM elements where the DOM hierarchy cannot be used to represent the relationship."
+                  },
+                  "aria-placeholder": {
+                    "type": "string",
+                    "description": "Defines a short hint (a word or short phrase) intended to aid the user with data entry when the control has no value.\nA hint could be a sample value or a brief description of the expected format."
+                  },
+                  "aria-posinset": {
+                    "type": "number",
+                    "description": "Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM."
+                  },
+                  "aria-pressed": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      },
+                      {
+                        "const": "mixed"
+                      }
+                    ],
+                    "description": "Indicates the current \"pressed\" state of toggle buttons."
+                  },
+                  "aria-readonly": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates that the element is not editable, but is otherwise operable."
+                  },
+                  "aria-relevant": {
+                    "enum": [
+                      "text",
+                      "additions",
+                      "additions removals",
+                      "additions text",
+                      "all",
+                      "removals",
+                      "removals additions",
+                      "removals text",
+                      "text additions",
+                      "text removals"
+                    ],
+                    "description": "Indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified."
+                  },
+                  "aria-required": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates that user input is required on the element before a form may be submitted."
+                  },
+                  "aria-roledescription": {
+                    "type": "string",
+                    "description": "Defines a human-readable, author-localized description for the role of an element."
+                  },
+                  "aria-rowcount": {
+                    "type": "number",
+                    "description": "Defines the total number of rows in a table, grid, or treegrid."
+                  },
+                  "aria-rowindex": {
+                    "type": "number",
+                    "description": "Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid."
+                  },
+                  "aria-rowindextext": {
+                    "type": "string",
+                    "description": "Defines a human readable text alternative of aria-rowindex."
+                  },
+                  "aria-rowspan": {
+                    "type": "number",
+                    "description": "Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid."
+                  },
+                  "aria-selected": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true"
+                      },
+                      {
+                        "const": "false"
+                      }
+                    ],
+                    "description": "Indicates the current \"selected\" state of various widgets."
+                  },
+                  "aria-setsize": {
+                    "type": "number",
+                    "description": "Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM."
+                  },
+                  "aria-sort": {
+                    "enum": [
+                      "none",
+                      "ascending",
+                      "descending",
+                      "other"
+                    ],
+                    "description": "Indicates if items in a table or grid are sorted in ascending or descending order."
+                  },
+                  "aria-valuemax": {
+                    "type": "number",
+                    "description": "Defines the maximum allowed value for a range widget."
+                  },
+                  "aria-valuemin": {
+                    "type": "number",
+                    "description": "Defines the minimum allowed value for a range widget."
+                  },
+                  "aria-valuenow": {
+                    "type": "number",
+                    "description": "Defines the current value for a range widget."
+                  },
+                  "aria-valuetext": {
+                    "type": "string",
+                    "description": "Defines the human readable text alternative of aria-valuenow for a range widget."
+                  },
+                  "dangerouslySetInnerHTML": {
+                    "x-type": "{ __html: string | TrustedHTML; }"
+                  },
+                  "onCopy": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCopyCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCut": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCutCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPaste": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPasteCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCompositionEnd": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCompositionEndCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCompositionStart": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCompositionStartCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCompositionUpdate": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCompositionUpdateCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onFocus": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onFocusCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onBlur": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onBlurCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onChange": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onChangeCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onBeforeInput": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onBeforeInputCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onInput": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onInputCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onReset": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onResetCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSubmit": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSubmitCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onInvalid": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onInvalidCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoad": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onError": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onErrorCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onKeyDown": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onKeyDownCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onKeyPress": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onKeyPressCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onKeyUp": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onKeyUpCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAbort": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAbortCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCanPlay": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCanPlayCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCanPlayThrough": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onCanPlayThroughCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDurationChange": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDurationChangeCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onEmptied": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onEmptiedCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onEncrypted": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onEncryptedCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onEnded": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onEndedCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadedData": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadedDataCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadedMetadata": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadedMetadataCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadStart": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLoadStartCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPause": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPauseCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPlay": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPlayCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPlaying": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPlayingCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onProgress": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onProgressCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onRateChange": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onRateChangeCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSeeked": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSeekedCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSeeking": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSeekingCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onStalled": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onStalledCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSuspend": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSuspendCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTimeUpdate": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTimeUpdateCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onVolumeChange": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onVolumeChangeCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onWaiting": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onWaitingCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAuxClick": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAuxClickCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onClick": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onClickCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onContextMenu": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onContextMenuCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDoubleClick": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDoubleClickCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDrag": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragEnd": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragEndCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragEnter": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragEnterCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragExit": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragExitCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragLeave": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragLeaveCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragOver": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragOverCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragStart": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDragStartCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDrop": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onDropCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseDown": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseDownCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseEnter": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseLeave": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseMove": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseMoveCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseOut": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseOutCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseOver": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseOverCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseUp": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onMouseUpCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSelect": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onSelectCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchCancel": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchCancelCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchEnd": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchEndCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchMove": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchMoveCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchStart": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTouchStartCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerDown": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerDownCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerMove": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerMoveCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerUp": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerUpCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerCancel": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerCancelCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerEnter": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerLeave": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerOver": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerOverCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerOut": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onPointerOutCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onGotPointerCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onGotPointerCaptureCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLostPointerCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onLostPointerCaptureCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onScroll": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onScrollCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onScrollEnd": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onScrollEndCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onWheel": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onWheelCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAnimationStart": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAnimationStartCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAnimationEnd": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAnimationEndCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAnimationIteration": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onAnimationIterationCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onToggle": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onBeforeToggle": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionCancel": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionCancelCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionEnd": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionEndCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionRun": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionRunCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionStart": {
+                    "x-function": true,
+                    "x-host": true
+                  },
+                  "onTransitionStartCapture": {
+                    "x-function": true,
+                    "x-host": true
+                  }
+                },
+                "required": [
+                  "remaining"
+                ]
+              },
+              "StudioRun": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "The ask, in the user's words. Shown as the job's title."
+                  },
+                  "status": {
+                    "enum": [
+                      "running",
+                      "done",
+                      "failed",
+                      "queued",
+                      "cancelled",
+                      "partial"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/Variation"
+                    },
+                    "description": "Results. Show them as they land — a finished one doesn't wait for its siblings."
+                  },
+                  "keptIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Which results the user is keeping. Caller-owned, like the grid's own prop."
+                  },
+                  "queue": {
+                    "type": "object",
+                    "properties": {
+                      "position": {
+                        "type": "number"
+                      },
+                      "typicalWait": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "stage": {
+                    "type": "string",
+                    "description": "What's happening right now: \"Rendering frame 12 of 48\"."
+                  },
+                  "progress": {
+                    "type": "number",
+                    "description": "Measured only, 0–1. Leave it out while the extent is unknown."
+                  },
+                  "startedAt": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "x-type": "Date"
+                      }
+                    ]
+                  },
+                  "cost": {
+                    "type": "string",
+                    "description": "What this run costs, formatted by you: \"12 credits\"."
+                  },
+                  "error": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "refunded": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "message"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "prompt",
+                  "status",
+                  "items"
+                ]
+              },
+              "Variation": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "preview": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode",
+                    "description": "The result itself: an image, a video poster, a card of text. Yours to render."
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "\"Version 3\", \"Warmer light\"."
+                  },
+                  "status": {
+                    "enum": [
+                      "running",
+                      "done",
+                      "failed"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "Why this one failed, and what happened to the credits."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              "StudioHistoryEntry": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "What was asked for."
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "Formatted by you: \"2 hours ago\"."
+                  },
+                  "thumbnails": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "$ref": "#/$defs/UINode"
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "x-react": "ReactNode"
+                    },
+                    "description": "Thumbnails. The overview a scrolling feed never gives."
+                  },
+                  "settings": {
+                    "type": "string",
+                    "description": "The settings this run used, in words: \"Photographic · Square · Standard\"."
+                  },
+                  "total": {
+                    "type": "number",
+                    "description": "How many results it produced, when more exist than thumbnails shown."
+                  }
+                },
+                "required": [
+                  "id",
+                  "prompt",
+                  "thumbnails"
+                ]
+              }
+            }
+          },
+          "events": [
+            {
+              "name": "onGenerate",
+              "required": true,
+              "params": [
+                {
+                  "name": "submission",
+                  "type": "ComposerSubmission"
+                }
+              ],
+              "description": "The ask."
+            },
+            {
+              "name": "onPromptValueChange",
+              "required": false,
+              "params": [
+                {
+                  "name": "value",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onValueChange",
+              "required": true,
+              "params": [
+                {
+                  "name": "groupId",
+                  "type": "string"
+                },
+                {
+                  "name": "optionId",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onResetSettings",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onCancel",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onRetry",
+              "required": false,
+              "params": []
+            },
+            {
+              "name": "onKeptChange",
+              "required": true,
+              "params": [
+                {
+                  "name": "ids",
+                  "type": "string[]"
+                }
+              ],
+              "description": "Required: the grid always offers Keep, so without this the checkbox is a dead\ncontrol. Results are caller-owned, like everywhere else in the system."
+            },
+            {
+              "name": "onRegenerateRest",
+              "required": false,
+              "params": [
+                {
+                  "name": "idsToReplace",
+                  "type": "string[]"
+                }
+              ],
+              "description": "Replaces only the results the user didn't keep."
+            },
+            {
+              "name": "onUse",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onMore",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onRetryItem",
+              "required": false,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "onNotifyChange",
+              "required": false,
+              "params": [
+                {
+                  "name": "notify",
+                  "type": "boolean"
+                }
+              ]
+            },
+            {
+              "name": "onRecall",
+              "required": false,
+              "params": [
+                {
+                  "name": "entryId",
+                  "type": "string"
+                }
+              ],
+              "description": "Puts a past run's prompt and settings back. The reason this history is worth keeping."
+            },
+            {
+              "name": "onOpenHistoryEntry",
+              "required": false,
+              "params": [
+                {
+                  "name": "entryId",
+                  "type": "string"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "inline-citations",
       "title": "Inline Citations",
       "description": "Claim-level sources that take one step to check. `CitedText` takes the answer's `sources` (id, title, url, publisher, date), numbers them in order and renders a numbered reference list underneath. `Cite` wraps one claim, takes `source` (an id or ids), the `quote` that supports it (or one quote per source) and `support`: 'quoted' or 'paraphrased'. Each claim gets a small numbered marker. On hover, keyboard focus or tap, a popover shows the supporting passage itself next to the claim, says whether the source quotes it or the agent summarised it, and links to 'Open at this passage', which deep-links with a URL text fragment so the source opens scrolled to the highlighted words. The claim is highlighted while its source is open. A `Cite` with no source gets a dashed '?' marker and says it has nothing behind it, so unsourced statements can't pass for cited ones. Use it in AI answers, research summaries and reports. For 'why this?' about a whole answer, use AI Context Surface instead.",
@@ -4584,11 +7188,11 @@
             "properties": {
               "state": {
                 "enum": [
+                  "done",
+                  "failed",
                   "thinking",
                   "working",
                   "asking",
-                  "done",
-                  "failed",
                   "queued",
                   "deciding",
                   "streaming",
@@ -5599,8 +8203,8 @@
               },
               "layout": {
                 "enum": [
-                  "stack",
-                  "grid"
+                  "grid",
+                  "stack"
                 ],
                 "description": "`\"stack\"` (default) lays items in a vertical flex column; `\"grid\"` uses a CSS grid."
               }
@@ -6211,6 +8815,10 @@
                   "$ref": "#/$defs/AgentRun"
                 }
               },
+              "selectedId": {
+                "type": "string",
+                "description": "The run currently open beside this list, so the row it came from is marked."
+              },
               "emptyLabel": {
                 "type": "string"
               }
@@ -6231,11 +8839,11 @@
                   },
                   "state": {
                     "enum": [
-                      "done",
-                      "running",
-                      "failed",
                       "needsYou",
-                      "scheduled"
+                      "running",
+                      "scheduled",
+                      "done",
+                      "failed"
                     ]
                   },
                   "agent": {
@@ -6750,11 +9358,11 @@
             "properties": {
               "state": {
                 "enum": [
+                  "done",
+                  "failed",
                   "thinking",
                   "working",
                   "asking",
-                  "done",
-                  "failed",
                   "queued",
                   "deciding",
                   "streaming",
@@ -7252,10 +9860,10 @@
               },
               "status": {
                 "enum": [
-                  "blocked",
-                  "done",
                   "running",
-                  "failed"
+                  "done",
+                  "failed",
+                  "blocked"
                 ]
               },
               "name": {
@@ -7485,8 +10093,8 @@
                   },
                   "status": {
                     "enum": [
-                      "done",
                       "running",
+                      "done",
                       "failed"
                     ]
                   },
