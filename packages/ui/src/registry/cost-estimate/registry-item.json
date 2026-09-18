@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "cost-estimate",
+  "title": "Cost Estimate",
+  "description": "What a run will cost and how long it will take, shown before it starts. Takes a `cost` range (`low` and optional `high`, formatted by you in money or credits), an optional `duration` in plain words, a `confidence` tier from Confidence Meter, a `basis` naming where the estimate comes from, an `items` breakdown of what the spend is made of, and a `balance` with the user's remaining budget or credits — including `exceeds` when this run would go past it, which is stated before the button rather than after. A range is the default shape on purpose: a single confident figure claims precision an estimate doesn't have, and the confidence is a tier rather than a percentage for the same reason. Purely presentational and provider-free: you compute the numbers from your own pricing and history and pass them in formatted, so the component never guesses a currency, a model price or a token count. Holds completely still — it is the user's turn. Use it before a costly or long run, beside Intent Preview or Agent Plan. Not for live spend during a run, not for a billing page, and not for showing raw token counts, which are not a unit people can judge.",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme", "@pixeldosa/confidence-meter"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/cost-estimate/cost-estimate.tsx",
+      "target": "components/ui/cost-estimate.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils` and @pixeldosa/confidence-meter, which installs automatically. Format `cost`, `duration` and `balance` yourself: the component never formats currency or time.",
+  "meta": {
+    "engineeringNotes": "The API refuses the two lies this surface usually tells. First, a single figure: `cost` is a range, and a caller who genuinely knows the price passes only `low`, which makes precision an explicit choice rather than the default. Second, a percentage of certainty: confidence reuses the shipped three-tier Confidence Meter instead of inventing a number, and `basis` names the evidence so the estimate can be judged. Everything arrives pre-formatted as strings because currency, locale and credit units belong to the host product; a component that formatted money would have to guess a currency and would be wrong in half the places it renders. The only proportion drawn is the budget bar, which comes from a measured `used` value — the same rule the rest of the system applies to progress. `exceeds` is a separate flag rather than something derived from the numbers, because only the caller knows whether the estimate's high end, the low end, or an average is the figure that counts against a budget.",
+    "motionNotes": "Nothing moves. This is the user's turn in the fullest sense — a decision about money — so the component holds completely still, with no shimmer, pulse or progress. The only transitions are the standard instant colour changes on its buttons, and those are disabled under `prefers-reduced-motion`."
+  }
+}

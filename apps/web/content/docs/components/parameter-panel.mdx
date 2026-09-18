@@ -1,0 +1,64 @@
+---
+title: Parameter Panel
+description: The controls beside the prompt — pick a look from previews instead of naming it.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ParameterPanel } from "@/components/ui/parameter-panel";
+
+<ParameterPanel
+  groups={groups}
+  values={values}
+  onChange={(groupId, optionId) => setValues({ ...values, [groupId]: optionId })}
+  summary="4 photographic square images · 40 credits"
+  onReset={reset}
+/>
+```
+
+## Why it exists
+
+Research on generative tools calls the core problem the articulation barrier: people can
+picture what they want but can't name it, and style vocabulary ("tilt-shift",
+"synth-wave") is exactly the knowledge they lack. Showing options beats asking people to
+describe them.
+
+## Features
+
+- **Recognition, not recall.** Every option can carry a small preview: a thumbnail of that
+  style, a shape for an aspect ratio.
+- **Labels always ship.** Studies of prompt controls found novel icons are misread almost
+  universally, so an option is never an icon alone.
+- **Price on the option.** Anything that changes the cost says so where it's chosen, not
+  in a bill afterwards.
+- **One help line per group**, under the current choice, instead of help text on every
+  option.
+- **Real radio groups.** Arrow keys, grouping and announcement come from the platform.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `groups` | `{ id, label, options }[]` | Options carry `label`, `preview?`, `costNote?`, `detail?`. |
+| `values` | `Record<string, string>` | Chosen option id per group id. |
+| `onChange` | `(groupId, optionId) => void` | Required. |
+| `summary` | `string` | What the choices add up to. |
+| `onReset` | `() => void` | |
+| `title` | `string` | Defaults to `"Settings"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- Each group is a `fieldset` with a `legend`; options are radio inputs, so arrow keys work
+  and the group is announced as a group.
+- Previews are decorative and hidden; the label is the accessible name.
+- Focus shows the standard ring on the whole option, not just the hidden input.
+
+## When not to use
+
+- **A settings page.** This belongs beside the thing it affects.
+- **Free-text parameters:** put those in `Prompt Composer`'s controls.
+- **Twenty options in a group:** that's a picker or a search, not a row of previews.

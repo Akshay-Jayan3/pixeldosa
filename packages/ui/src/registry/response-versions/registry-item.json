@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "response-versions",
+  "title": "Response Versions",
+  "description": "Every answer the agent gave, kept. Takes `versions` (oldest first, each with `content`, an optional `label` naming what produced it and a pre-formatted `time`), the `activeId` and `onActiveChange`, plus optional `onRegenerate`, `onKeep` and `busy`. Stepping back and forth is two buttons and a count (\"Version 2 of 3\"); \"Compare with previous\" puts the current version beside the one before it, with the current one outlined; \"Keep this one\" hands a version back to you as the answer. Regenerating appends rather than replaces, which is the whole point: in most products regenerating destroys the previous answer, so a better answer is a gamble and people keep copies elsewhere. Purely presentational — you own the list, the regeneration and what keeping means. Use it under any answer people regenerate: chat replies, drafts, generated copy. Not for a full document's revision history, and not for comparing two arbitrary versions far apart in a list.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/response-versions/response-versions.tsx",
+      "target": "components/ui/response-versions.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Append a new version on regenerate; never replace one.",
+  "meta": {
+    "engineeringNotes": "Versions are a caller-owned array and the component holds only the compare toggle, because the history has to outlive this component's mount — a version list kept in local state would be lost by any parent re-mount, which is exactly the loss the component exists to prevent. Comparison is deliberately limited to the current version and the one immediately before it: an arbitrary two-version picker doubles the controls for a case nobody had, and the common question is always \"is this better than the last try?\". The compare toggle resets itself when there is no previous version, so a shrinking list cannot leave the component in a state it cannot render. The announcement says which version is showing rather than the content, so switching versions with a screen reader gives position, not a re-read of the whole answer.",
+    "motionNotes": "One animation: the new version fades in over `--pd-duration-base`, keyed on the version id so a re-render with the same version never re-animates. Regeneration is the only busy state, and it lives in the button's own label (\"Writing another…\") rather than a spinner over the text, because the old answer stays readable the entire time. Under `prefers-reduced-motion` the fade is dropped and the switch is instant."
+  }
+}

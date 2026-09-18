@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "compare-view",
+  "title": "Compare View",
+  "description": "Before and after, without the usual accessibility failure. Takes `before` and `after`, each with your own `content` and a required `label` that doubles as its description, a starting `view` of `slider` or `side`, `allowViewChange`, an `aspectRatio` so nothing jumps while media loads, and an optional `onChoose` returning `before` or `after`. The slider is a native `input[type=range]`, which is the point: comparison sliders in AI editing tools are almost all mouse-only, built from pointer maths with no keyboard path and no announcement, while a range input gives arrow keys, Home and End, touch, and a labelled value screen readers can read (\"60% AI edit, clear sky\"). The after side is clipped rather than resized, so both halves stay pixel-aligned, and side-by-side is one click away for anyone who would rather see both at once. Purely presentational: you render both sides. Use it for edits, upscales, restorations and style transfers. Not for several results of one prompt (that is Variation Grid), and not for text, which needs Diff Accept.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/compare-view/compare-view.tsx",
+      "target": "components/ui/compare-view.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Write both `label`s as real descriptions: they are the accessible text for each side.",
+  "meta": {
+    "engineeringNotes": "The slider is a real range input for one reason that outweighs the styling cost: every keyboard, touch and assistive-technology behaviour comes from the platform, and the custom handles these tools ship are the single most common accessibility failure in AI editing UIs. Revealing is done with `clip-path` on an absolutely positioned overlay rather than by resizing the after side, because resizing re-lays-out the media and the two halves drift apart by a pixel or two at every step — visible exactly where people are looking for differences. `aria-valuetext` counts down from the slider value — the handle is the divider, so a higher value uncovers *less* of the new image — and names the side it is measuring, so the announcement matches the screen instead of contradicting it. Labels are required rather than optional on both sides, since a comparison whose halves are unlabelled is meaningless to anyone not looking at it.",
+    "motionNotes": "Nothing animates. The handle follows the input directly with no easing, because a comparison is a direct-manipulation surface where a lagging reveal reads as broken rather than smooth. The view toggle changes layout instantly for the same reason, and `prefers-reduced-motion` has nothing to disable."
+  }
+}

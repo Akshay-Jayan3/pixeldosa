@@ -1,0 +1,174 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "cost-estimate",
+  "title": "Cost Estimate",
+  "description": "What a run will cost and how long it will take, shown before it starts. Takes a `cost` range (`low` and optional `high`, formatted by you in money or credits), an optional `duration` in plain words, a `confidence` tier from Confidence Meter, a `basis` naming where the estimate comes from, an `items` breakdown of what the spend is made of, and a `balance` with the user's remaining budget or credits — including `exceeds` when this run would go past it, which is stated before the button rather than after. A range is the default shape on purpose: a single confident figure claims precision an estimate doesn't have, and the confidence is a tier rather than a percentage for the same reason. Purely presentational and provider-free: you compute the numbers from your own pricing and history and pass them in formatted, so the component never guesses a currency, a model price or a token count. Holds completely still — it is the user's turn. Use it before a costly or long run, beside Intent Preview or Agent Plan. Not for live spend during a run, not for a billing page, and not for showing raw token counts, which are not a unit people can judge.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme",
+    "@pixeldosa/confidence-meter"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/cost-estimate/cost-estimate.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { ConfidenceMeter, type ConfidenceTier } from \"@/components/ui/confidence-meter\";\nimport { cn } from \"@/lib/utils\";\n\n/** One thing the run will spend on, in the user's words. */\nexport type CostItem = {\n  id: string;\n  /** \"Reads 240 pages\", \"12 image generations\". */\n  label: string;\n  /** What it costs, already formatted by you: \"$0.40\", \"120 credits\", \"~2 min\". */\n  amount?: string;\n  detail?: string;\n};\n\nexport type CostRange = {\n  /** Formatted by you, in your currency or unit: \"$1.20\", \"600 credits\". */\n  low: string;\n  /** Leave out for a single figure you're sure of. */\n  high?: string;\n};\n\nexport interface CostEstimateProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  /** What the run is, in the user's words: \"Research the top 5 competitors\". */\n  task?: string;\n  /** What it will spend. A range is the honest shape of an estimate. */\n  cost: CostRange;\n  /** How long it will take: \"about 3 to 5 minutes\". Plain words, not a countdown. */\n  duration?: string;\n  /**\n   * How good the estimate is. Tiers, never a percentage: an estimate that claims\n   * precision it doesn't have is worse than no estimate.\n   */\n  confidence?: ConfidenceTier;\n  /** Where the estimate comes from: \"your last 20 runs\". */\n  basis?: string;\n  /** What the spend is made of. Shown as a short list, never a chart. */\n  items?: CostItem[];\n  /** What's left, if the user has a budget or a credit balance. */\n  balance?: {\n    /** \"1,250 credits left\", \"$18.40 of $50 left\". */\n    label: string;\n    /** 0–1, measured. Renders a bar; leave it out when you only have words. */\n    used?: number;\n    /** Set when this run would take them past their budget. */\n    exceeds?: boolean;\n  };\n  runLabel?: string;\n  onRun?: () => void;\n  onCancel?: () => void;\n  /** \"Use a cheaper model\", \"Narrow the sources\". */\n  adjustLabel?: string;\n  onAdjust?: () => void;\n}\n\n/**\n * What a run will cost and how long it will take, before it starts.\n *\n * People decide whether to let an agent run on two numbers nobody usually shows them:\n * money and time. The component's whole job is to state both honestly. Estimates are a\n * **range**, not a single confident figure; the confidence is a tier rather than a\n * percentage; the basis is named (\"from your last 20 runs\"), so the number can be\n * judged rather than taken on faith; and a run that would exceed the remaining budget\n * says so before the button, not after.\n *\n * Holds completely still: this is the user's turn.\n */\nfunction CostEstimate({\n  headingLevel = 3,\n  title = \"Before this runs\",\n  task,\n  cost,\n  duration,\n  confidence,\n  basis,\n  items,\n  balance,\n  runLabel = \"Run it\",\n  onRun,\n  onCancel,\n  adjustLabel,\n  onAdjust,\n  className,\n  ...props\n}: CostEstimateProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const amount = cost.high ? `${cost.low} to ${cost.high}` : cost.low;\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col rounded-lg border bg-card\", className)}\n      {...props}\n    >\n      <header className=\"flex flex-col gap-1 border-b p-4\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        {task ? <p className=\"text-sm text-muted-foreground text-pretty\">{task}</p> : null}\n      </header>\n\n      <div className=\"flex flex-col gap-4 p-4\">\n        <div className=\"flex flex-wrap items-baseline gap-x-8 gap-y-3\">\n          <p className=\"flex flex-col gap-0.5\">\n            <span className=\"text-xs text-muted-foreground\">Estimated cost</span>\n            <span className=\"text-2xl font-medium text-foreground tabular-nums\">{amount}</span>\n          </p>\n          {duration ? (\n            <p className=\"flex flex-col gap-0.5\">\n              <span className=\"text-xs text-muted-foreground\">Estimated time</span>\n              <span className=\"text-2xl font-medium text-foreground\">{duration}</span>\n            </p>\n          ) : null}\n        </div>\n\n        {confidence ? <ConfidenceMeter confidence={confidence} provenance={basis} /> : null}\n        {!confidence && basis ? <p className=\"text-xs text-muted-foreground\">Based on {basis}</p> : null}\n\n        {items && items.length > 0 ? (\n          <ul className=\"flex flex-col divide-y rounded-md border\">\n            {items.map((item) => (\n              <li key={item.id} className=\"flex items-baseline justify-between gap-4 px-3 py-2\">\n                <span className=\"flex min-w-0 flex-col\">\n                  <span className=\"text-sm text-foreground text-pretty\">{item.label}</span>\n                  {item.detail ? (\n                    <span className=\"text-xs text-muted-foreground text-pretty\">{item.detail}</span>\n                  ) : null}\n                </span>\n                {item.amount ? (\n                  <span className=\"shrink-0 text-sm text-muted-foreground tabular-nums\">{item.amount}</span>\n                ) : null}\n              </li>\n            ))}\n          </ul>\n        ) : null}\n\n        {balance ? (\n          <div className=\"flex flex-col gap-1.5\">\n            {/* Measured, so a proportion is honest here — unlike the estimate above. */}\n            {balance.used !== undefined ? (\n              <span aria-hidden=\"true\" className=\"h-1.5 w-full overflow-hidden rounded-full bg-muted\">\n                <span\n                  className={cn(\n                    \"block h-full rounded-full\",\n                    balance.exceeds ? \"bg-agent-blocked\" : \"bg-foreground\"\n                  )}\n                  style={{ width: `${Math.round(Math.min(1, Math.max(0, balance.used)) * 100)}%` }}\n                />\n              </span>\n            ) : null}\n            <p\n              className={cn(\n                \"text-xs\",\n                balance.exceeds ? \"font-medium text-agent-blocked\" : \"text-muted-foreground\"\n              )}\n            >\n              {balance.label}\n              {balance.exceeds ? \" · this run would go over it\" : \"\"}\n            </p>\n          </div>\n        ) : null}\n      </div>\n\n      {onRun || onCancel || onAdjust ? (\n        <footer className=\"flex flex-wrap items-center gap-2 border-t p-4\">\n          {onRun ? (\n            <button\n              type=\"button\"\n              onClick={onRun}\n              className=\"rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {runLabel}\n            </button>\n          ) : null}\n          {onAdjust && adjustLabel ? (\n            <button\n              type=\"button\"\n              onClick={onAdjust}\n              className=\"rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {adjustLabel}\n            </button>\n          ) : null}\n          {onCancel ? (\n            <button\n              type=\"button\"\n              onClick={onCancel}\n              className=\"relative rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground underline-offset-2 outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              Cancel\n            </button>\n          ) : null}\n          <p className=\"w-full text-xs text-muted-foreground text-pretty sm:w-auto sm:flex-1 sm:text-right\">\n            An estimate, not a quote.\n          </p>\n        </footer>\n      ) : null}\n    </section>\n  );\n}\n\nexport { CostEstimate };\n",
+      "type": "registry:ui",
+      "target": "components/ui/cost-estimate.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "The API refuses the two lies this surface usually tells. First, a single figure: `cost` is a range, and a caller who genuinely knows the price passes only `low`, which makes precision an explicit choice rather than the default. Second, a percentage of certainty: confidence reuses the shipped three-tier Confidence Meter instead of inventing a number, and `basis` names the evidence so the estimate can be judged. Everything arrives pre-formatted as strings because currency, locale and credit units belong to the host product; a component that formatted money would have to guess a currency and would be wrong in half the places it renders. The only proportion drawn is the budget bar, which comes from a measured `used` value — the same rule the rest of the system applies to progress. `exceeds` is a separate flag rather than something derived from the numbers, because only the caller knows whether the estimate's high end, the low end, or an average is the figure that counts against a budget.",
+    "motionNotes": "Nothing moves. This is the user's turn in the fullest sense — a decision about money — so the component holds completely still, with no shimmer, pulse or progress. The only transitions are the standard instant colour changes on its buttons, and those are disabled under `prefers-reduced-motion`.",
+    "schema": {
+      "component": "CostEstimate",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "CostEstimate",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string",
+            "description": "What the run is, in the user's words: \"Research the top 5 competitors\"."
+          },
+          "cost": {
+            "$ref": "#/$defs/CostRange",
+            "description": "What it will spend. A range is the honest shape of an estimate."
+          },
+          "duration": {
+            "type": "string",
+            "description": "How long it will take: \"about 3 to 5 minutes\". Plain words, not a countdown."
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "How good the estimate is. Tiers, never a percentage: an estimate that claims\nprecision it doesn't have is worse than no estimate."
+          },
+          "basis": {
+            "type": "string",
+            "description": "Where the estimate comes from: \"your last 20 runs\"."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/CostItem"
+            },
+            "description": "What the spend is made of. Shown as a short list, never a chart."
+          },
+          "balance": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "\"1,250 credits left\", \"$18.40 of $50 left\"."
+              },
+              "used": {
+                "type": "number",
+                "description": "0–1, measured. Renders a bar; leave it out when you only have words."
+              },
+              "exceeds": {
+                "type": "boolean",
+                "description": "Set when this run would take them past their budget."
+              }
+            },
+            "required": [
+              "label"
+            ],
+            "description": "What's left, if the user has a budget or a credit balance."
+          },
+          "runLabel": {
+            "type": "string"
+          },
+          "adjustLabel": {
+            "type": "string",
+            "description": "\"Use a cheaper model\", \"Narrow the sources\"."
+          }
+        },
+        "required": [
+          "cost"
+        ],
+        "$defs": {
+          "CostRange": {
+            "type": "object",
+            "properties": {
+              "low": {
+                "type": "string",
+                "description": "Formatted by you, in your currency or unit: \"$1.20\", \"600 credits\"."
+              },
+              "high": {
+                "type": "string",
+                "description": "Leave out for a single figure you're sure of."
+              }
+            },
+            "required": [
+              "low"
+            ]
+          },
+          "CostItem": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "\"Reads 240 pages\", \"12 image generations\"."
+              },
+              "amount": {
+                "type": "string",
+                "description": "What it costs, already formatted by you: \"$0.40\", \"120 credits\", \"~2 min\"."
+              },
+              "detail": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onRun",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onCancel",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onAdjust",
+          "required": false,
+          "params": []
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils` and @pixeldosa/confidence-meter, which installs automatically. Format `cost`, `duration` and `balance` yourself: the component never formats currency or time.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

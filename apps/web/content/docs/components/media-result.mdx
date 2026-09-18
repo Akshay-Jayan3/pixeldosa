@@ -1,0 +1,89 @@
+---
+title: Media Result
+description: A finished generated image, video or clip — with what made it and whether content credentials are attached.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { MediaResult } from "@/components/ui/media-result";
+
+<MediaResult
+  title="Bottle on stone, warm light"
+  aspectRatio="4 / 5"
+  madeBy="Made with Imagen 4 · today at 14:02"
+  credentials={{ attached: true, detail: "Content Credentials + invisible watermark", href: verifyUrl }}
+  actions={[{ id: "use", label: "Use in the post", primary: true }, { id: "download", label: "Download" }]}
+  onAction={handle}
+>
+  <img src={url} alt="A dark bottle on a stone surface in warm light" className="size-full object-cover" />
+</MediaResult>
+```
+
+## Why it exists
+
+Since August 2026, the EU AI Act's Article 50 and California's SB 942 both require
+machine-readable disclosure of AI-generated media, and the big generators now sign their
+output with Content Credentials and an invisible watermark. The interface should say so,
+next to the result — and say when it hasn't.
+
+## Features
+
+- **Provenance in words**, beside the media: what made it, when, and whether credentials
+  are attached.
+- **Unsigned is a visible state.** When credentials are missing the frame says so in the
+  waiting colour, rather than staying quiet.
+- **A link to verify**, when you have one.
+- **Your own note** for usage rights, and actions with one primary.
+- **The layout never jumps:** set `aspectRatio` to the output's shape.
+
+## Variants
+
+### Signed
+
+<PreviewStack>
+  <MediaResultSpecimen
+    title="Bottle on stone, warm light"
+    madeBy="Made with Imagen 4 · today at 14:02"
+    credentials={{ attached: true, detail: "Content Credentials + invisible watermark" }}
+  />
+</PreviewStack>
+
+### Not signed yet
+
+<PreviewStack>
+  <MediaResultSpecimen
+    title="Draft key visual"
+    madeBy="Made with an internal model · 12 minutes ago"
+    credentials={{ attached: false }}
+    note="Don't publish until credentials are attached."
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `children` | `ReactNode` | Required. The media itself; give images real alt text. |
+| `title` | `string` | What it is, in the user's words. |
+| `aspectRatio` | `string` | Defaults to `"1 / 1"`. |
+| `madeBy` | `string` | Model and time, formatted by you. |
+| `credentials` | `{ attached, detail?, href? }` | Pass `attached: false` honestly. |
+| `note` | `string` | Usage rights, or your own caveat. |
+| `actions` / `onAction` | `{ id, label, primary? }[]` | At most one primary. |
+
+## Accessibility
+
+- A `figure` with a `figcaption`, so the title and provenance are associated with the
+  media by the platform.
+- The provenance state is text, not only an icon or a colour.
+- The caption sits outside the media box, so it's never baked into a screenshot of the
+  image.
+
+## When not to use
+
+- **Work still in progress:** use `Generation Job`.
+- **A grid of candidates:** use `Variation Grid`.
+- **A general "AI generated" badge** on text: use `AI Disclosure`.

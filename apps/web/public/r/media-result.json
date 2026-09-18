@@ -1,0 +1,161 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "media-result",
+  "title": "Media Result",
+  "description": "A finished piece of generated media, with its provenance attached. Takes the media itself as children, a `title`, an `aspectRatio` so the layout never jumps, `madeBy` naming the model and time, a `credentials` object (`attached`, a `detail` such as \"Content Credentials + invisible watermark\", and an optional `href` to verify), a `note` for usage rights, and `actions` with `onAction`. Provenance is stated in words beside the result rather than hidden in a details panel, and when credentials are **not** attached the frame says so plainly, because an unmarked file is the one a team needs to know about before it ships. That reflects the law as of August 2026: the EU AI Act's Article 50 and California's SB 942 both require machine-readable disclosure of AI-generated media, and the major generators now sign output with C2PA credentials and an invisible watermark. Purely presentational: you render the media and own the signing. Use it wherever a generated image, video or audio clip is presented as finished. Not for work still in progress (that is Generation Job), and not for a grid of candidates (that is Variation Grid).",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/media-result/media-result.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type MediaAction = {\n  id: string;\n  label: string;\n  /** The one action that takes the result forward. At most one. */\n  primary?: boolean;\n};\n\nexport interface MediaResultProps extends Omit<React.ComponentPropsWithoutRef<\"figure\">, \"onSelect\"> {\n  /** The result itself: an `img`, a `video`, an audio player. Yours to render. */\n  children: React.ReactNode;\n  /** What it is, in the user's words: \"Bottle on stone, warm light\". */\n  title?: string;\n  /** Aspect ratio of the frame, so the layout never jumps while media loads. */\n  aspectRatio?: string;\n  /**\n   * What made it and when, formatted by you. Shown with the result, not hidden in a\n   * details panel.\n   */\n  madeBy?: string;\n  /**\n   * Content Credentials (C2PA) and any visible or invisible watermark. Since August 2026\n   * the EU AI Act's Article 50 and California's SB 942 both require machine-readable\n   * disclosure of AI-generated media, so this is a product requirement, not a nicety.\n   */\n  credentials?: {\n    /** True once your pipeline has signed the file. */\n    attached: boolean;\n    /** \"Content Credentials + SynthID\", \"C2PA manifest signed by Acme\". */\n    detail?: string;\n    /** Where someone can check it. */\n    href?: string;\n  };\n  /** Your own note: usage rights, model terms, \"for internal use\". */\n  note?: string;\n  actions?: MediaAction[];\n  onAction?: (actionId: string) => void;\n}\n\n/**\n * A finished piece of generated media, with its provenance attached.\n *\n * Two laws that took effect in August 2026 — the EU AI Act's Article 50 and California's\n * SB 942 — require machine-readable disclosure of AI-generated media, and the major\n * generators now sign their output with Content Credentials and an invisible watermark.\n * So the frame states what made the result and whether credentials are attached, in\n * words, beside the thing itself. When they aren't attached it says so plainly rather\n * than staying quiet, because an unmarked file is the one a team needs to know about\n * before it ships.\n *\n * Holds completely still: the work is finished.\n */\nfunction MediaResult({\n  children,\n  title,\n  aspectRatio = \"1 / 1\",\n  madeBy,\n  credentials,\n  note,\n  actions,\n  onAction,\n  className,\n  ...props\n}: MediaResultProps) {\n  const captionId = React.useId();\n\n  return (\n    <figure\n      aria-labelledby={title ? captionId : undefined}\n      className={cn(\"flex flex-col overflow-hidden rounded-lg border bg-card\", className)}\n      {...props}\n    >\n      <div style={{ aspectRatio }} className=\"flex w-full items-center justify-center overflow-hidden bg-muted\">\n        {children}\n      </div>\n\n      <figcaption className=\"flex flex-col gap-2 border-t p-3\">\n        {title ? (\n          <p id={captionId} className=\"text-sm font-medium text-foreground text-pretty\">\n            {title}\n          </p>\n        ) : null}\n\n        {madeBy ? <p className=\"text-xs text-muted-foreground text-pretty\">{madeBy}</p> : null}\n\n        {credentials ? (\n          <p\n            className={cn(\n              \"flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs\",\n              credentials.attached ? \"text-muted-foreground\" : \"text-agent-waiting\"\n            )}\n          >\n            <svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" className=\"size-3.5 shrink-0\">\n              {credentials.attached ? (\n                <path\n                  d=\"M8 1.5 13.5 4v4c0 3-2.4 5.6-5.5 6.5C4.9 13.6 2.5 11 2.5 8V4L8 1.5Z\"\n                  stroke=\"currentColor\"\n                  strokeWidth=\"1.4\"\n                  strokeLinejoin=\"round\"\n                />\n              ) : (\n                <>\n                  <circle cx=\"8\" cy=\"8\" r=\"6.2\" stroke=\"currentColor\" strokeWidth=\"1.4\" />\n                  <path d=\"M8 5v4\" stroke=\"currentColor\" strokeWidth=\"1.4\" strokeLinecap=\"round\" />\n                  <circle cx=\"8\" cy=\"11\" r=\"0.8\" fill=\"currentColor\" />\n                </>\n              )}\n            </svg>\n            <span className=\"text-pretty\">\n              {credentials.attached\n                ? credentials.detail\n                  ? `Marked as AI-made · ${credentials.detail}`\n                  : \"Marked as AI-made, with content credentials\"\n                : \"No content credentials attached yet\"}\n            </span>\n            {credentials.href ? (\n              <a\n                href={credentials.href}\n                className=\"rounded-sm font-medium underline underline-offset-4 outline-none hover:no-underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n              >\n                Check them\n              </a>\n            ) : null}\n          </p>\n        ) : null}\n\n        {note ? <p className=\"text-xs text-muted-foreground text-pretty\">{note}</p> : null}\n\n        {actions && actions.length > 0 && onAction ? (\n          <div className=\"flex flex-wrap gap-1.5 pt-0.5\">\n            {actions.map((action) => (\n              <button\n                key={action.id}\n                type=\"button\"\n                onClick={() => onAction(action.id)}\n                className={cn(\n                  \"rounded-md px-2.5 py-1 text-xs font-medium outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none focus-visible:ring-[3px] focus-visible:ring-ring/40\",\n                  action.primary\n                    ? \"bg-primary text-primary-foreground hover:bg-primary/90\"\n                    : \"border border-input text-foreground hover:bg-accent hover:text-accent-foreground\"\n                )}\n              >\n                {action.label}\n              </button>\n            ))}\n          </div>\n        ) : null}\n      </figcaption>\n    </figure>\n  );\n}\n\nexport { MediaResult };\n",
+      "type": "registry:ui",
+      "target": "components/ui/media-result.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "`credentials` is a small object rather than a boolean because the three questions a team has are different: is it signed, what was applied, and where can it be checked. Treating the unsigned case as a visible state in the waiting colour — instead of simply omitting the line — is the deliberate inversion here: products that only show a badge when signing succeeds make an unsigned file indistinguishable from a file nobody thought about, which is precisely the one that must not ship under the 2026 disclosure rules. The frame is a `figure` with a `figcaption`, so provenance and title are associated with the media by the platform rather than by proximity, and the whole caption stays outside the media box so it is never baked into a screenshot of the image itself.",
+    "motionNotes": "Nothing animates: the work is finished, and this system reserves motion for a machine that is still busy. Only the standard instant colour changes on the action buttons, dropped under `prefers-reduced-motion`.",
+    "schema": {
+      "component": "MediaResult",
+      "element": "figure",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "MediaResult",
+        "type": "object",
+        "properties": {
+          "children": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "The result itself: an `img`, a `video`, an audio player. Yours to render."
+          },
+          "title": {
+            "type": "string",
+            "description": "What it is, in the user's words: \"Bottle on stone, warm light\"."
+          },
+          "aspectRatio": {
+            "type": "string",
+            "description": "Aspect ratio of the frame, so the layout never jumps while media loads."
+          },
+          "madeBy": {
+            "type": "string",
+            "description": "What made it and when, formatted by you. Shown with the result, not hidden in a\ndetails panel."
+          },
+          "credentials": {
+            "type": "object",
+            "properties": {
+              "attached": {
+                "type": "boolean",
+                "description": "True once your pipeline has signed the file."
+              },
+              "detail": {
+                "type": "string",
+                "description": "\"Content Credentials + SynthID\", \"C2PA manifest signed by Acme\"."
+              },
+              "href": {
+                "type": "string",
+                "description": "Where someone can check it."
+              }
+            },
+            "required": [
+              "attached"
+            ],
+            "description": "Content Credentials (C2PA) and any visible or invisible watermark. Since August 2026\nthe EU AI Act's Article 50 and California's SB 942 both require machine-readable\ndisclosure of AI-generated media, so this is a product requirement, not a nicety."
+          },
+          "note": {
+            "type": "string",
+            "description": "Your own note: usage rights, model terms, \"for internal use\"."
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/MediaAction"
+            }
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          },
+          "MediaAction": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "primary": {
+                "type": "boolean",
+                "description": "The one action that takes the result forward. At most one."
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onAction",
+          "required": false,
+          "params": [
+            {
+              "name": "actionId",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Render the media yourself and give images real alt text. Pass `credentials.attached: false` honestly — the absence is the useful signal.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

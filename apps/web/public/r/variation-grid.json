@@ -1,0 +1,207 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "variation-grid",
+  "title": "Variation Grid",
+  "description": "The results of one prompt, with the good ones kept. Takes `items` (each with your own `preview` node, a `label`, a per-cell `status` of `running`, `done` or `failed`, and a `note` explaining a failure), the `keptIds` the user is holding with `onKeptChange`, `onRegenerateRest` which replaces only what isn't kept, a `regenerateCost` shown on the button before the click, plus `onUse`, `onMore` and a per-cell `onRetry`. Keeping is the point: research on how people use generation tools describes them keeping the two results they like and running the rest again, which almost no tool supports, so people download favourites and re-prompt by hand. Failures are per cell, so one timed-out result shows its own reason and Retry while the others stay usable. Purely presentational: you render the previews and own the generation. Use it for any prompt that returns several candidates — images, video takes, copy, layouts. Not for a single result (that is Generation Placeholder or Media Result), and not as a gallery of past work.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/variation-grid/variation-grid.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type VariationStatus = \"running\" | \"done\" | \"failed\";\n\nexport type Variation = {\n  id: string;\n  /** The result itself: an image, a video poster, a card of text. Yours to render. */\n  preview?: React.ReactNode;\n  /** \"Version 3\", \"Warmer light\". */\n  label?: string;\n  status?: VariationStatus;\n  /** Why this one failed, and what happened to the credits. */\n  note?: string;\n};\n\nexport interface VariationGridProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\" | \"onSelect\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  items: Variation[];\n  /** The ones the user is keeping. They survive the next regeneration. */\n  keptIds: string[];\n  onKeptChange: (ids: string[]) => void;\n  /** Regenerates only what isn't kept — the thing people do by hand today. */\n  onRegenerateRest?: (idsToReplace: string[]) => void;\n  /** Cost of that regeneration, formatted by you: \"4 credits\". Shown before the click. */\n  regenerateCost?: string;\n  /** Takes one result forward: into the document, the post, the canvas. */\n  onUse?: (id: string) => void;\n  useLabel?: string;\n  /** More like this one. */\n  onMore?: (id: string) => void;\n  /** Retries a single failed result. */\n  onRetry?: (id: string) => void;\n  /** Aspect ratio for each cell, so the grid never jumps as results land. */\n  aspectRatio?: string;\n}\n\n/**\n * The results of one prompt, with the good ones kept.\n *\n * Research on how people actually use generation tools calls this apple picking: they\n * keep the two they like and run the rest again. Almost no tool supports it, so people do\n * it by hand — downloading favourites, re-prompting, losing track of which was which.\n * Here keeping is a first-class state: kept results are marked, \"Regenerate the rest\"\n * replaces only the others, and the cost of doing that is on the button before the click,\n * because unpriced iteration is the loudest complaint in this category.\n *\n * Failures are per cell, not per batch: one failed result shows its own reason and its own\n * Retry while the rest stay usable.\n */\nfunction VariationGrid({\n  headingLevel = 3,\n  title = \"Results\",\n  items,\n  keptIds,\n  onKeptChange,\n  onRegenerateRest,\n  regenerateCost,\n  onUse,\n  useLabel = \"Use this\",\n  onMore,\n  onRetry,\n  aspectRatio = \"1 / 1\",\n  className,\n  ...props\n}: VariationGridProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const kept = items.filter((item) => keptIds.includes(item.id));\n  const replaceable = items.filter((item) => !keptIds.includes(item.id) && item.status !== \"running\");\n\n  const toggleKeep = (id: string) =>\n    onKeptChange(keptIds.includes(id) ? keptIds.filter((value) => value !== id) : [...keptIds, id]);\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col gap-3\", className)}\n      {...props}\n    >\n      <div className=\"flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        <p className=\"text-xs text-muted-foreground tabular-nums\">\n          {kept.length > 0 ? `${kept.length} kept · ${replaceable.length} can be replaced` : `${items.length} results`}\n        </p>\n      </div>\n\n      <ul className=\"grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4\">\n        {items.map((item) => {\n          const isKept = keptIds.includes(item.id);\n          const status = item.status ?? \"done\";\n          return (\n            <li\n              key={item.id}\n              className={cn(\n                \"group relative flex flex-col overflow-hidden rounded-lg border bg-card\",\n                isKept && \"border-[1.5px] border-foreground\"\n              )}\n            >\n              <div\n                style={{ aspectRatio }}\n                className={cn(\n                  \"relative flex w-full items-center justify-center overflow-hidden bg-muted\",\n                  status === \"failed\" && \"bg-agent-blocked-soft\"\n                )}\n              >\n                {status === \"running\" ? (\n                  <span className=\"flex flex-col items-center gap-2 p-3 text-center\">\n                    <span\n                      aria-hidden=\"true\"\n                      className=\"size-2.5 rounded-full bg-agent-working animate-[pd-cell-pulse_1.4s_ease-in-out_infinite] motion-reduce:animate-none\"\n                    />\n                    <span className=\"text-xs text-muted-foreground\">Generating…</span>\n                  </span>\n                ) : status === \"failed\" ? (\n                  <span className=\"flex flex-col items-center gap-1.5 p-3 text-center\">\n                    <span className=\"text-xs font-medium text-agent-blocked\">Didn't finish</span>\n                    {item.note ? <span className=\"text-xs text-muted-foreground text-pretty\">{item.note}</span> : null}\n                    {onRetry ? (\n                      <button\n                        type=\"button\"\n                        onClick={() => onRetry(item.id)}\n                        className=\"rounded-md border border-input bg-card px-2 py-1 text-xs font-medium text-foreground outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                      >\n                        Try this one again\n                      </button>\n                    ) : null}\n                  </span>\n                ) : (\n                  item.preview\n                )}\n              </div>\n\n              <div className=\"flex items-center justify-between gap-2 border-t px-2.5 py-2\">\n                <span className=\"min-w-0 truncate text-xs text-muted-foreground\">\n                  {item.label ?? \"\"}\n                </span>\n                {status === \"done\" ? (\n                  <button\n                    type=\"button\"\n                    aria-pressed={isKept}\n                    aria-label={isKept ? `Stop keeping ${item.label ?? \"this result\"}` : `Keep ${item.label ?? \"this result\"}`}\n                    onClick={() => toggleKeep(item.id)}\n                    className={cn(\n                      \"relative shrink-0 rounded-md px-2 py-1 text-xs font-medium outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none focus-visible:ring-[3px] focus-visible:ring-ring/40\",\n                      isKept\n                        ? \"bg-foreground text-background\"\n                        : \"text-muted-foreground hover:bg-accent hover:text-accent-foreground\"\n                    )}\n                  >\n                    {isKept ? \"Kept\" : \"Keep\"}\n                  </button>\n                ) : null}\n              </div>\n\n              {status === \"done\" && (onUse || onMore) ? (\n                <div className=\"flex flex-wrap gap-1.5 border-t px-2.5 py-2\">\n                  {onUse ? (\n                    <button\n                      type=\"button\"\n                      onClick={() => onUse(item.id)}\n                      className=\"rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                    >\n                      {useLabel}\n                    </button>\n                  ) : null}\n                  {onMore ? (\n                    <button\n                      type=\"button\"\n                      onClick={() => onMore(item.id)}\n                      className=\"rounded-md border border-input px-2 py-1 text-xs font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                    >\n                      More like this\n                    </button>\n                  ) : null}\n                </div>\n              ) : null}\n            </li>\n          );\n        })}\n      </ul>\n\n      {onRegenerateRest ? (\n        <div className=\"flex flex-wrap items-center gap-x-3 gap-y-1\">\n          <button\n            type=\"button\"\n            disabled={replaceable.length === 0}\n            onClick={() => onRegenerateRest(replaceable.map((item) => item.id))}\n            className=\"rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50\"\n          >\n            {replaceable.length === items.length\n              ? \"Regenerate all\"\n              : `Regenerate the other ${replaceable.length}`}\n          </button>\n          {/* The price of iterating, before the click. */}\n          {regenerateCost ? (\n            <p className=\"text-xs text-muted-foreground\">{regenerateCost} · what you kept stays.</p>\n          ) : (\n            <p className=\"text-xs text-muted-foreground\">What you kept stays.</p>\n          )}\n        </div>\n      ) : null}\n    </section>\n  );\n}\n\nexport { VariationGrid };\n",
+      "type": "registry:ui",
+      "target": "components/ui/variation-grid.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "The kept set is caller-owned and passed in, because it has to survive the regeneration that replaces the other cells — holding it internally would lose the user's choices exactly when the component re-renders with new results. `onRegenerateRest` hands back the ids it is replacing rather than a bare signal, so the caller can keep positions stable and never has to diff two arrays to work out what the user meant. A cell that is still running is excluded from the replaceable set, which stops a second click from cancelling work already in flight. Per-cell status rather than a batch status comes from how these pipelines actually fail: partial success is the common case, and a grid that collapses to a single error state throws away results the user already paid for. The regeneration cost is a caller-formatted string on the button because unpriced iteration is the single most common complaint in this category.",
+    "motionNotes": "Only unfinished cells move: a running cell pulses its dot while the rest hold still, so a grid mid-regeneration reads as 'these two are working, the others are yours'. Kept cells change by border weight rather than by animation, since keeping is the user's turn and a celebratory motion there would be noise. Under `prefers-reduced-motion` the pulse stops and the running state is carried by its label.",
+    "schema": {
+      "component": "VariationGrid",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "VariationGrid",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Variation"
+            }
+          },
+          "keptIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The ones the user is keeping. They survive the next regeneration."
+          },
+          "regenerateCost": {
+            "type": "string",
+            "description": "Cost of that regeneration, formatted by you: \"4 credits\". Shown before the click."
+          },
+          "useLabel": {
+            "type": "string"
+          },
+          "aspectRatio": {
+            "type": "string",
+            "description": "Aspect ratio for each cell, so the grid never jumps as results land."
+          }
+        },
+        "required": [
+          "items",
+          "keptIds"
+        ],
+        "$defs": {
+          "Variation": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "preview": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "The result itself: an image, a video poster, a card of text. Yours to render."
+              },
+              "label": {
+                "type": "string",
+                "description": "\"Version 3\", \"Warmer light\"."
+              },
+              "status": {
+                "enum": [
+                  "done",
+                  "running",
+                  "failed"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "description": "Why this one failed, and what happened to the credits."
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onKeptChange",
+          "required": true,
+          "params": [
+            {
+              "name": "ids",
+              "type": "string[]"
+            }
+          ]
+        },
+        {
+          "name": "onRegenerateRest",
+          "required": false,
+          "params": [
+            {
+              "name": "idsToReplace",
+              "type": "string[]"
+            }
+          ],
+          "description": "Regenerates only what isn't kept — the thing people do by hand today."
+        },
+        {
+          "name": "onUse",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "description": "Takes one result forward: into the document, the post, the canvas."
+        },
+        {
+          "name": "onMore",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "description": "More like this one."
+        },
+        {
+          "name": "onRetry",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "description": "Retries a single failed result."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Render each `preview` yourself: an `img`, a poster frame, a card of text. Set `aspectRatio` to your output's shape so the grid never jumps.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

@@ -1,0 +1,104 @@
+---
+title: AI Disclosure
+description: Say what the AI did and what it used — or ask first, with both answers equally available.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AIDisclosure } from "@/components/ui/ai-disclosure";
+
+<AIDisclosure
+  title="Written by AI, from your project"
+  summary="A draft reply, prepared from this thread and your saved tone."
+  facts={[
+    { id: "used", label: "What it used", value: "The last 20 messages in this thread." },
+    { id: "training", label: "Training", value: "Your content isn't used to train the model." },
+  ]}
+  learnMoreHref="/privacy"
+/>
+```
+
+## Why it exists
+
+People are entitled to know when AI wrote something, what it read to do that, and what
+happens to their data — and to be asked before a feature records, remembers or shares.
+Most products bury this in a policy page or a tooltip.
+
+## Features
+
+- **Two shapes, one voice.** `notice` states the fact; `consent` asks first.
+- **Specifics, not boilerplate.** `facts` are label-and-value pairs about this feature:
+  what it used, how long it's kept, who can see it.
+- **A notice stays one line** with the details one click away.
+- **Consent shows the details up front.** A decision taken without them isn't consent.
+- **Both answers look the same.** Same size, same prominence, nothing preselected, and no
+  dismiss — a question you can close is a question that gets closed.
+
+## Variants
+
+### A notice on AI-written content
+
+<PreviewStack>
+  <AIDisclosureSpecimen
+    headingLevel={3}
+    title="This reply was drafted by AI"
+    summary="Prepared from this thread and your saved tone. Check it before sending."
+    facts={[
+      { id: "used", label: "What it used", value: "The last 20 messages in this thread and your tone settings." },
+      { id: "kept", label: "How long it's kept", value: "The draft stays in this thread until you delete it." },
+    ]}
+  />
+</PreviewStack>
+
+### Asking first
+
+<PreviewStack>
+  <AIDisclosureSpecimen
+    headingLevel={3}
+    variant="consent"
+    title="Record and summarise this meeting?"
+    summary="Everyone in the meeting is told. You can stop it at any point."
+    facts={[
+      { id: "who", label: "Who can see it", value: "You and the three people on this call." },
+      { id: "kept", label: "How long it's kept", value: "30 days, then deleted." },
+    ]}
+    allowLabel="Record and summarise"
+    declineLabel="Don't record"
+  />
+</PreviewStack>
+
+### A short notice, no details
+
+<PreviewStack>
+  <AIDisclosureSpecimen headingLevel={3} title="This summary was written by AI" summary="Check anything you plan to act on." />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `title` | `string` | Required. The fact, or the question. |
+| `variant` | `"notice" \| "consent"` | Defaults to `"notice"`. |
+| `summary` | `string` | One sentence in the user's words. |
+| `facts` | `{ id, label, value }[]` | The specifics. Shown up front for consent. |
+| `learnMoreHref` / `learnMoreLabel` | `string` | Your policy page. |
+| `onAllow` / `onDecline` | `() => void` | Consent only. |
+| `allowLabel` / `declineLabel` | `string` | Say what happens: "Record and summarise". |
+| `onDismiss` | `() => void` | Notice only. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- A labelled `<section>` with a real heading.
+- The details toggle is a proper expander (`aria-expanded`, `aria-controls`).
+- Consent buttons are ordinary buttons of equal weight, in reading order, with labels that
+  say what will happen rather than "OK" and "Cancel".
+
+## When not to use
+
+- **For one consequential action** awaiting a decision, use `AI Approval Gate`.
+- **As a cookie banner.** This is about what a feature does with a person's content.
+- **To explain one output's sources**, use `AI Context Surface` or `Inline Citations`.

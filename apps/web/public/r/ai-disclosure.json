@@ -1,0 +1,130 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ai-disclosure",
+  "title": "AI Disclosure",
+  "description": "What the AI did, what it used, and — when it matters — asking first. Two shapes in one component. `variant=\"notice\"` states a fact (\"Written by AI, from your project\") with the specifics one click away, so a label never becomes a wall of policy text; `variant=\"consent\"` asks before anything happens, shows the specifics up front, and gives both answers equal weight: same size, same prominence, nothing preselected, no styling that makes declining look like a mistake. Takes a `title`, a one-sentence `summary`, `facts` as label-and-value pairs (\"What it used\", \"How long it's kept\", \"Who can see it\"), an optional `learnMoreHref`, `onAllow` and `onDecline` for consent, and `onDismiss` for a notice. Purely presentational: it states what you tell it and reports the decision back. Use it on AI-written content, on recording or memory features, and anywhere a person should know or be asked. Not a cookie banner, and not a replacement for AI Approval Gate, which is about one consequential action rather than what the system does in general.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/ai-disclosure/ai-disclosure.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\n/** One thing the user should know, stated plainly. */\nexport type DisclosureFact = {\n  id: string;\n  /** \"What it used\", \"Who can see it\", \"How long it's kept\". */\n  label: string;\n  /** \"Your last 20 messages in this project.\" */\n  value: string;\n};\n\nexport interface AIDisclosureProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  /**\n   * `notice` states what happened or is happening. `consent` asks first and nothing\n   * proceeds until the person answers.\n   */\n  variant?: \"notice\" | \"consent\";\n  /** \"Written by AI\", \"This call will be recorded and summarised\". */\n  title: string;\n  /** One sentence in the user's words. */\n  summary?: string;\n  /** The specifics, shown on demand for a notice and up front for consent. */\n  facts?: DisclosureFact[];\n  /** Your policy page. */\n  learnMoreHref?: string;\n  learnMoreLabel?: string;\n  /** Consent only. Both answers are equally available; neither is preselected. */\n  onAllow?: () => void;\n  onDecline?: () => void;\n  allowLabel?: string;\n  declineLabel?: string;\n  /** Notice only. Lets the reader dismiss it once they've read it. */\n  onDismiss?: () => void;\n}\n\n/**\n * What the AI did, what it used, and — when it matters — asking first.\n *\n * Two shapes, one component. A `notice` states the fact (\"Written by AI from your last 20\n * messages\") and keeps the specifics one click away, so a label doesn't become a wall of\n * policy text. A `consent` asks before anything happens, with both answers equally\n * available: no preselected \"Allow\", no styling that makes declining look like a mistake,\n * and the specifics visible without expanding anything, because consent given without\n * reading isn't consent.\n *\n * Holds completely still. Nothing here is the machine's turn.\n */\nfunction AIDisclosure({\n  headingLevel = 3,\n  variant = \"notice\",\n  title,\n  summary,\n  facts,\n  learnMoreHref,\n  learnMoreLabel = \"How this works\",\n  onAllow,\n  onDecline,\n  allowLabel = \"Allow\",\n  declineLabel = \"Not now\",\n  onDismiss,\n  className,\n  ...props\n}: AIDisclosureProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const detailsId = React.useId();\n  const consent = variant === \"consent\";\n  const [open, setOpen] = React.useState(consent);\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\n        \"flex flex-col gap-3 rounded-lg border bg-card p-3\",\n        consent && \"border-[1.5px] border-agent-waiting bg-agent-waiting-soft\",\n        className\n      )}\n      {...props}\n    >\n      <div className=\"flex items-start gap-2.5\">\n        <svg viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\" className=\"mt-0.5 size-4 shrink-0 text-muted-foreground\">\n          <circle cx=\"12\" cy=\"12\" r=\"9\" stroke=\"currentColor\" strokeWidth=\"1.6\" />\n          <path d=\"M12 11v5\" stroke=\"currentColor\" strokeWidth=\"1.6\" strokeLinecap=\"round\" />\n          <circle cx=\"12\" cy=\"8\" r=\"0.9\" fill=\"currentColor\" />\n        </svg>\n        <div className=\"flex min-w-0 flex-1 flex-col gap-1\">\n          <Heading id={headingId} className=\"text-sm font-medium text-foreground text-pretty\">\n            {title}\n          </Heading>\n          {summary ? <p className=\"text-sm text-muted-foreground text-pretty\">{summary}</p> : null}\n        </div>\n        {onDismiss && !consent ? (\n          <button\n            type=\"button\"\n            onClick={onDismiss}\n            aria-label=\"Dismiss this notice\"\n            className=\"relative -m-1 inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            <svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" className=\"size-3.5\">\n              <path d=\"m4 4 8 8M12 4l-8 8\" stroke=\"currentColor\" strokeWidth=\"1.6\" strokeLinecap=\"round\" />\n            </svg>\n          </button>\n        ) : null}\n      </div>\n\n      {facts && facts.length > 0 ? (\n        <div className=\"flex flex-col gap-2\">\n          {/* A notice keeps the specifics one click away; consent shows them up front,\n              because a decision made without them isn't a decision. */}\n          {!consent ? (\n            <button\n              type=\"button\"\n              aria-expanded={open}\n              aria-controls={detailsId}\n              onClick={() => setOpen((value) => !value)}\n              className=\"self-start rounded-md text-xs font-medium text-muted-foreground underline-offset-4 outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {open ? \"Hide the details\" : \"What this used\"}\n            </button>\n          ) : null}\n          <dl\n            id={detailsId}\n            hidden={!open}\n            className=\"grid gap-x-4 gap-y-1.5 text-xs sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]\"\n          >\n            {facts.map((fact) => (\n              <React.Fragment key={fact.id}>\n                <dt className=\"text-muted-foreground\">{fact.label}</dt>\n                <dd className=\"text-foreground text-pretty\">{fact.value}</dd>\n              </React.Fragment>\n            ))}\n          </dl>\n        </div>\n      ) : null}\n\n      {learnMoreHref ? (\n        <a\n          href={learnMoreHref}\n          className=\"self-start rounded-md text-xs font-medium text-foreground underline underline-offset-4 outline-none hover:no-underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n        >\n          {learnMoreLabel}\n        </a>\n      ) : null}\n\n      {consent && (onAllow || onDecline) ? (\n        // Equal weight on purpose: the same size and the same prominence, so declining\n        // never looks like the wrong answer.\n        <div className=\"flex flex-wrap gap-2\">\n          {onAllow ? (\n            <button\n              type=\"button\"\n              onClick={onAllow}\n              className=\"rounded-md border-[1.5px] border-foreground px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {allowLabel}\n            </button>\n          ) : null}\n          {onDecline ? (\n            <button\n              type=\"button\"\n              onClick={onDecline}\n              className=\"rounded-md border-[1.5px] border-foreground px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {declineLabel}\n            </button>\n          ) : null}\n        </div>\n      ) : null}\n    </section>\n  );\n}\n\nexport { AIDisclosure };\n",
+      "type": "registry:ui",
+      "target": "components/ui/ai-disclosure.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Notice and consent are one component because they share a sentence, a set of facts and a visual home; splitting them produced two surfaces that drifted apart in wording, which is how products end up disclosing one thing and asking about another. What differs is only what the variant does with the facts: a notice hides them behind a disclosure button so the common case stays a single line, while consent renders them open, because a decision taken without the specifics is not consent and an expander is an easy thing to skip. Both consent buttons carry identical styling by construction rather than by convention — there is no primary variant available to the caller — so a product cannot make \"Allow\" the obvious answer. The consent variant intentionally offers no dismiss: a question you can close is a question that gets closed.",
+    "motionNotes": "Nothing animates in either variant. Consent is the user's turn at its most consequential, and a notice is a statement of fact, so neither has anything to express through motion; the only transitions are the standard instant colour changes on buttons, disabled under `prefers-reduced-motion`.",
+    "schema": {
+      "component": "AIDisclosure",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AIDisclosure",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "variant": {
+            "enum": [
+              "notice",
+              "consent"
+            ],
+            "description": "`notice` states what happened or is happening. `consent` asks first and nothing\nproceeds until the person answers."
+          },
+          "title": {
+            "type": "string",
+            "description": "\"Written by AI\", \"This call will be recorded and summarised\"."
+          },
+          "summary": {
+            "type": "string",
+            "description": "One sentence in the user's words."
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/DisclosureFact"
+            },
+            "description": "The specifics, shown on demand for a notice and up front for consent."
+          },
+          "learnMoreHref": {
+            "type": "string",
+            "description": "Your policy page."
+          },
+          "learnMoreLabel": {
+            "type": "string"
+          },
+          "allowLabel": {
+            "type": "string"
+          },
+          "declineLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "$defs": {
+          "DisclosureFact": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "\"What it used\", \"Who can see it\", \"How long it's kept\"."
+              },
+              "value": {
+                "type": "string",
+                "description": "\"Your last 20 messages in this project.\""
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "value"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onAllow",
+          "required": false,
+          "params": [],
+          "description": "Consent only. Both answers are equally available; neither is preselected."
+        },
+        {
+          "name": "onDecline",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onDismiss",
+          "required": false,
+          "params": [],
+          "description": "Notice only. Lets the reader dismiss it once they've read it."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Write the `facts` as specifics about this feature, not policy boilerplate.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

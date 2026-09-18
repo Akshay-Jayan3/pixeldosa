@@ -28,7 +28,446 @@
   ],
   "meta": {
     "engineeringNotes": "A Block, so an orchestration rather than new UI: every element is an existing component, and the contribution is the rules for combining them. Busy signals are exclusive. `presenceFor` shows Agent Presence only in the gaps where nothing else reports progress (before reasoning or tools exist, or between the last tool and the first token). A streaming reasoning trace or running tool call already says what is happening, and once text exists the Message's quantized cursor takes over, because two simultaneous 'working' indicators read as noise and make neither trustworthy. Reasoning is forced to stop streaming once answer text arrives, regardless of what the reasoning data says, since a ticking trace under a streaming answer misreports what the model is doing. `busy` derives from the latest assistant turn alone, so Send becomes Stop for exactly that window. The composer is controlled by the block, which lets a `fill` suggestion write into it while the user keeps editing during a stream. Suggestions render only on the latest assistant turn in 'done' status, and older turns' suggestions are hidden, so stale follow-ups never compete with current ones. Text goes through `splitCodeFences`, so an unclosed fence streams as a Code Block. Screen reader announcements are derived by diffing each turn's previous status: a transition out of 'streaming' produces one message (replied with a summary, failed, or stopped) and never a token stream. Turn data is plain objects, so it maps from any runtime (AI SDK, LangGraph, a custom SSE stream) without a dependency.",
-    "motionNotes": "Inherited, not invented. The block adds no motion of its own. Agent Presence's line form moves while the agent thinks or works. Reasoning Stream and Tool Call Group shimmer only their verbs while running. The Message cursor pulses on the shared cell keyframe while text streams. Suggestions arrive with their staggered fade once an answer is done. The Message Scroller follows instantly while pinned and scrolls smoothly only on 'Jump to latest'. Because each part applies the same tokens and the turn-taking grammar, the whole screen has one rhythm: motion while the machine works, stillness when it's the user's turn. Every part handles prefers-reduced-motion itself, so the block needs no separate fallback."
+    "motionNotes": "Inherited, not invented. The block adds no motion of its own. Agent Presence's line form moves while the agent thinks or works. Reasoning Stream and Tool Call Group shimmer only their verbs while running. The Message cursor pulses on the shared cell keyframe while text streams. Suggestions arrive with their staggered fade once an answer is done. The Message Scroller follows instantly while pinned and scrolls smoothly only on 'Jump to latest'. Because each part applies the same tokens and the turn-taking grammar, the whole screen has one rhythm: motion while the machine works, stillness when it's the user's turn. Every part handles prefers-reduced-motion itself, so the block needs no separate fallback.",
+    "schema": {
+      "component": "AIChatExperience",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AIChatExperience",
+        "type": "object",
+        "properties": {
+          "turns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ChatTurn"
+            }
+          },
+          "suggestionMode": {
+            "enum": [
+              "fill",
+              "send"
+            ],
+            "description": "How follow-up suggestions behave. `fill` (default) puts them in the composer."
+          },
+          "assistantName": {
+            "type": "string"
+          },
+          "empty": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "suggestions": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "prompt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "description": "Shown when there are no turns yet."
+          },
+          "controls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ComposerControl"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ComposerAttachment"
+            }
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5
+            ],
+            "description": "Level of the empty-state title and of the Sources headings in answers (the title is gone once a conversation exists, so they share the level). Defaults to 2."
+          },
+          "expression": {
+            "enum": [
+              "full",
+              "subtle",
+              "off"
+            ],
+            "description": "How much of the agent shows. `full` adds its drawn head as the assistant's avatar,\nwith a face that follows the turn; `subtle` (default) shows the head only beside\n\"Thinking\"; `off` uses plain dots."
+          }
+        },
+        "required": [
+          "turns"
+        ],
+        "$defs": {
+          "ChatTurn": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "enum": [
+                  "user",
+                  "assistant"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "description": "Markdown-ish text. Fenced code becomes Code Blocks; the rest goes through `renderText`."
+              },
+              "content": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "Custom content instead of `text` — e.g. an answer marked up with `<Cite>`."
+              },
+              "status": {
+                "enum": [
+                  "done",
+                  "failed",
+                  "streaming",
+                  "stopped"
+                ],
+                "description": "Assistant turns. Defaults to \"done\"."
+              },
+              "error": {
+                "type": "string"
+              },
+              "reasoning": {
+                "type": "object",
+                "properties": {
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "streaming": {
+                    "type": "boolean"
+                  },
+                  "durationMs": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "steps"
+                ]
+              },
+              "toolCalls": {
+                "type": "array",
+                "items": {}
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/CitationSource"
+                },
+                "description": "Sources behind the answer. Rendered as a reference list; use `content` + `<Cite>` for inline markers."
+              },
+              "suggestions": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "prompt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label"
+                      ]
+                    }
+                  ]
+                },
+                "description": "Follow-ups. Only shown on the latest assistant turn, once it's done."
+              }
+            },
+            "required": [
+              "id",
+              "role"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          },
+          "CitationSource": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "publisher": {
+                "type": "string",
+                "description": "Who published it: \"Reuters\", \"Internal wiki\", \"Q3 board deck\"."
+              },
+              "date": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          },
+          "ComposerControl": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "Short label shown on the pill: \"Tone\", \"Length\", \"For\"."
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "label"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "defaultValue": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "options",
+              "defaultValue"
+            ]
+          },
+          "ComposerAttachment": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string",
+                "description": "e.g. \"PDF · 2.4 MB\"."
+              },
+              "status": {
+                "enum": [
+                  "failed",
+                  "uploading",
+                  "ready"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onSend",
+          "required": true,
+          "params": [
+            {
+              "name": "submission",
+              "type": "ComposerSubmission"
+            }
+          ]
+        },
+        {
+          "name": "onStop",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onRetry",
+          "required": false,
+          "params": [
+            {
+              "name": "turnId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onContinue",
+          "required": false,
+          "params": [
+            {
+              "name": "turnId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onRegenerate",
+          "required": false,
+          "params": [
+            {
+              "name": "turnId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onApplyCode",
+          "required": false,
+          "params": [
+            {
+              "name": "code",
+              "type": "string"
+            },
+            {
+              "name": "language",
+              "type": "string | undefined"
+            }
+          ],
+          "description": "Called on Apply in a code block."
+        },
+        {
+          "name": "renderText",
+          "required": false,
+          "params": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "description": "Your markdown renderer. Defaults to paragraphs split on blank lines."
+        },
+        {
+          "name": "onAttachFiles",
+          "required": false,
+          "params": [
+            {
+              "name": "files",
+              "type": "File[]"
+            }
+          ]
+        },
+        {
+          "name": "onRemoveAttachment",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onLoadOlder",
+          "required": false,
+          "params": [],
+          "description": "Called near the top of the history."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Installs the whole chat stack it composes. Keep `turns` in your state and update the latest assistant turn as your stream reports reasoning, tool calls, text and completion. Pass your markdown renderer as `renderText`.",
   "categories": [

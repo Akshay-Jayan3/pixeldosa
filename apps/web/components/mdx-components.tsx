@@ -4,7 +4,15 @@ import type { MDXComponents } from "mdx/types";
 
 import * as PixelDosaUI from "@pixeldosa/ui";
 
-import { ActionToolbarSpecimen, AIFormFillSpecimen } from "@/components/mdx-specimens";
+import {
+  ActionToolbarSpecimen,
+  AIDisclosureSpecimen,
+  AIFormFillSpecimen,
+  CostEstimateSpecimen,
+  DraftModeSpecimen,
+  MediaResultSpecimen,
+  ResponseFeedbackSpecimen,
+} from "@/components/mdx-specimens";
 import { slugify } from "@/lib/toc";
 
 /**
@@ -62,7 +70,12 @@ export const mdxComponents: MDXComponents = {
   Preview,
   PreviewStack,
   ActionToolbarSpecimen,
+  AIDisclosureSpecimen,
   AIFormFillSpecimen,
+  CostEstimateSpecimen,
+  DraftModeSpecimen,
+  MediaResultSpecimen,
+  ResponseFeedbackSpecimen,
   h2: ({ children, ...props }) => (
     <h2
       {...props}
@@ -105,7 +118,12 @@ export const mdxComponents: MDXComponents = {
     />
   ),
   table: (props) => (
-    <div className="mt-4 overflow-x-auto rounded-lg border">
+    // Focusable like `pre` above: a props table wide enough to scroll sideways is
+    // unreachable by keyboard otherwise, and every component page has one.
+    <div
+      tabIndex={0}
+      className="mt-4 overflow-x-auto rounded-lg border outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
+    >
       <table {...props} className="w-full border-collapse text-left text-sm" />
     </div>
   ),

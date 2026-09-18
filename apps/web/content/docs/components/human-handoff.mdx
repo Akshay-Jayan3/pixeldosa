@@ -1,0 +1,95 @@
+---
+title: Human Handoff
+description: When a person takes over from the agent — and what they're handed.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { HumanHandoff } from "@/components/ui/human-handoff";
+
+<HumanHandoff
+  stage="waitingForPerson"
+  reason="The customer asked for a refund outside the policy window. I can't decide this one."
+  context={[
+    { id: "customer", label: "Customer", value: "Priya Menon · 3 years, no refunds before" },
+    { id: "tried", label: "I already tried", value: "Offered a replacement and a 30% credit. Both declined." },
+  ]}
+  onTakeOver={take}
+/>
+```
+
+## Why it exists
+
+Handoffs usually lose everything: the customer repeats themselves, whoever takes over
+re-reads a transcript to find three facts, and nobody records what the agent already
+tried — so the same rejected remedy gets offered twice.
+
+## Features
+
+- **The context is the component.** The facts a colleague would ask for in the first
+  thirty seconds, including what the agent already tried.
+- **The reason is in the agent's own words**, so the person knows why it stopped.
+- **It works both ways.** Handing a finished job back to the agent is a real stage, not an
+  afterthought.
+- **Waiting holds completely still**, in the waiting colour, the same treatment approvals
+  get.
+
+## Variants
+
+### Waiting for a person
+
+<PreviewStack>
+  <HumanHandoff
+    headingLevel={3}
+    title="Refund decision"
+    stage="waitingForPerson"
+    waitingFor="Waiting 6 minutes"
+    reason="The customer asked for a refund outside the policy window. I can't decide this one."
+    context={[
+      { id: "order", label: "Order", value: "#48120 · £240 · delivered 31 days ago" },
+      { id: "tried", label: "I already tried", value: "Offered a replacement and a 30% credit. Both declined." },
+    ]}
+  />
+</PreviewStack>
+
+### A person has it
+
+<PreviewStack>
+  <HumanHandoff
+    headingLevel={3}
+    title="Billing question"
+    stage="personHandling"
+    person="Dana in support"
+    reason="Dana has the conversation. I'll keep the notes up to date."
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `stage` | `"agentHandling" \| "waitingForPerson" \| "personHandling" \| "returnedToAgent"` | Required. |
+| `reason` | `string` | Why the agent stepped back, in its words. |
+| `context` | `{ id, label, value }[]` | The facts the person receives. |
+| `person` | `string` | Who has it now. |
+| `waitingFor` | `string` | How long, formatted by you. |
+| `onTakeOver` / `takeOverLabel` | `() => void` / `string` | |
+| `onReturnToAgent` / `returnLabel` | `() => void` / `string` | |
+| `title` | `string` | Defaults to `"Handover"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- A labelled `<section>`; the context is a description list, so labels and values are
+  paired for screen readers.
+- The stage is stated in words, not only by colour.
+- Nothing animates in any stage.
+
+## When not to use
+
+- **One consequential action awaiting a decision:** use `AI Approval Gate`.
+- **A question the agent could answer itself:** use `Agent Ask`.
+- **Routing or assignment rules:** that's your queueing system, not this.

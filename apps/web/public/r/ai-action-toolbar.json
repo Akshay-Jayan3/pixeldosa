@@ -19,7 +19,143 @@
   ],
   "meta": {
     "engineeringNotes": "An extraction, not new design: three already-shipped components had independently hand-rolled the same control strip. Smart Field renders Retry, Reject/Accept and an 'Value accepted. Undo' row; Diff Accept renders 'Changes applied. Undo' and a Regenerate-on-conflict button; Selection Actions renders Retry and Dismiss. Across those seven call sites exactly three button treatments recur verbatim — filled primary, bordered secondary, underline quiet — along with a character-for-character duplicated spinner SVG and a duplicated message+Undo confirmation row. Those three treatments became the CVA `intent` variants rather than being re-derived a fourth time. Two deliberate boundaries: (1) `busy` is a per-action prop rather than internal state, because every existing call site already holds the request and its AbortController, so owning a second copy here would let the toolbar's idea of 'in flight' drift from the caller's; (2) the undo *timer* stays with the consumer — Smart Field and Diff Accept both already run it inside their own status state machines, and absorbing it here would fight those machines rather than simplify them, so the toolbar renders the undo affordance while the consumer owns when it exists. The roving tabindex is kept as an action id rather than an index so the tab stop survives the actions array changing between renders, and it falls back to the first enabled action whenever the focused one becomes disabled — otherwise a toolbar whose focused action just disabled would have no tab stop at all and become unreachable by keyboard.",
-    "motionNotes": "Deliberately minimal, and the restraint is the decision. Colour-only transitions on hover and focus at `--pd-duration-instant` (100ms) with `--pd-ease-standard`, matching every other control in the system. There is no entrance animation, on purpose: this toolbar is always revealed by a container that already animates — Smart Field's proposal panel owns a grid-template-rows expand, Selection Actions owns a fade-and-scale — so a second entrance here would double-animate the same appearance. That mirrors Confidence Meter's rule that motion belongs to what wraps a primitive, not the primitive itself. The one continuous animation is the busy spinner, which is honest: it maps to a real in-flight request and stops when that request settles. Under prefers-reduced-motion the colour transitions drop to instant via `motion-reduce:transition-none`, while the spinner deliberately keeps rotating — removing it would leave a busy state with no visible indication at all, and the reduced-motion contract is a fallback that preserves legibility, not a removal."
+    "motionNotes": "Deliberately minimal, and the restraint is the decision. Colour-only transitions on hover and focus at `--pd-duration-instant` (100ms) with `--pd-ease-standard`, matching every other control in the system. There is no entrance animation, on purpose: this toolbar is always revealed by a container that already animates — Smart Field's proposal panel owns a grid-template-rows expand, Selection Actions owns a fade-and-scale — so a second entrance here would double-animate the same appearance. That mirrors Confidence Meter's rule that motion belongs to what wraps a primitive, not the primitive itself. The one continuous animation is the busy spinner, which is honest: it maps to a real in-flight request and stops when that request settles. Under prefers-reduced-motion the colour transitions drop to instant via `motion-reduce:transition-none`, while the spinner deliberately keeps rotating — removing it would leave a busy state with no visible indication at all, and the reduced-motion contract is a fallback that preserves legibility, not a removal.",
+    "schema": {
+      "component": "AIActionToolbar",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AIActionToolbar",
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/AIAction"
+            }
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "Leading status text, e.g. \"Changes applied.\" Renders before the actions."
+          },
+          "label": {
+            "type": "string",
+            "description": "Accessible name for the toolbar."
+          }
+        },
+        "required": [
+          "actions"
+        ],
+        "$defs": {
+          "AIAction": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "icon": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "Optional leading icon. No icon set is bundled — pass your own `size-4` icon."
+              },
+              "intent": {
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "quiet",
+                  "destructive"
+                ],
+                "description": "Visual weight. Exactly one action should be `primary`. Defaults to `secondary`."
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "busy": {
+                "type": "boolean",
+                "description": "Owned by the consumer, not this component: the caller already holds the request\n(and usually its AbortController), so the toolbar reflects that state rather than\nkeeping a second copy that can drift out of sync with it."
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onAction",
+          "required": true,
+          "params": [
+            {
+              "name": "actionId",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils` and `class-variance-authority`. No icon set is bundled — pass your own `size-4` icons via each action's optional `icon` prop, matching how Smart Field and Selection Actions already take icons. Exactly one action should carry `intent=\"primary\"`; the component does not enforce this, because a confirmation-only row (a lone quiet Undo) legitimately has none.",
   "categories": [

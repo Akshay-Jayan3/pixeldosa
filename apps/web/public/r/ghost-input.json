@@ -18,7 +18,74 @@
   ],
   "meta": {
     "engineeringNotes": "The ghost text is rendered as a separate mirror div positioned exactly behind the real <input>, with the typed-text portion set to transparent — not as a styled fake caret or a contentEditable trick. This is the only approach that keeps native input behaviour (IME composition, selection, undo, autofill, screen-reader field semantics) completely intact, at the cost of the mirror div needing identical padding/font/line-height to the input, which is why both come from the same className. The whole request lifecycle — debounce timer, AbortController — lives in refs rather than state so that a rapid keystroke can synchronously cancel the previous request without waiting for a re-render; a state-based cancellation would let a slow response race a fast one and briefly show a stale suggestion. The right-arrow accept only fires when the caret is already at the end of the value (checked via selectionStart/selectionEnd), because otherwise it would silently hijack normal in-text cursor movement, which is a worse failure mode than requiring Tab.",
-    "motionNotes": "The suggestion's appearance is a plain opacity transition using duration.fast and easing.standard from the token scale — deliberately not a slide or typewriter reveal, both of which would misrepresent what happened: the whole continuation exists immediately (it was already fetched), so animating it in character-by-character would be a fabricated sense of the model 'typing', not a real progressive state. Under prefers-reduced-motion this reduces to a duration.instant swap via the same token path every other component in the system uses; nothing here required a component-specific reduced-motion branch, which is itself a signal the animation is doing the minimum necessary rather than something decorative."
+    "motionNotes": "The suggestion's appearance is a plain opacity transition using duration.fast and easing.standard from the token scale — deliberately not a slide or typewriter reveal, both of which would misrepresent what happened: the whole continuation exists immediately (it was already fetched), so animating it in character-by-character would be a fabricated sense of the model 'typing', not a real progressive state. Under prefers-reduced-motion this reduces to a duration.instant swap via the same token path every other component in the system uses; nothing here required a component-specific reduced-motion branch, which is itself a signal the animation is doing the minimum necessary rather than something decorative.",
+    "schema": {
+      "component": "GhostInput",
+      "element": "input",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "GhostInput",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Current field value. GhostInput is controlled — there is no uncontrolled mode."
+          },
+          "debounceMs": {
+            "type": "number",
+            "description": "Debounce before `fetchSuggestion` fires, in ms."
+          },
+          "minChars": {
+            "type": "number",
+            "description": "Don't request a suggestion below this many characters."
+          },
+          "wrapperClassName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "events": [
+        {
+          "name": "onValueChange",
+          "required": true,
+          "params": [
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "fetchSuggestion",
+          "required": true,
+          "params": [
+            {
+              "name": "value",
+              "type": "string"
+            },
+            {
+              "name": "signal",
+              "type": "AbortSignal"
+            }
+          ],
+          "description": "Called after the user pauses typing, with an `AbortSignal` that fires the moment\nanother keystroke arrives. Must resolve to a full continuation of `value` — a\nresult that doesn't start with the current value is treated as stale and dropped.\nReturn `null`/`undefined`/`\"\"` for \"no suggestion\"."
+        },
+        {
+          "name": "onAcceptSuggestion",
+          "required": false,
+          "params": [
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "description": "Fired with the full accepted value when the user accepts the suggestion."
+        }
+      ]
+    }
   },
   "docs": "value/onValueChange are required — this is a controlled component only. fetchSuggestion must resolve to the FULL continued string (current value + completion), not just the completion tail; the component slices the tail itself and drops any result that doesn't start with the value it was requested for, so a response arriving after the user has kept typing can't overwrite what they see. Drops into <FieldControl> directly since id/aria-invalid/aria-describedby/ref all forward to the underlying <input>.",
   "categories": [

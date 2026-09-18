@@ -19,7 +19,129 @@
   ],
   "meta": {
     "engineeringNotes": "Composes Diff Accept for the 'replacement' result kind (Rewrite) rather than reimplementing accept/reject a second time — Rewrite is exactly the 'AI proposes replacement text, human reviews' problem Diff Accept already solves, and the two components sharing one review UI keeps the whole AI tier consistent instead of each component inventing its own version of the same interaction. Selection detection listens to document-level `selectionchange`, filtered to whether the selection's anchor node falls inside `containerRef`, debounced (default 200ms) so the toolbar appears once the selection has settled rather than jittering while the user is still dragging or extending with the keyboard — one mechanism covers both input methods, since `selectionchange` fires for either. The toolbar's root uses `onMouseDown` with `preventDefault` — the standard rich-text-editor-toolbar trick — because without it, focusing a toolbar button would collapse the browser's live selection before the click handler ever runs, since focusing an element outside the current selection normally clears it. `onReplace` deliberately takes the original selected text as a second argument rather than assuming a plain string content model on the component's own side: this component cannot know whether the consumer's content is a plain string, a contentEditable region, or a structured rich-text document, so it hands back enough context (the exact original substring) for a plain-string consumer to splice correctly via `content.replace(original, merged)`, while a richer content model would use its own document API and ignore the second argument.",
-    "motionNotes": "The toolbar mounts in a closed visual state and flips to open on the next animation frame (a `visible` state lagging one rAF behind the selection existing), the same two-phase-mount pattern `Command Menu` uses, so the fade+scale-in (`--pd-duration-fast`/`--pd-ease-standard`) actually has a 'from' value to animate away from rather than popping in already-visible. No motion plays while the selection itself is still changing — the toolbar simply doesn't exist yet during that phase (enforced by the debounce), which is the correct behaviour research on floating selection toolbars confirms (centre after the selection settles, not during), achieved structurally rather than via a suppressed-animation flag. Result content (prose, a classification label, a list, or the composed Diff Accept panel) swaps in via a plain state change, never a per-character reveal, consistent with every other AI-tier component's 'the value already exists in full' reasoning. Under `prefers-reduced-motion`, the fade/scale transition drops via `motion-reduce:transition-none` (scale pinned via `motion-reduce:scale-100`), leaving the toolbar's appearance instant but still fully legible."
+    "motionNotes": "The toolbar mounts in a closed visual state and flips to open on the next animation frame (a `visible` state lagging one rAF behind the selection existing), the same two-phase-mount pattern `Command Menu` uses, so the fade+scale-in (`--pd-duration-fast`/`--pd-ease-standard`) actually has a 'from' value to animate away from rather than popping in already-visible. No motion plays while the selection itself is still changing — the toolbar simply doesn't exist yet during that phase (enforced by the debounce), which is the correct behaviour research on floating selection toolbars confirms (centre after the selection settles, not during), achieved structurally rather than via a suppressed-animation flag. Result content (prose, a classification label, a list, or the composed Diff Accept panel) swaps in via a plain state change, never a per-character reveal, consistent with every other AI-tier component's 'the value already exists in full' reasoning. Under `prefers-reduced-motion`, the fade/scale transition drops via `motion-reduce:transition-none` (scale pinned via `motion-reduce:scale-100`), leaving the toolbar's appearance instant but still fully legible.",
+    "schema": {
+      "component": "SelectionActions",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "SelectionActions",
+        "type": "object",
+        "properties": {
+          "containerRef": {
+            "x-type": "RefObject<HTMLElement | null>",
+            "description": "The region to watch for selections. A toolbar outside this element is ignored."
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SelectionAction"
+            }
+          },
+          "settleMs": {
+            "type": "number",
+            "description": "Debounce after the selection stops changing before the toolbar appears, in ms."
+          }
+        },
+        "required": [
+          "containerRef",
+          "actions"
+        ],
+        "$defs": {
+          "SelectionAction": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "icon": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "icon"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onAction",
+          "required": true,
+          "params": [
+            {
+              "name": "actionId",
+              "type": "string"
+            },
+            {
+              "name": "selectedText",
+              "type": "string"
+            },
+            {
+              "name": "signal",
+              "type": "AbortSignal"
+            }
+          ]
+        },
+        {
+          "name": "onReplace",
+          "required": false,
+          "params": [
+            {
+              "name": "mergedValue",
+              "type": "string"
+            },
+            {
+              "name": "originalSelectedText",
+              "type": "string"
+            }
+          ],
+          "description": "Called only when an accepted `replacement` result is applied via Diff Accept.\nReceives the original selected text alongside the merged result so a plain-string\ncontent model can splice it back in (e.g. `content.replace(originalText,\nmergedValue)`); a rich-text/contentEditable consumer would instead use its own\ndocument model's replace-range primitive, ignoring the second argument."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils` and the `diff-accept` primitive at `@/components/ui/diff-accept` (installed automatically as a registry dependency), used to render the 'replacement' result kind. Renders via a React portal to document.body with `position: fixed`, so it is not clipped by an `overflow: hidden` ancestor. Keyboard-only users generally cannot create an arbitrary text selection in static, non-editable content — a platform-level limitation this component cannot fix; the guarantee it makes is that once any selection exists, the toolbar itself is fully keyboard-operable.",
   "categories": [

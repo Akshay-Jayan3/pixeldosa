@@ -7,3 +7,4 @@ out
 .env
 .env.local
 .DS_Store
+apps/web/schemas.generated.json

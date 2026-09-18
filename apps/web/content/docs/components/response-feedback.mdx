@@ -1,0 +1,78 @@
+---
+title: Response Feedback
+description: Thumbs with a reason that goes somewhere, and a confirmation that says where.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ResponseFeedback } from "@/components/ui/response-feedback";
+
+<ResponseFeedback
+  destination="the team that trains this assistant"
+  reasons={[
+    { id: "wrong", label: "Something is wrong" },
+    { id: "source", label: "Wrong or missing source" },
+  ]}
+  onSubmit={(feedback) => report(feedback)}
+/>
+```
+
+## Why it exists
+
+A bare thumbs-down tells a team that something was wrong and nothing about what. Asking
+for the reason costs the user two seconds and turns a shrug into something a team can act
+on.
+
+## Features
+
+- **A thumbs up sends on its own.** Praise shouldn't cost a form. `askOnUp` changes that
+  when you want it.
+- **Reasons are multi-select**, in your users' words, because an answer is usually wrong
+  in more than one way.
+- **The comment is optional**, and an empty one is never sent as feedback.
+- **The confirmation names the destination.** "Thanks, that goes to the team that trains
+  this assistant."
+- **No double submits.** The controls are replaced by the confirmation.
+
+## Variants
+
+### Ready
+
+<PreviewStack>
+  <ResponseFeedbackSpecimen destination="the team that trains this assistant" />
+</PreviewStack>
+
+### Already sent
+
+<PreviewStack>
+  <ResponseFeedbackSpecimen submitted destination="the team that trains this assistant" />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `onSubmit` | `(submission) => void` | Required. `{ verdict, reasonIds, comment? }`. |
+| `reasons` | `{ id, label }[]` | Yours. A default set ships. |
+| `askOnUp` | `boolean` | Ask for reasons after a thumbs up too. Defaults to `false`. |
+| `destination` | `string` | Where the feedback goes, named in the confirmation. |
+| `submitted` | `boolean` | Start in the confirmed state. |
+| `label` | `string` | Defaults to `"Was this answer useful?"`. |
+
+## Accessibility
+
+- The thumbs are a labelled group of toggle buttons with `aria-pressed`.
+- Reasons are real checkboxes inside a `fieldset` with a legend; the chips are their
+  labels, so the whole chip is a hit target.
+- The comment has a visible label.
+
+## When not to use
+
+- **As the only way to report harm.** Anything unsafe needs a route a person reads, with a
+  way to follow up.
+- **As a rating that changes the answer.** If a thumbs-down should trigger a retry, say so
+  and use `Response Versions`.
+- **For support.** A ticket has a conversation; this doesn't.

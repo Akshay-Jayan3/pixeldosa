@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "credits-meter",
+  "title": "Credits Meter",
+  "description": "What's left, and what this will cost — before the click. Takes the `remaining` balance and optional `allowance`, both formatted by you, a measured `used` proportion, a `nextAction` naming the action and its `cost` together with `affordable` when it exceeds the balance, `resets` for when the balance renews or expires, `recent` for movement including refunds, `low` to mark a balance worth flagging, and `onTopUp`. The pairing of action and price is the point: buyers of these tools rank credit opacity as their first frustration, and the specific complaint is that you cannot tell what an action will cost until it has been spent. Purely presentational: you compute the numbers and format the units. Use it beside a generate button, in a studio's sidebar, or above a batch. Not a billing page, and not a place for raw token counts — convert to the unit your users are charged in.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/credits-meter/credits-meter.tsx",
+      "target": "components/ui/credits-meter.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Keep `nextAction.label` specific to the click it sits beside: '8 images · 1024 × 1024', not 'Generate'.",
+  "meta": {
+    "engineeringNotes": "`nextAction` is a single object rather than separate label and cost props so the two can never be rendered apart: a price with no action, or an action with no price, is the pattern the component exists to replace. `affordable` is a caller flag instead of something derived from parsing the strings, because balances and costs arrive as formatted text in whatever unit and locale the product uses, and a component that tried to compare them would have to parse money. The bar is drawn only from a measured `used` value, which keeps it consistent with the rest of the system's rule that a proportion must be real, and it draws what is *left* rather than what is spent: it sits under a figure that counts down, and a bar filling up beside a balance running out reads as plenty-left at the exact moment it is not. Refunds get a place in `recent` because generation pipelines refund routinely and almost no interface shows it, which leaves people believing failures cost them money.",
+    "motionNotes": "Nothing animates. A balance is a fact and the next action's price is a decision point, so neither has anything to express through motion; only the standard instant colour change on the top-up button, disabled under `prefers-reduced-motion`."
+  }
+}

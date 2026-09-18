@@ -17,7 +17,189 @@
   ],
   "meta": {
     "engineeringNotes": "Designed as the turn, not the text bubble. An assistant reply contains reasoning, tool calls, citations and prose, and treating those as siblings of the message breaks both reading order and accessibility. Here they are children of one `<article>`, named 'You said' or '<author> said' and marked `aria-busy` while streaming, so assistive tech treats the turn as one unit that is still arriving. Status is caller-owned because only the stream knows it. Each status has distinct UI, and none discards content: failed keeps the partial answer (dimmed) with an actionable error in an alert region and Retry; stopped labels the answer incomplete with Continue and Start over. Actions on assistant turns render only once the status is 'done', because copying or applying half an answer is an error the interface shouldn't invite. The user bubble keeps its actions hidden until hover or focus-within, and always shows them on touch devices via `(hover: none)`. Assistant turns have no bubble so code, tables and long prose get the full width. `MessageContent` carries typography for the HTML any markdown renderer emits, so the component stays renderer-agnostic and dependency-free.",
-    "motionNotes": "The only moving part is the streaming cursor: one quantized cell pulsing on the shared `pd-cell-pulse` keyframe, the system's machine-busy grammar, rather than a blinking text caret, which would imply typing. It disappears the moment status leaves 'streaming', and the answer holds still once done. Actions on the user's own message fade in at `--pd-duration-fast` on hover or focus. There's no entrance animation on the message itself, because the list decides how new turns arrive. Under prefers-reduced-motion the cursor is a static cell and the fade is instant."
+    "motionNotes": "The only moving part is the streaming cursor: one quantized cell pulsing on the shared `pd-cell-pulse` keyframe, the system's machine-busy grammar, rather than a blinking text caret, which would imply typing. It disappears the moment status leaves 'streaming', and the answer holds still once done. Actions on the user's own message fade in at `--pd-duration-fast` on hover or focus. There's no entrance animation on the message itself, because the list decides how new turns arrive. Under prefers-reduced-motion the cursor is a static cell and the fade is instant.",
+    "schema": {
+      "component": "Message",
+      "element": "article",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Message",
+        "type": "object",
+        "properties": {
+          "role": {
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "status": {
+            "enum": [
+              "done",
+              "failed",
+              "streaming",
+              "stopped"
+            ],
+            "description": "Assistant messages only. Owned by the caller, from the real stream."
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "Shown above the message: \"Assistant\", a model name, a teammate."
+          },
+          "avatar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "A small avatar or an `AgentPresence` in its dot form."
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "Timestamp or other quiet metadata, shown next to the author."
+          },
+          "actions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "Actions for a finished message, usually an `AIActionToolbar`. Hidden until it finishes."
+          },
+          "error": {
+            "type": "string",
+            "description": "Why it failed, in words a user can act on."
+          },
+          "showCursor": {
+            "type": "boolean",
+            "description": "The end-of-stream cursor while streaming. Turn it off while something else already\nshows progress (a reasoning trace, a running tool), so there's one busy signal at a time."
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onRetry",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onContinue",
+          "required": false,
+          "params": [],
+          "description": "Offered on a stopped message, to pick up where it left off."
+        }
+      ]
+    },
+    "subcomponents": [
+      {
+        "component": "MessageContent",
+        "element": "div",
+        "props": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "MessageContent",
+          "type": "object",
+          "properties": {}
+        },
+        "events": []
+      }
+    ]
   },
   "docs": "Requires `cn` at `@/lib/utils`. Bring your own markdown renderer and wrap its output in `MessageContent`. Set `status` from the stream itself: 'done' only when the stream closes, 'stopped' when the user aborted.",
   "categories": [

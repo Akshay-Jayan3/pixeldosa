@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "media-result",
+  "title": "Media Result",
+  "description": "A finished piece of generated media, with its provenance attached. Takes the media itself as children, a `title`, an `aspectRatio` so the layout never jumps, `madeBy` naming the model and time, a `credentials` object (`attached`, a `detail` such as \"Content Credentials + invisible watermark\", and an optional `href` to verify), a `note` for usage rights, and `actions` with `onAction`. Provenance is stated in words beside the result rather than hidden in a details panel, and when credentials are **not** attached the frame says so plainly, because an unmarked file is the one a team needs to know about before it ships. That reflects the law as of August 2026: the EU AI Act's Article 50 and California's SB 942 both require machine-readable disclosure of AI-generated media, and the major generators now sign output with C2PA credentials and an invisible watermark. Purely presentational: you render the media and own the signing. Use it wherever a generated image, video or audio clip is presented as finished. Not for work still in progress (that is Generation Job), and not for a grid of candidates (that is Variation Grid).",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/media-result/media-result.tsx",
+      "target": "components/ui/media-result.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Render the media yourself and give images real alt text. Pass `credentials.attached: false` honestly — the absence is the useful signal.",
+  "meta": {
+    "engineeringNotes": "`credentials` is a small object rather than a boolean because the three questions a team has are different: is it signed, what was applied, and where can it be checked. Treating the unsigned case as a visible state in the waiting colour — instead of simply omitting the line — is the deliberate inversion here: products that only show a badge when signing succeeds make an unsigned file indistinguishable from a file nobody thought about, which is precisely the one that must not ship under the 2026 disclosure rules. The frame is a `figure` with a `figcaption`, so provenance and title are associated with the media by the platform rather than by proximity, and the whole caption stays outside the media box so it is never baked into a screenshot of the image itself.",
+    "motionNotes": "Nothing animates: the work is finished, and this system reserves motion for a machine that is still busy. Only the standard instant colour changes on the action buttons, dropped under `prefers-reduced-motion`."
+  }
+}

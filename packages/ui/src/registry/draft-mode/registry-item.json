@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "draft-mode",
+  "title": "Draft Mode",
+  "description": "The agent prepares everything and nothing leaves until a person sends it. Takes `enabled` with `onEnabledChange` for the mode itself, the `items` the agent has prepared (each with a `title` phrased as the consequence, an optional `target` naming who or what it touches, a `detail`, and `irreversible` for anything that can't be taken back), then `onSend`, `onDiscard` and `onEdit`. Items are chosen explicitly with checkboxes; the send button names the count, the line beside it says how many of the chosen items can't be undone, and nothing is ever sent by a single glance-and-click. With the mode off, a still, orange-marked strip states what now happens instead and offers to turn it back on. It is the opposite failure mode to an approval dialog: an approval interrupts once per action and trains people to click through, while draft mode lets the agent work and collects the output for one review at a time the person chooses. Holds completely still — everything here is the user's turn. Use it for agents that send email, post, publish or change live data. Not for a single high-risk action awaiting a decision (that is AI Approval Gate), and not for reviewing many AI-proposed edits row by row (that is AI Triage Table).",
+  "type": "registry:ui",
+  "categories": ["ai-assisted", "content", "application"],
+  "dependencies": [],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/draft-mode/draft-mode.tsx",
+      "target": "components/ui/draft-mode.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. The component owns only the selection; the held items, the mode and what sending means stay with you.",
+  "meta": {
+    "engineeringNotes": "Selection is the component's only state, and it is pruned against `items` on every change: an id that has left the list is dropped, because a stale id surviving in the selection is exactly how a batch action sends the wrong thing. There is no accept-all shortcut hiding behind a single control — 'Select all' is a visible, reversible selection step before the send, and the send button carries the count so the action names its own size. Irreversibility is counted from the chosen items rather than shown per row only, so the sentence under the button changes as the selection changes and the warning cannot be scrolled past. The mode switch is a real `role=\"switch\"` with an explanatory sentence that rewrites itself for each state, instead of a settings label that leaves people guessing what 'off' does; turning it off does not hide the consequence, it states it in the waiting colour and offers the way back.",
+    "motionNotes": "Nothing animates except the switch itself, which slides its thumb over `--pd-duration-fast` so the state change reads as a physical flip rather than a repaint. No item pulses, shimmers or slides in: this surface is entirely the user's turn, and motion here would imply the agent is still doing something. Under `prefers-reduced-motion` the switch transition is dropped and the state is carried by position, colour and the word On or Off."
+  }
+}

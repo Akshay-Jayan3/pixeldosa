@@ -1,0 +1,138 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "activity-trail",
+  "title": "Activity Trail",
+  "description": "What the agent did, why it was allowed to, and what came of it. Takes `entries` (each with a pre-formatted `time`, an `actor` of `agent`, `person` or `system` with an `actorName`, an `action` phrased as its consequence, an optional `target`, an `authority` line naming what permitted it, a `result`, and `undoable`), plus `onUndo` and `onExport`. The `authority` field is the one audit logs leave out and the one people actually ask about: \"who let it do that?\" — an approval, an autonomy level, a schedule someone set. Compliance logging is becoming mandatory for high-risk systems under the EU AI Act, with months of retention expected in regulated industries, but those records are built for auditors; this is the readable version for the person whose inbox the agent used, and `onExport` hands the same records to your compliance process so the two never drift apart. Purely presentational. Use it under a run, in an agent's settings, or on a record the agent touched. Not a developer event log, and not a chat transcript.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/activity-trail/activity-trail.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type TrailActor = \"agent\" | \"person\" | \"system\";\n\nexport type TrailEntry = {\n  id: string;\n  /** Formatted by you: \"14:02\", \"Yesterday 09:15\". Never recomputed here. */\n  time: string;\n  actor: TrailActor;\n  /** Who exactly: \"Research agent\", \"Dana\", \"Scheduler\". */\n  actorName?: string;\n  /** The consequence, in the user's words: \"Emailed the summary to 3 people\". */\n  action: string;\n  /** What it touched: a file, a record, a recipient list. */\n  target?: string;\n  /**\n   * Why it was allowed to do this: \"You approved it\", \"Autonomy: acts on low-risk\n   * things\", \"Scheduled by Dana\". The question every log leaves out.\n   */\n  authority?: string;\n  /** What came of it: \"Sent\", \"3 rows changed\", \"No matches\". */\n  result?: string;\n  /** Set when this specific action can still be reversed. */\n  undoable?: boolean;\n};\n\nexport interface ActivityTrailProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  /** Newest last, the way a person reads a story. */\n  entries: TrailEntry[];\n  onUndo?: (id: string) => void;\n  /** Hands the whole trail to your export: CSV, JSON, a compliance system. */\n  onExport?: () => void;\n  exportLabel?: string;\n  emptyLabel?: string;\n}\n\nconst ACTOR_LABEL: Record<TrailActor, string> = {\n  agent: \"Agent\",\n  person: \"Person\",\n  system: \"System\",\n};\n\n/**\n * What the agent did, why it was allowed to, and what came of it.\n *\n * Audit logs are being written into law — the EU AI Act requires high-risk systems to\n * keep logs that can reconstruct a decision, and regulated industries now expect months\n * of retention — but those logs are built for compliance teams, not for the person whose\n * inbox the agent used. This is the readable version: one line per action phrased as its\n * consequence, the authority it acted under, the result, and Undo where the action can\n * still be reversed. `onExport` hands the same records to whatever your compliance\n * process needs, so the two views never drift apart.\n *\n * Holds completely still: everything here already happened.\n */\nfunction ActivityTrail({\n  headingLevel = 3,\n  title = \"What happened\",\n  entries,\n  onUndo,\n  onExport,\n  exportLabel = \"Export\",\n  emptyLabel = \"Nothing yet.\",\n  className,\n  ...props\n}: ActivityTrailProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col rounded-lg border bg-card\", className)}\n      {...props}\n    >\n      <header className=\"flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b p-4\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        {onExport ? (\n          <button\n            type=\"button\"\n            onClick={onExport}\n            className=\"rounded-md text-xs font-medium text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            {exportLabel}\n          </button>\n        ) : null}\n      </header>\n\n      {entries.length === 0 ? (\n        <p className=\"p-4 text-sm text-muted-foreground\">{emptyLabel}</p>\n      ) : (\n        <ol className=\"flex flex-col\">\n          {entries.map((entry) => (\n            <li key={entry.id} className=\"flex gap-3 border-b px-4 py-3 last:border-b-0\">\n              <span className=\"w-20 shrink-0 text-xs text-muted-foreground tabular-nums\">{entry.time}</span>\n\n              <div className=\"flex min-w-0 flex-1 flex-col gap-0.5\">\n                <p className=\"text-sm text-foreground text-pretty\">\n                  <span className=\"text-muted-foreground\">\n                    {entry.actorName ?? ACTOR_LABEL[entry.actor]}\n                    {\" · \"}\n                  </span>\n                  {entry.action}\n                </p>\n                {entry.target ? (\n                  <p className=\"font-mono text-xs text-muted-foreground text-pretty\">{entry.target}</p>\n                ) : null}\n                <p className=\"flex flex-wrap gap-x-3 text-xs text-muted-foreground\">\n                  {/* The question every audit log leaves out. */}\n                  {entry.authority ? <span className=\"text-pretty\">Allowed by: {entry.authority}</span> : null}\n                  {entry.result ? <span className=\"text-pretty\">Result: {entry.result}</span> : null}\n                </p>\n              </div>\n\n              {onUndo && entry.undoable ? (\n                <button\n                  type=\"button\"\n                  onClick={() => onUndo(entry.id)}\n                  className=\"relative shrink-0 self-start rounded-md border border-input px-2 py-1 text-xs font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                >\n                  Undo\n                </button>\n              ) : null}\n            </li>\n          ))}\n        </ol>\n      )}\n    </section>\n  );\n}\n\nexport { ActivityTrail };\n",
+      "type": "registry:ui",
+      "target": "components/ui/activity-trail.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Entries are newest last, the order a story is read in, rather than the newest-first order of a log — this surface is meant to be reconstructed rather than monitored, and reversing it makes causation read backwards. `authority` is a required-shaped optional: nothing enforces it, but its absence in a row is visible, which pushes teams to record what permitted an action at the moment they render it rather than reconstructing it later from three systems. Undo is per entry and driven by the caller's `undoable` flag, because only the caller knows whether a specific action is still reversible; the component never infers reversibility from the action's words. Export exists so the human-readable trail and the compliance record come from one array instead of two implementations that disagree.",
+    "motionNotes": "Nothing animates. Every row describes something that already happened, and this system reserves motion for a machine that is still busy; an entry that slid or faded in would imply the record was still being written. Only the standard instant colour change on Undo, dropped under `prefers-reduced-motion`.",
+    "schema": {
+      "component": "ActivityTrail",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ActivityTrail",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TrailEntry"
+            },
+            "description": "Newest last, the way a person reads a story."
+          },
+          "exportLabel": {
+            "type": "string"
+          },
+          "emptyLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "$defs": {
+          "TrailEntry": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "time": {
+                "type": "string",
+                "description": "Formatted by you: \"14:02\", \"Yesterday 09:15\". Never recomputed here."
+              },
+              "actor": {
+                "enum": [
+                  "agent",
+                  "person",
+                  "system"
+                ]
+              },
+              "actorName": {
+                "type": "string",
+                "description": "Who exactly: \"Research agent\", \"Dana\", \"Scheduler\"."
+              },
+              "action": {
+                "type": "string",
+                "description": "The consequence, in the user's words: \"Emailed the summary to 3 people\"."
+              },
+              "target": {
+                "type": "string",
+                "description": "What it touched: a file, a record, a recipient list."
+              },
+              "authority": {
+                "type": "string",
+                "description": "Why it was allowed to do this: \"You approved it\", \"Autonomy: acts on low-risk\nthings\", \"Scheduled by Dana\". The question every log leaves out."
+              },
+              "result": {
+                "type": "string",
+                "description": "What came of it: \"Sent\", \"3 rows changed\", \"No matches\"."
+              },
+              "undoable": {
+                "type": "boolean",
+                "description": "Set when this specific action can still be reversed."
+              }
+            },
+            "required": [
+              "id",
+              "time",
+              "actor",
+              "action"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onUndo",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onExport",
+          "required": false,
+          "params": [],
+          "description": "Hands the whole trail to your export: CSV, JSON, a compliance system."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Write `action` as the consequence (\"Emailed the summary to 3 people\"), never as a function name.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

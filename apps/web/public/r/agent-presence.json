@@ -18,7 +18,68 @@
   ],
   "meta": {
     "engineeringNotes": "The load-bearing decision is that the eleven states split into two classes with opposite visual treatments rather than into eleven variations of one treatment. Every surveyed implementation renders 'thinking' and 'waiting for your approval' in the same register — something moving plus a line of text — but those are opposites: one means relax, the other means nothing proceeds until you act. Encoding that as motion-versus-stillness makes the most important question on the surface ('is it my turn?') answerable pre-attentively. The vocabulary itself is taken from protocol events rather than invented: `deciding` exists because AG-UI streams TOOL_CALL_ARGS before execution, so choosing an action is distinguishable from performing it; `queued` exists because OpenAI Responses emits it and accepted-but-not-started is not the same as working; `asking` maps to MCP elicitation and `awaitingApproval` to LangGraph's interrupt(). The orb uses a Fibonacci spiral distribution rather than the flat ring of dots most AI orbs use, which is what makes it read as a volume rather than a circle, and it is rendered with CSS 3D transforms inside a preserve-3d container so perspective supplies depth scaling for free — no per-frame JavaScript and no canvas. All three forms animate via CSS keyframes with per-element negative delays rather than a requestAnimationFrame loop; an earlier component in this system was rebuilt for exactly this reason, since re-rendering hundreds of React nodes per frame to nudge a transform is what makes these indicators stutter.",
-    "motionNotes": "Rotation speed is the state: 24s per revolution when queued, 12s thinking, 7s deciding, 4s working — so the same object communicates urgency through tempo rather than through a different animation per state, which is what lets states morph rather than cut. Terminal machine states (`done`, `failed`, `cancelled`) drop rotation entirely and settle to a smaller resting scale. Hand-off states stop dead: no keyframe is applied at all, and the dots transition to full scale and full opacity over `--pd-duration-slow`, so the arrival of the user's turn is a settling rather than a switch. Only `transform` and `opacity` animate, so every form composites on the GPU regardless of point count. Under `prefers-reduced-motion` every keyframe is disabled and each state still holds a visually distinct static configuration — differing scale and opacity per state — so the grammar survives with zero movement; the reduced-motion state is the same information without the motion, not a removal of the signal."
+    "motionNotes": "Rotation speed is the state: 24s per revolution when queued, 12s thinking, 7s deciding, 4s working — so the same object communicates urgency through tempo rather than through a different animation per state, which is what lets states morph rather than cut. Terminal machine states (`done`, `failed`, `cancelled`) drop rotation entirely and settle to a smaller resting scale. Hand-off states stop dead: no keyframe is applied at all, and the dots transition to full scale and full opacity over `--pd-duration-slow`, so the arrival of the user's turn is a settling rather than a switch. Only `transform` and `opacity` animate, so every form composites on the GPU regardless of point count. Under `prefers-reduced-motion` every keyframe is disabled and each state still holds a visually distinct static configuration — differing scale and opacity per state — so the grammar survives with zero movement; the reduced-motion state is the same information without the motion, not a removal of the signal.",
+    "schema": {
+      "component": "AgentPresence",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AgentPresence",
+        "type": "object",
+        "properties": {
+          "state": {
+            "enum": [
+              "thinking",
+              "working",
+              "asking",
+              "done",
+              "failed",
+              "queued",
+              "deciding",
+              "streaming",
+              "cancelled",
+              "suggesting",
+              "awaitingApproval"
+            ]
+          },
+          "form": {
+            "enum": [
+              "figure",
+              "mark",
+              "line",
+              "field",
+              "orb"
+            ]
+          },
+          "size": {
+            "enum": [
+              "sm",
+              "lg",
+              "default"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "Overrides the state's default label. For `working`, name the actual tool."
+          },
+          "hideLabel": {
+            "type": "boolean",
+            "description": "Hide the text label and show only the indicator. The label is still announced."
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "events": [
+        {
+          "name": "onCancel",
+          "required": false,
+          "params": [],
+          "description": "Shown while it is the machine's turn. Never hidden behind a hover."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`, @pixeldosa/agent-figure for the `figure` and `mark` forms (installed automatically), and the `pd-orb-spin` / `pd-cell-pulse` keyframes supplied by @pixeldosa/pixeldosa-theme's css block. The state vocabulary maps directly onto AG-UI events, OpenAI Responses lifecycle events, AI SDK stream parts, LangGraph interrupts and MCP elicitation — see the docs page for the mapping table.",
   "categories": [

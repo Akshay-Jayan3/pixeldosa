@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "parameter-panel",
+  "title": "Parameter Panel",
+  "description": "The controls beside the prompt: pick, don't describe. Takes `groups` (each a label and a set of `options` with a plain `label`, an optional `preview` thumbnail, a `costNote` and a `detail` line), the chosen `values` per group, `onChange`, a `summary` of what the choices add up to, and `onReset`. It answers the articulation barrier research directly: people can picture what they want but cannot name it, and style vocabulary is exactly the knowledge they lack, so options are shown as small previews they can recognise instead of words they must recall. Two further findings are built in: every option keeps a text label, because novel icons are misread almost universally, and any option that changes the price says so where it is chosen rather than in a bill afterwards. Purely presentational: you own the options, the previews and the pricing. Use it beside a prompt box for image, video or audio generation. Not for a settings page, and not for free-text parameters, which belong in Prompt Composer's controls.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/parameter-panel/parameter-panel.tsx",
+      "target": "components/ui/parameter-panel.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Give every option a real `preview` where you can — a thumbnail of that style, a shape for an aspect ratio — and never ship an option that is only an icon.",
+  "meta": {
+    "engineeringNotes": "Each group is a real `fieldset` of radio inputs with the input visually hidden behind its label, so arrow-key navigation, grouping and announcement come from the platform rather than from a custom roving-tabindex implementation that would have to be re-tested in every host app. The chosen value is caller-owned per group id, which lets a product persist presets, share them in a URL, or drive them from a model's suggestion without the component holding a second source of truth. `costNote` sits on the option rather than being derived, because only the caller knows how its pricing composes — quality multiplied by count multiplied by resolution is not something a component can infer from labels. `detail` renders once per group under the current choice instead of on every option, which keeps a panel of twelve options from becoming a wall of help text.",
+    "motionNotes": "Nothing animates beyond the standard instant colour change on a choice. Selection is carried by border weight and label weight rather than motion: this is the user's turn, and a panel that animates under a moving cursor invites mis-clicks. Under `prefers-reduced-motion` even those transitions are dropped."
+  }
+}

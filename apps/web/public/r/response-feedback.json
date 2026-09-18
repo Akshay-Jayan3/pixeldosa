@@ -1,0 +1,92 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "response-feedback",
+  "title": "Response Feedback",
+  "description": "Thumbs with a reason that goes somewhere. Takes `reasons` (yours, in the user's words; a sensible default set ships), `onSubmit` receiving `{ verdict, reasonIds, comment }`, an optional `destination` naming where the feedback goes, `askOnUp` to ask after praise too, and `submitted` when you've already recorded feedback for this answer. A thumbs up sends on its own — praise shouldn't cost a form — while a thumbs down opens a small panel of reasons as multi-select chips with an optional comment, then a single Send. The confirmation names the destination, because a product that collects feedback without saying what happens to it is asking a favour it never repays. Purely presentational: you route the submission. Use it under an answer, beside AI Action Toolbar. Not for a support ticket, not for a rating that decides what the model does next, and not as the only route for reporting something harmful — that needs a path a person reads.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/response-feedback/response-feedback.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type FeedbackVerdict = \"up\" | \"down\";\n\nexport type FeedbackReason = {\n  id: string;\n  /** What was wrong, in the user's words: \"Made something up\", \"Wrong source\". */\n  label: string;\n};\n\nexport type FeedbackSubmission = {\n  verdict: FeedbackVerdict;\n  reasonIds: string[];\n  comment?: string;\n};\n\nexport interface ResponseFeedbackProps extends Omit<React.ComponentPropsWithoutRef<\"div\">, \"onSubmit\"> {\n  /** Reasons offered after a thumbs down. Yours, not generic ones. */\n  reasons?: FeedbackReason[];\n  /** Also ask why after a thumbs up. Off by default: praise shouldn't cost a form. */\n  askOnUp?: boolean;\n  onSubmit: (submission: FeedbackSubmission) => void;\n  /** Where it goes and what happens to it — the thing most products never say. */\n  destination?: string;\n  label?: string;\n  /** Set when the caller has already recorded feedback for this answer. */\n  submitted?: boolean;\n}\n\nconst DEFAULT_REASONS: FeedbackReason[] = [\n  { id: \"wrong\", label: \"Something is wrong\" },\n  { id: \"made-up\", label: \"Made something up\" },\n  { id: \"source\", label: \"Wrong or missing source\" },\n  { id: \"instructions\", label: \"Didn't follow my instructions\" },\n  { id: \"length\", label: \"Too long or too short\" },\n  { id: \"tone\", label: \"Wrong tone\" },\n];\n\n/**\n * Thumbs with a reason that goes somewhere.\n *\n * A bare thumbs-down tells a team that something was wrong and nothing about what. This\n * asks for the reason in the user's words, keeps the comment optional, and says where the\n * feedback goes — because a product that collects feedback without saying what happens to\n * it is asking for a favour it never repays.\n *\n * Holds completely still: it's the user's turn.\n */\nfunction ResponseFeedback({\n  reasons = DEFAULT_REASONS,\n  askOnUp = false,\n  onSubmit,\n  destination,\n  label = \"Was this answer useful?\",\n  submitted = false,\n  className,\n  ...props\n}: ResponseFeedbackProps) {\n  const [verdict, setVerdict] = React.useState<FeedbackVerdict | null>(null);\n  const [chosen, setChosen] = React.useState<string[]>([]);\n  const [comment, setComment] = React.useState(\"\");\n  const [sent, setSent] = React.useState(submitted);\n  const groupId = React.useId();\n  const commentId = React.useId();\n\n  const choose = (next: FeedbackVerdict) => {\n    setVerdict(next);\n    setChosen([]);\n    setComment(\"\");\n    // A thumbs up is complete on its own unless the caller wants to ask.\n    if (next === \"up\" && !askOnUp) {\n      onSubmit({ verdict: \"up\", reasonIds: [] });\n      setSent(true);\n    }\n  };\n\n  const send = () => {\n    if (!verdict) return;\n    onSubmit({ verdict, reasonIds: chosen, comment: comment.trim() || undefined });\n    setSent(true);\n  };\n\n  if (sent) {\n    return (\n      <p\n        className={cn(\n          \"animate-[pd-fade-in_var(--pd-duration-base)_var(--pd-ease-decelerate)_both] text-xs text-muted-foreground text-pretty motion-reduce:animate-none\",\n          className\n        )}\n        {...props}\n      >\n        Thanks{destination ? `, that goes to ${destination}` : \"\"}.\n      </p>\n    );\n  }\n\n  return (\n    <div className={cn(\"flex flex-col gap-3\", className)} {...props}>\n      <div role=\"group\" aria-labelledby={groupId} className=\"flex flex-wrap items-center gap-2\">\n        <p id={groupId} className=\"text-xs text-muted-foreground\">\n          {label}\n        </p>\n        {(\n          [\n            { value: \"up\" as const, text: \"Yes\", path: \"M7 20V9l5-6 1 1-1 5h6l-2 11H7Z\" },\n            { value: \"down\" as const, text: \"No\", path: \"M17 4v11l-5 6-1-1 1-5H6l2-11h9Z\" },\n          ]\n        ).map((option) => (\n          <button\n            key={option.value}\n            type=\"button\"\n            aria-pressed={verdict === option.value}\n            onClick={() => choose(option.value)}\n            className={cn(\n              \"relative inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none focus-visible:ring-[3px] focus-visible:ring-ring/40\",\n              verdict === option.value\n                ? \"border-foreground text-foreground\"\n                : \"border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground\"\n            )}\n          >\n            <svg viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\" className=\"size-3.5\">\n              <path d={option.path} stroke=\"currentColor\" strokeWidth=\"1.6\" strokeLinejoin=\"round\" />\n            </svg>\n            {option.text}\n          </button>\n        ))}\n      </div>\n\n      {verdict && (verdict === \"down\" || askOnUp) ? (\n        <div className=\"flex flex-col gap-3 rounded-lg border bg-card p-3\">\n          <fieldset className=\"flex flex-col gap-2\">\n            <legend className=\"text-xs text-muted-foreground\">\n              {verdict === \"down\" ? \"What went wrong? Pick any that apply.\" : \"What worked? Pick any that apply.\"}\n            </legend>\n            <div className=\"flex flex-wrap gap-1.5\">\n              {reasons.map((reason) => {\n                const active = chosen.includes(reason.id);\n                return (\n                  <label\n                    key={reason.id}\n                    className={cn(\n                      \"cursor-pointer rounded-full border px-2.5 py-1 text-xs transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none\",\n                      active\n                        ? \"border-foreground bg-foreground text-background\"\n                        : \"border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground\",\n                      \"has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-ring/40\"\n                    )}\n                  >\n                    <input\n                      type=\"checkbox\"\n                      checked={active}\n                      onChange={() =>\n                        setChosen((previous) =>\n                          previous.includes(reason.id)\n                            ? previous.filter((id) => id !== reason.id)\n                            : [...previous, reason.id]\n                        )\n                      }\n                      className=\"sr-only\"\n                    />\n                    {reason.label}\n                  </label>\n                );\n              })}\n            </div>\n          </fieldset>\n\n          <div className=\"flex flex-col gap-1.5\">\n            <label htmlFor={commentId} className=\"text-xs text-muted-foreground\">\n              Anything else? (optional)\n            </label>\n            <textarea\n              id={commentId}\n              value={comment}\n              onChange={(event) => setComment(event.target.value)}\n              rows={2}\n              className=\"w-full resize-y rounded-md border border-input bg-transparent p-2 text-base text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none focus-visible:ring-[3px] focus-visible:ring-ring/40 sm:text-sm\"\n            />\n          </div>\n\n          <div className=\"flex flex-wrap items-center gap-3\">\n            <button\n              type=\"button\"\n              onClick={send}\n              className=\"rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              Send feedback\n            </button>\n            <button\n              type=\"button\"\n              onClick={() => setVerdict(null)}\n              className=\"rounded-md px-2 py-1 text-xs font-medium text-muted-foreground underline-offset-2 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              Cancel\n            </button>\n            {destination ? (\n              <p className=\"text-xs text-muted-foreground text-pretty\">Goes to {destination}.</p>\n            ) : null}\n          </div>\n        </div>\n      ) : null}\n    </div>\n  );\n}\n\nexport { ResponseFeedback };\n",
+      "type": "registry:ui",
+      "target": "components/ui/response-feedback.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "The asymmetry between up and down is the design: a thumbs up submits immediately and a thumbs down opens the reason panel, because the useful signal is concentrated in what went wrong and a form after praise costs goodwill for data nobody reads. Reasons are multi-select rather than a single choice, since an answer is usually wrong in more than one way, and they arrive as ids so the caller can route and aggregate them without parsing labels. The comment stays optional and is trimmed to undefined when empty, so a submission never carries a whitespace string that looks like feedback in a dashboard. After sending, the component collapses to a single sentence naming the destination instead of leaving the controls in place, which prevents the double-submit that turns one opinion into three.",
+    "motionNotes": "Nothing moves except the confirmation, which fades in once over `--pd-duration-base`. The reason panel appears without a slide or a height animation: it is the user's turn, and an animating panel under a cursor that is already moving toward a chip costs a mis-click. Under `prefers-reduced-motion` the fade is dropped.",
+    "schema": {
+      "component": "ResponseFeedback",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ResponseFeedback",
+        "type": "object",
+        "properties": {
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/FeedbackReason"
+            },
+            "description": "Reasons offered after a thumbs down. Yours, not generic ones."
+          },
+          "askOnUp": {
+            "type": "boolean",
+            "description": "Also ask why after a thumbs up. Off by default: praise shouldn't cost a form."
+          },
+          "destination": {
+            "type": "string",
+            "description": "Where it goes and what happens to it — the thing most products never say."
+          },
+          "label": {
+            "type": "string"
+          },
+          "submitted": {
+            "type": "boolean",
+            "description": "Set when the caller has already recorded feedback for this answer."
+          }
+        },
+        "$defs": {
+          "FeedbackReason": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "What was wrong, in the user's words: \"Made something up\", \"Wrong source\"."
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onSubmit",
+          "required": true,
+          "params": [
+            {
+              "name": "submission",
+              "type": "FeedbackSubmission"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Route `onSubmit` somewhere a person actually reads.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

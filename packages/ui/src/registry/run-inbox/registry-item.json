@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "run-inbox",
+  "title": "Run Inbox",
+  "description": "Every agent run in one place, with the ones that need a person at the top. Takes `runs` (each with a `title` in the user's words, a `state` of `needsYou`, `running`, `scheduled`, `done` or `failed`, an `agent` name, a one-line `note`, a pre-formatted `time` and an `unread` flag), plus `onOpen` and an optional `onStop`. The grouping is the design: an inbox is the familiar shape for background agents, and its familiar failure is strict chronology, where a run that has waited three hours for an answer sits below one that finished a minute ago. Here anything waiting on a person comes first whatever its age, failures come next, and each group carries a count so the size of the pile is visible before scrolling. Purely presentational: you own the runs, the routing and what opening one does. Use it as the home screen for background or scheduled agents. Not for the steps inside one run (that is Agent Plan), and not as a notification feed.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/run-inbox/run-inbox.tsx",
+      "target": "components/ui/run-inbox.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Phrase `note` as the thing a person needs to decide or know, not as a status code.",
+  "meta": {
+    "engineeringNotes": "Grouping by state rather than sorting by time is the whole component, and it is why this is not a generic list: the research on agent management interfaces names the inbox's scaling problem exactly, and a pile ordered by recency buries the only rows that block progress. Counts sit on the group headers instead of a single unread badge, because 'four waiting on you' and 'four finished' are different feelings and one number cannot carry both. `unread` only changes weight and adds a screen-reader phrase rather than driving a separate 'new' section, since a run's state matters more than whether it has been opened. Stop appears only on running rows, so the control cannot be aimed at a run that has already ended.",
+    "motionNotes": "Motion means the machine is busy: only a running row's dot pulses. Rows waiting on a person hold completely still in the waiting colour, which is the turn-taking grammar applied to a list — the eye is drawn by stillness and position rather than by something blinking for attention. Under `prefers-reduced-motion` the pulse stops and state is carried by colour, position and words."
+  }
+}

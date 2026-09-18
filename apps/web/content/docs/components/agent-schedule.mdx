@@ -1,0 +1,74 @@
+---
+title: Agent Schedule
+description: When the agent runs on its own, written as sentences anyone can check.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { AgentSchedule } from "@/components/ui/agent-schedule";
+
+<AgentSchedule
+  triggers={[
+    {
+      id: "1",
+      when: "Every weekday at 9:00",
+      does: "Triages the support inbox and drafts replies",
+      enabled: true,
+      nextRun: "Tomorrow at 9:00",
+      lastRun: "Ran today · 24 drafted, 0 sent",
+      asksFirst: true,
+    },
+  ]}
+  onEnabledChange={toggle}
+  onRunNow={runNow}
+/>
+```
+
+Keep the cron expression in your backend. This surface is the sentence a colleague can
+check.
+
+## Why it exists
+
+Scheduled agents are where trust quietly breaks. The thing that runs at 9:00 every
+morning is the thing nobody is watching, and a schedule that has been failing for a week
+usually looks exactly like one that's fine.
+
+## Features
+
+- **Sentences, not cron.** "When an invoice arrives from a new supplier", not `0 9 * * 1-5`.
+- **A failed last run is visible on the row**, in the blocked colour, without opening
+  anything.
+- **The next run is stated**, so "is this still on?" has an answer.
+- **"Stops to ask you"** is shown while you're switching a trigger on, not discovered
+  later.
+- **One control to turn it off**, with the trigger's own sentence in its accessible name.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `triggers` | `{ id, when, does, enabled, nextRun?, lastRun?, lastFailed?, asksFirst? }[]` | You write `when` and `does`. |
+| `onEnabledChange` | `(id, enabled) => void` | Required. |
+| `onRunNow` | `(id) => void` | Runs one now. |
+| `onEdit` | `(id) => void` | |
+| `emptyLabel` | `string` | |
+| `title` | `string` | Defaults to `"When this agent runs"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- The on/off state lives in `aria-checked` only, never in the name — a name that carries
+  its own state gets read twice and renames the control every time it's used.
+- Each toggle is a real `role="switch"` whose accessible name includes the trigger's
+  sentence, so you hear which schedule you're turning off.
+- A failed last run is text as well as colour.
+- Only the switch animates, and that stops under `prefers-reduced-motion`.
+
+## When not to use
+
+- **A cron editor** for engineers: that's a different audience and a different surface.
+- **A calendar** of past and future runs: use `Run Inbox` for what happened.
+- **One-off runs:** those belong wherever the user starts work.

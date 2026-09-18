@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-schedule",
+  "title": "Agent Schedule",
+  "description": "When the agent runs on its own, in words anyone can check. Takes `triggers` (each a plain-words `when` — \"Every weekday at 9:00\", \"When an invoice arrives from a new supplier\", never a cron string — a `does` line phrased as the consequence, `enabled`, a pre-formatted `nextRun`, a `lastRun` summary with `lastFailed`, and `asksFirst` when a run will stop for approval), plus `onEnabledChange`, `onEdit` and `onRunNow`. Scheduled agents are where trust quietly breaks: the thing that runs at 9:00 every morning is the thing nobody is watching, and a schedule that has been failing for a week usually looks identical to one that is fine. So the last run's outcome sits on the row in the blocked colour when it failed, the next run is stated, and turning a trigger off is one control. Purely presentational: you own the scheduling, and you write the sentences. Use it in an agent's settings, or beside a Run Inbox. Not a cron editor, and not a calendar.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/agent-schedule/agent-schedule.tsx",
+      "target": "components/ui/agent-schedule.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Write `when` as a sentence a non-technical colleague could check, and keep the cron expression in your backend.",
+  "meta": {
+    "engineeringNotes": "Every trigger is caller-written prose rather than a structure the component renders into English, which is a deliberate trade: generated sentences from a rule object read fluently for simple cases and become nonsense at the first compound condition, and the person this surface protects is the one who has to verify that the sentence matches what the system does. The failed last run is rendered inline in the blocked colour rather than behind a status filter, because the state this component exists to prevent is a silent schedule failing unnoticed for a week. `asksFirst` is shown on the row so the approval behaviour of an unattended run is visible while it is being switched on, not discovered later. The switch is a real `role=\"switch\"` with an accessible name that includes the trigger's own sentence, so a screen-reader user hears which schedule they are turning off.",
+    "motionNotes": "Only the switch moves, sliding its thumb over `--pd-duration-fast` so flipping one reads as a physical change rather than a repaint. Nothing else animates: this is a settings surface, and a schedule row that pulsed would imply the agent is running right now. Under `prefers-reduced-motion` the slide is dropped and the state is carried by position, colour and the accessible name."
+  }
+}

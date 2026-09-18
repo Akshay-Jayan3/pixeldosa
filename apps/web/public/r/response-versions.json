@@ -1,0 +1,153 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "response-versions",
+  "title": "Response Versions",
+  "description": "Every answer the agent gave, kept. Takes `versions` (oldest first, each with `content`, an optional `label` naming what produced it and a pre-formatted `time`), the `activeId` and `onActiveChange`, plus optional `onRegenerate`, `onKeep` and `busy`. Stepping back and forth is two buttons and a count (\"Version 2 of 3\"); \"Compare with previous\" puts the current version beside the one before it, with the current one outlined; \"Keep this one\" hands a version back to you as the answer. Regenerating appends rather than replaces, which is the whole point: in most products regenerating destroys the previous answer, so a better answer is a gamble and people keep copies elsewhere. Purely presentational — you own the list, the regeneration and what keeping means. Use it under any answer people regenerate: chat replies, drafts, generated copy. Not for a full document's revision history, and not for comparing two arbitrary versions far apart in a list.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/response-versions/response-versions.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type ResponseVersion = {\n  id: string;\n  /** What produced it, in the user's words: \"Shorter\", \"With sources\", \"First answer\". */\n  label?: string;\n  /** Already formatted by you: \"2 minutes ago\". Rendered as given, never recomputed. */\n  time?: string;\n  content: React.ReactNode;\n};\n\nexport interface ResponseVersionsProps extends Omit<React.ComponentPropsWithoutRef<\"div\">, \"onChange\"> {\n  /** Oldest first. A regenerate appends; nothing is ever replaced. */\n  versions: ResponseVersion[];\n  activeId: string;\n  onActiveChange: (id: string) => void;\n  /** Produces another version. The previous ones stay. */\n  onRegenerate?: () => void;\n  /** Keeps this version as the answer and ends the comparison. */\n  onKeep?: (id: string) => void;\n  /** True while a new version is being produced. */\n  busy?: boolean;\n  label?: string;\n}\n\n/**\n * Every answer the agent gave, kept.\n *\n * Regenerating is the most common thing people do with an AI answer, and in most products\n * it destroys the previous one — so a better answer is a gamble, and people keep copies in\n * a notes app. Here each attempt is a version: step back and forth, put two side by side,\n * and keep the one you want.\n *\n * Still by default. The only motion is while a new version is being produced.\n */\nfunction ResponseVersions({\n  versions,\n  activeId,\n  onActiveChange,\n  onRegenerate,\n  onKeep,\n  busy = false,\n  label = \"Answer versions\",\n  className,\n  ...props\n}: ResponseVersionsProps) {\n  const [compare, setCompare] = React.useState(false);\n  const index = Math.max(0, versions.findIndex((version) => version.id === activeId));\n  const current = versions[index];\n  const previous = versions[index - 1];\n\n  // Comparing needs something to compare against: at the first version, or once the list\n  // shrinks to one, the toggle has nothing to show.\n  React.useEffect(() => {\n    if (!previous) setCompare(false);\n  }, [previous]);\n\n  if (!current) return null;\n\n  const step = (direction: -1 | 1) => {\n    const next = versions[index + direction];\n    if (next) onActiveChange(next.id);\n  };\n\n  return (\n    <div className={cn(\"flex flex-col gap-3\", className)} {...props}>\n      <div role=\"group\" aria-label={label} className=\"flex flex-wrap items-center gap-x-3 gap-y-2\">\n        <div className=\"flex items-center gap-1\">\n          <button\n            type=\"button\"\n            aria-label=\"Previous version\"\n            disabled={index === 0}\n            onClick={() => step(-1)}\n            className=\"relative inline-flex size-7 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-30\"\n          >\n            <svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" className=\"size-4\">\n              <path d=\"M10 3 5 8l5 5\" stroke=\"currentColor\" strokeWidth=\"1.6\" strokeLinecap=\"round\" strokeLinejoin=\"round\" />\n            </svg>\n          </button>\n          <p className=\"text-xs text-muted-foreground tabular-nums\">\n            Version {index + 1} of {versions.length}\n          </p>\n          <button\n            type=\"button\"\n            aria-label=\"Next version\"\n            disabled={index === versions.length - 1}\n            onClick={() => step(1)}\n            className=\"relative inline-flex size-7 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-30\"\n          >\n            <svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" className=\"size-4\">\n              <path d=\"m6 3 5 5-5 5\" stroke=\"currentColor\" strokeWidth=\"1.6\" strokeLinecap=\"round\" strokeLinejoin=\"round\" />\n            </svg>\n          </button>\n        </div>\n\n        {current.label || current.time ? (\n          <p className=\"text-xs text-muted-foreground\">\n            {[current.label, current.time].filter(Boolean).join(\" · \")}\n          </p>\n        ) : null}\n\n        <span className=\"flex-1\" />\n\n        {previous ? (\n          <button\n            type=\"button\"\n            aria-pressed={compare}\n            onClick={() => setCompare((value) => !value)}\n            className=\"rounded-md px-2 py-1 text-xs font-medium text-muted-foreground underline-offset-2 outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            {compare ? \"Stop comparing\" : \"Compare with previous\"}\n          </button>\n        ) : null}\n\n        {onRegenerate ? (\n          <button\n            type=\"button\"\n            onClick={onRegenerate}\n            disabled={busy}\n            className=\"rounded-md border border-input px-2.5 py-1 text-xs font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50\"\n          >\n            {/* Says what it does to the other versions, because most products silently\n                throw them away. */}\n            {busy ? \"Writing another…\" : \"Regenerate\"}\n          </button>\n        ) : null}\n\n        {onKeep ? (\n          <button\n            type=\"button\"\n            onClick={() => onKeep(current.id)}\n            className=\"rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            Keep this one\n          </button>\n        ) : null}\n      </div>\n\n      {compare && previous ? (\n        <div className=\"grid gap-3 sm:grid-cols-2\">\n          <section aria-label={`Version ${index}`} className=\"flex flex-col gap-2 rounded-lg border bg-card p-3\">\n            <p className=\"text-xs text-muted-foreground\">\n              Version {index}\n              {previous.label ? ` · ${previous.label}` : \"\"}\n            </p>\n            <div className=\"text-sm text-foreground text-pretty\">{previous.content}</div>\n          </section>\n          <section\n            aria-label={`Version ${index + 1}, showing now`}\n            className=\"flex flex-col gap-2 rounded-lg border-[1.5px] border-foreground bg-card p-3\"\n          >\n            <p className=\"text-xs text-muted-foreground\">\n              Version {index + 1} · showing now\n            </p>\n            <div className=\"text-sm text-foreground text-pretty\">{current.content}</div>\n          </section>\n        </div>\n      ) : (\n        // Keyed on the version, so switching fades the new text in once rather than\n        // re-animating on every render.\n        <div key={current.id} className=\"animate-[pd-fade-in_var(--pd-duration-base)_var(--pd-ease-decelerate)_both] text-sm text-foreground text-pretty motion-reduce:animate-none\">\n          {current.content}\n        </div>\n      )}\n\n      <span role=\"status\" aria-live=\"polite\" className=\"sr-only\">\n        {busy ? \"Writing another version.\" : `Showing version ${index + 1} of ${versions.length}.`}\n      </span>\n    </div>\n  );\n}\n\nexport { ResponseVersions };\n",
+      "type": "registry:ui",
+      "target": "components/ui/response-versions.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Versions are a caller-owned array and the component holds only the compare toggle, because the history has to outlive this component's mount — a version list kept in local state would be lost by any parent re-mount, which is exactly the loss the component exists to prevent. Comparison is deliberately limited to the current version and the one immediately before it: an arbitrary two-version picker doubles the controls for a case nobody had, and the common question is always \"is this better than the last try?\". The compare toggle resets itself when there is no previous version, so a shrinking list cannot leave the component in a state it cannot render. The announcement says which version is showing rather than the content, so switching versions with a screen reader gives position, not a re-read of the whole answer.",
+    "motionNotes": "One animation: the new version fades in over `--pd-duration-base`, keyed on the version id so a re-render with the same version never re-animates. Regeneration is the only busy state, and it lives in the button's own label (\"Writing another…\") rather than a spinner over the text, because the old answer stays readable the entire time. Under `prefers-reduced-motion` the fade is dropped and the switch is instant.",
+    "schema": {
+      "component": "ResponseVersions",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ResponseVersions",
+        "type": "object",
+        "properties": {
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ResponseVersion"
+            },
+            "description": "Oldest first. A regenerate appends; nothing is ever replaced."
+          },
+          "activeId": {
+            "type": "string"
+          },
+          "busy": {
+            "type": "boolean",
+            "description": "True while a new version is being produced."
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "versions",
+          "activeId"
+        ],
+        "$defs": {
+          "ResponseVersion": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "What produced it, in the user's words: \"Shorter\", \"With sources\", \"First answer\"."
+              },
+              "time": {
+                "type": "string",
+                "description": "Already formatted by you: \"2 minutes ago\". Rendered as given, never recomputed."
+              },
+              "content": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              }
+            },
+            "required": [
+              "id",
+              "content"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onActiveChange",
+          "required": true,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onRegenerate",
+          "required": false,
+          "params": [],
+          "description": "Produces another version. The previous ones stay."
+        },
+        {
+          "name": "onKeep",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "description": "Keeps this version as the answer and ends the comparison."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Append a new version on regenerate; never replace one.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "activity-trail",
+  "title": "Activity Trail",
+  "description": "What the agent did, why it was allowed to, and what came of it. Takes `entries` (each with a pre-formatted `time`, an `actor` of `agent`, `person` or `system` with an `actorName`, an `action` phrased as its consequence, an optional `target`, an `authority` line naming what permitted it, a `result`, and `undoable`), plus `onUndo` and `onExport`. The `authority` field is the one audit logs leave out and the one people actually ask about: \"who let it do that?\" — an approval, an autonomy level, a schedule someone set. Compliance logging is becoming mandatory for high-risk systems under the EU AI Act, with months of retention expected in regulated industries, but those records are built for auditors; this is the readable version for the person whose inbox the agent used, and `onExport` hands the same records to your compliance process so the two never drift apart. Purely presentational. Use it under a run, in an agent's settings, or on a record the agent touched. Not a developer event log, and not a chat transcript.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/activity-trail/activity-trail.tsx",
+      "target": "components/ui/activity-trail.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Write `action` as the consequence (\"Emailed the summary to 3 people\"), never as a function name.",
+  "meta": {
+    "engineeringNotes": "Entries are newest last, the order a story is read in, rather than the newest-first order of a log — this surface is meant to be reconstructed rather than monitored, and reversing it makes causation read backwards. `authority` is a required-shaped optional: nothing enforces it, but its absence in a row is visible, which pushes teams to record what permitted an action at the moment they render it rather than reconstructing it later from three systems. Undo is per entry and driven by the caller's `undoable` flag, because only the caller knows whether a specific action is still reversible; the component never infers reversibility from the action's words. Export exists so the human-readable trail and the compliance record come from one array instead of two implementations that disagree.",
+    "motionNotes": "Nothing animates. Every row describes something that already happened, and this system reserves motion for a machine that is still busy; an entry that slid or faded in would imply the record was still being written. Only the standard instant colour change on Undo, dropped under `prefers-reduced-motion`."
+  }
+}

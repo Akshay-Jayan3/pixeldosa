@@ -17,7 +17,200 @@
   ],
   "meta": {
     "engineeringNotes": "Three decisions separate this from a chat prompt asking the same question. First, provenance is a required prop rather than an optional nicety: MCP obliges a client to show which server is requesting input, and it is also the only basis a user has for judging whether the question is safe to answer at all. Second, refusal is modelled as two distinct outcomes instead of one dismissal — declining answers 'not this information' while cancelling answers 'not this operation', and collapsing them would silently convert a narrow refusal into an abort. Third, the field types deliberately bias toward concrete options: `select` renders as labelled radio cards carrying optional hints (the disambiguation case, which is what elicitation is mostly used for, is far better served by 'Q3 Revenue Final.xlsx — edited 3 days ago' than by a text box), and `confirm` renders explicit Yes/No buttons rather than a checkbox, since a checkbox's unchecked state is ambiguous between 'no' and 'not answered'. That ambiguity matters here because submit is gated on required fields actually being answered. The component deliberately does not compose AI Action Toolbar for its actions despite the system's compose-don't-reinvent rule: the primary control is a real form submit button, and wrapping form submission inside a `role=\"toolbar\"` would misreport the semantics to assistive technology for the sake of visual consistency. Text inputs are 16px on small viewports because anything smaller makes iOS Safari zoom the page on focus.",
-    "motionNotes": "Almost none, and that is the design. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a), which means it holds perfectly still — the absence of motion is precisely what signals that nothing proceeds until the user acts, and animating it would put it back in the same visual register as the machine's own busy states. The only motion present is the shared colour transition on hover, press and focus at `--pd-duration-instant`, matching every other control in the system, and it is dropped entirely under `prefers-reduced-motion` while the selected-state border and background still communicate which option is chosen. Entrance animation belongs to whatever surface reveals this component, not to the component itself — the same rule Confidence Meter and AI Action Toolbar hold."
+    "motionNotes": "Almost none, and that is the design. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a), which means it holds perfectly still — the absence of motion is precisely what signals that nothing proceeds until the user acts, and animating it would put it back in the same visual register as the machine's own busy states. The only motion present is the shared colour transition on hover, press and focus at `--pd-duration-instant`, matching every other control in the system, and it is dropped entirely under `prefers-reduced-motion` while the selected-state border and background still communicate which option is chosen. Entrance animation belongs to whatever surface reveals this component, not to the component itself — the same rule Confidence Meter and AI Action Toolbar hold.",
+    "schema": {
+      "component": "AgentAsk",
+      "element": "form",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AgentAsk",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "question": {
+            "type": "string",
+            "description": "The actual question. Targeted and answerable — never \"can you provide more information?\"."
+          },
+          "source": {
+            "type": "string",
+            "description": "Who is asking. Required, not optional: MCP's elicitation spec obliges a client to\nshow which server is requesting input, because \"some software wants your data\" is\nnot a question a user can safely answer without knowing the asker."
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "text"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "placeholder": {
+                      "type": "string"
+                    },
+                    "required": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "label"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "number"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "placeholder": {
+                      "type": "string"
+                    },
+                    "required": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "label"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "confirm"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "required": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "label"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "select"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/AskFieldOption"
+                      }
+                    },
+                    "required": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "label",
+                    "options"
+                  ]
+                }
+              ]
+            }
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Why it's asking. Short context that makes the question answerable."
+          },
+          "submitLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "source",
+          "fields"
+        ],
+        "$defs": {
+          "AskFieldOption": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value",
+              "label"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onRespond",
+          "required": true,
+          "params": [
+            {
+              "name": "values",
+              "type": "Record<string, string | boolean>"
+            }
+          ]
+        },
+        {
+          "name": "onDecline",
+          "required": false,
+          "params": [],
+          "description": "Answer refused, continue without it. Distinct from cancelling the run."
+        },
+        {
+          "name": "onCancel",
+          "required": false,
+          "params": [],
+          "description": "Abandon the whole operation. MCP requires this be offered alongside decline."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. MCP's elicitation spec requires that a client show which server is asking and offer both decline and cancel — `source` is therefore a required prop, and you should wire `onDecline` and `onCancel` rather than omitting them, even though the component tolerates their absence for non-MCP uses.",
   "categories": [

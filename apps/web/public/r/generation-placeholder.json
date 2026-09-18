@@ -17,7 +17,116 @@
   ],
   "meta": {
     "engineeringNotes": "The load-bearing decision is that progress is encoded spatially, not temporally. Each cell derives a stable pseudo-random threshold from its index (a deterministic sine hash, so the pattern never reshuffles between renders — a reshuffling field reads as noise rather than a resolve), and a cell resolves once `progress` passes its threshold. That is ordered-dither logic borrowed from halftone rendering: it produces an organic dissolve that is nonetheless an exact function of real progress, rather than a decorative animation that merely implies work. The payoff is the reduced-motion story, which is unusually strong for an animated component: because the information lives in the pattern rather than the movement, `prefers-reduced-motion` removes every transition and the progress stays completely legible — no fallback had to be invented. `progress` is optional with no synthetic fallback, deliberately: media generation genuinely reports steps (diffusion iterations, encoded frames) where text streaming does not, so a percentage here is measured rather than invented — the system's rule is not 'never show a number' but 'never invent precision you don't have', which is the same rule that makes Confidence Meter refuse one. `aspectRatio` is required because a media placeholder that resizes on completion causes a layout shift at exactly the moment the user's attention is on it. `processing` exists as a state separate from `generating` so a user is never told 'done' while an upscale or encode is still running. The requestAnimationFrame loop that drives indeterminate mode is not started at all when the component is determinate or motion is reduced, since an animation frame loop nobody can see is pure battery cost.",
-    "motionNotes": "Cells transition `transform: scale` at `--pd-duration-base` with `--pd-ease-standard`; because each cell's threshold differs, the resolve reads as a wave without any explicit stagger orchestration — the stagger is a free consequence of the threshold distribution. Indeterminate mode travels a phase offset across the same thresholds on a 2s loop, the single continuous animation in the component, and it maps to real ongoing work rather than decorating a wait. Completion is a cross-fade, never a pop: the artifact fades in over `--pd-duration-base` with `--pd-ease-decelerate` while the field is unmounted, so the two states morph rather than cut. Only `transform` and `opacity` animate, so the whole field composites on the GPU regardless of density. Under `prefers-reduced-motion` every transition is dropped and the wave loop never starts; cells snap to their correct scale and hold a static pattern, which costs nothing because progress was already spatial — the reduced-motion state is the same information without the movement, which is the fallback contract rather than a removal."
+    "motionNotes": "Cells transition `transform: scale` at `--pd-duration-base` with `--pd-ease-standard`; because each cell's threshold differs, the resolve reads as a wave without any explicit stagger orchestration — the stagger is a free consequence of the threshold distribution. Indeterminate mode travels a phase offset across the same thresholds on a 2s loop, the single continuous animation in the component, and it maps to real ongoing work rather than decorating a wait. Completion is a cross-fade, never a pop: the artifact fades in over `--pd-duration-base` with `--pd-ease-decelerate` while the field is unmounted, so the two states morph rather than cut. Only `transform` and `opacity` animate, so the whole field composites on the GPU regardless of density. Under `prefers-reduced-motion` every transition is dropped and the wave loop never starts; cells snap to their correct scale and hold a static pattern, which costs nothing because progress was already spatial — the reduced-motion state is the same information without the movement, which is the fallback contract rather than a removal.",
+    "schema": {
+      "component": "GenerationPlaceholder",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "GenerationPlaceholder",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "done",
+              "failed",
+              "queued",
+              "generating",
+              "processing"
+            ]
+          },
+          "progress": {
+            "type": "number",
+            "description": "0–1, and only when the backend actually reports it (diffusion steps, encoded\nframes). Omit for indeterminate — the component never fabricates a percentage or\ncreeps toward 90%, because a made-up number is worse than an honest \"still working\"."
+          },
+          "aspectRatio": {
+            "type": "string",
+            "description": "Reserves the artifact's final bounds so nothing shifts when it arrives. Required,\nnot optional: a media placeholder that resizes on completion causes a layout jump\nat exactly the moment the user is looking at it."
+          },
+          "label": {
+            "type": "string",
+            "description": "Visible and announced status text, e.g. \"Generating image\"."
+          },
+          "form": {
+            "enum": [
+              "field",
+              "mosaic",
+              "sweep",
+              "bars"
+            ]
+          },
+          "density": {
+            "enum": [
+              "sm",
+              "lg",
+              "default"
+            ]
+          },
+          "children": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "The finished artifact. Revealed when `status` is `done`."
+          }
+        },
+        "required": [
+          "status",
+          "aspectRatio",
+          "label"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onCancel",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onRetry",
+          "required": false,
+          "params": [],
+          "description": "Recovery path for `failed`. Without it the failure state explains but can't be acted on."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils` and the `pd-fade-in` keyframe supplied by @pixeldosa/pixeldosa-theme's css block. `aspectRatio` is deliberately required rather than optional — it is the prop that prevents a layout shift when the artifact arrives, which is the whole reason this is a container component.",
   "categories": [

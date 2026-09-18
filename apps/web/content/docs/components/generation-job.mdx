@@ -1,0 +1,103 @@
+---
+title: Generation Job
+description: A generation that takes minutes — queue position, honest waits, partial results and refunds.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { GenerationJob } from "@/components/ui/generation-job";
+
+<GenerationJob
+  status={job.status}
+  title="4 product images · 1024 × 1024"
+  queue={{ position: job.queuePosition, typicalWait: "2 to 4 minutes" }}
+  stage={job.stage}
+  progress={job.measuredProgress}
+  startedAt={job.startedAt}
+  cost="40 credits"
+  refundNote="Anything that fails is refunded"
+  onCancel={job.cancel}
+>
+  {job.outputs.map((output) => <img key={output.id} src={output.url} alt="" />)}
+</GenerationJob>
+```
+
+Pass `progress` only when you measure it. Without it, no bar is drawn.
+
+## Why it exists
+
+Reviews of image and video tools rank credits and unexplained waiting above quality.
+Queues of ten to thirty minutes are normal at peak, and people are given a spinner, no
+position, no estimate, and no idea what happens to their credits when a job fails.
+
+## Features
+
+- **The queue is a real state:** position, plus what the wait usually is at this moment.
+- **No invented progress.** A bar appears only when you pass a measured `progress`.
+- **Partial results show immediately.** With `status="partial"`, two finished images of
+  four are two finished images, not a spinner.
+- **The refund rule is stated before a failure**, and what happened to the money after
+  one.
+- **Nobody has to watch.** A "Tell me when it's done" checkbox, so long jobs don't hold
+  someone at the screen.
+- **Stop stays visible** for the whole run, and the elapsed counter ticks itself.
+
+## Variants
+
+### In the queue
+
+<PreviewStack>
+  <GenerationJob
+    headingLevel={3}
+    status="queued"
+    title="A 6-second clip · 1080p"
+    queue={{ position: 4, typicalWait: "8 to 12 minutes" }}
+    cost="120 credits"
+    refundNote="Not charged until it starts"
+  />
+</PreviewStack>
+
+### Failed, with the credits back
+
+<PreviewStack>
+  <GenerationJob
+    headingLevel={3}
+    status="failed"
+    title="4 lifestyle images · 1536 × 1024"
+    error={{ message: "The model timed out after 4 minutes.", refunded: "Your 40 credits are back." }}
+    cost="40 credits"
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `status` | `"queued" \| "running" \| "partial" \| "done" \| "failed" \| "cancelled"` | Required. |
+| `title` | `string` | Required. What's being made. |
+| `queue` | `{ position?, typicalWait? }` | Say what you know. |
+| `stage` | `string` | "Rendering 3 of 4". Shimmers while running. |
+| `progress` | `number` | Measured, 0–1. Omit and no bar is drawn. |
+| `startedAt` | `number \| Date` | Drives the elapsed counter. |
+| `cost` / `refundNote` | `string` | Formatted by you. |
+| `error` | `{ message, refunded? }` | The reason, and what happened to the money. |
+| `notify` / `onNotifyChange` | `boolean` / `(v) => void` | "Tell me when it's done". |
+| `onCancel` / `onRetry` | `() => void` | Stop while active; Try again after a failure. |
+| `children` | `ReactNode` | Finished outputs, shown as they land. |
+
+## Accessibility
+
+- A labelled `<section>` with a real heading.
+- Status, queue position and failures are announced once through a polite live region —
+  the ticking counter is not announced.
+- The progress bar is decorative; the words carry the same information.
+- The status dot's pulse stops under `prefers-reduced-motion`.
+
+## When not to use
+
+- **Work that takes a second or two:** use `Generation Placeholder`.
+- **An agent run with steps:** use `Agent Plan` with statuses.
+- **A list of past jobs:** this is one job. A queue of many is a different surface.

@@ -17,7 +17,32 @@
   ],
   "meta": {
     "engineeringNotes": "Extracted from two already-shipped components (Smart Field, Selection Actions) that had independently hand-rolled the identical tiered indicator — the concrete signal per the system's own 'a component is not an island' rule that this belongs as its own primitive rather than being re-derived a third time. Confidence is a three-tier enum, not a raw number, by deliberate and unchanged decision from Smart Field's original plan: a fabricated percentage would claim precision the model doesn't actually have, and the system's token set has no 'success'/'warning' hue to spend on a red/yellow/green scale anyway — only `destructive` keeps real chroma. A numeric-score-to-tier bucketing input was considered and deferred: no current consumer has a raw calibrated score to map, and adding that path now would solve a hypothetical need rather than an observed one. Provenance is folded into this component as an optional prop rather than left as a sibling element every consumer composes separately, since the two already-shipped call sites both rendered them side by side anyway — one import now covers both.",
-    "motionNotes": "None, deliberately. This is a static presentational primitive with no state transitions of its own — any entrance/exit motion belongs to whatever container shows it (e.g. Smart Field's proposal panel), the same way Card's motion belongs to whatever wraps it, not to the primitive itself. Nothing here required a component-specific motion or reduced-motion branch, which is itself a signal the component is doing exactly what it needs to and no more."
+    "motionNotes": "None, deliberately. This is a static presentational primitive with no state transitions of its own — any entrance/exit motion belongs to whatever container shows it (e.g. Smart Field's proposal panel), the same way Card's motion belongs to whatever wraps it, not to the primitive itself. Nothing here required a component-specific motion or reduced-motion branch, which is itself a signal the component is doing exactly what it needs to and no more.",
+    "schema": {
+      "component": "ConfidenceMeter",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ConfidenceMeter",
+        "type": "object",
+        "properties": {
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "provenance": {
+            "type": "string",
+            "description": "Optional source caption, rendered as \"via {provenance}\" alongside the tier."
+          }
+        },
+        "required": [
+          "confidence"
+        ]
+      },
+      "events": []
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Has no client-side behaviour (no state, effects, or event handlers), so it carries no `\"use client\"` directive and can render on the server.",
   "categories": [

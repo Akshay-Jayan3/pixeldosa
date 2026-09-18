@@ -19,7 +19,138 @@
   ],
   "meta": {
     "engineeringNotes": "Mirrors ghost-input's contract shape (value/onValueChange controlled-only, a fetchX behaviour injected by the consumer, an AbortSignal for cancellation) deliberately, so the AI tier reads as one consistent family rather than each component inventing its own pattern — the two differ only in what they return: a plain continuation string for ghost-input versus a structured { value, confidence, provenance } proposal here, because a complete replacement value needs that context attached and a continuation tail does not. Confidence rendering composes the shared `confidence-meter` primitive (extracted after Selection Actions needed the identical tiered indicator) rather than hand-rolling its own bars a second time — a three-tier enum (low/medium/high), not a raw number, because a fabricated percentage would claim precision the underlying model doesn't actually have, and because the system has no colour scale to spend on a red/yellow/green treatment anyway. autoPropose is opt-in and gated to empty fields only, adopted directly from CRM-enrichment research (Clay/HubSpot/Attio): confidence gates whether a proposal is allowed to overwrite existing data, so the safest default auto-behaviour is 'only ever fill a blank,' never 'silently reconsider what's already there.' Manual typing at any point cancels an in-flight fetch or dismisses a shown-but-unaccepted proposal, reusing ghost-input's staleness philosophy: a suggestion answering a question the field no longer asks is worse than no suggestion. The proposal panel animates open/closed via a CSS grid-template-rows trick (0fr to 1fr) rather than measuring and animating an explicit pixel height, which is the standard token-free way to animate a height that depends on variable content without a ResizeObserver.",
-    "motionNotes": "The proposal panel's height expansion and the field's colour tint both use --pd-duration-fast/--pd-ease-standard; the trigger's busy spinner and accept/reject colour changes use --pd-duration-instant, matching Button's press-feedback timing, because those are immediate state confirmations rather than content arriving. The proposed value itself never animates in character-by-character — the full value already exists the moment it's returned, so a typewriter reveal would misrepresent it as being generated live, the same reasoning ghost-input's plan already established. Confidence Meter (composed, not reimplemented here) has no motion of its own — under prefers-reduced-motion, the panel's grid-template-rows transition and the colour transitions are dropped via motion-reduce:transition-none, leaving the underlying state (panel present/absent, tint present/absent) fully legible without animation."
+    "motionNotes": "The proposal panel's height expansion and the field's colour tint both use --pd-duration-fast/--pd-ease-standard; the trigger's busy spinner and accept/reject colour changes use --pd-duration-instant, matching Button's press-feedback timing, because those are immediate state confirmations rather than content arriving. The proposed value itself never animates in character-by-character — the full value already exists the moment it's returned, so a typewriter reveal would misrepresent it as being generated live, the same reasoning ghost-input's plan already established. Confidence Meter (composed, not reimplemented here) has no motion of its own — under prefers-reduced-motion, the panel's grid-template-rows transition and the colour transitions are dropped via motion-reduce:transition-none, leaving the underlying state (panel present/absent, tint present/absent) fully legible without animation.",
+    "schema": {
+      "component": "SmartField",
+      "element": "input",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "SmartField",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Current field value. SmartField is controlled — there is no uncontrolled mode."
+          },
+          "triggerIcon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "Icon shown in the trigger button. No bundled icon set — supply your own, size-4 recommended."
+          },
+          "triggerLabel": {
+            "type": "string",
+            "description": "Accessible label for the trigger button."
+          },
+          "autoPropose": {
+            "type": "boolean",
+            "description": "Fetch a proposal automatically once mounted, if `value` is empty. Off by default —\nfetching without an explicit ask contradicts the AI tier's \"nothing happens\nunannounced\" posture, but some products (e.g. Notion's Custom Agent autofill) do\nwant this, so it's an opt-in rather than cut entirely."
+          },
+          "proposeToken": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "Changing this value requests a proposal. It exists so a parent can fill several\nfields from one action — `AI Form Fill` bumps a single token and every field it\ngoverns proposes at once — without this component giving up ownership of its own\nproposal state. Ignored on first render, so mounting is never a request; use\n`autoPropose` for that."
+          },
+          "undoWindowMs": {
+            "type": "number",
+            "description": "How long the Undo affordance stays visible after accepting, in ms."
+          },
+          "wrapperClassName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "triggerIcon"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onValueChange",
+          "required": true,
+          "params": [
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "fetchProposal",
+          "required": true,
+          "params": [
+            {
+              "name": "currentValue",
+              "type": "string"
+            },
+            {
+              "name": "signal",
+              "type": "AbortSignal"
+            }
+          ],
+          "description": "Fetches a proposal for the current value. Return null/undefined for \"no proposal\"."
+        },
+        {
+          "name": "onAcceptProposal",
+          "required": false,
+          "params": [
+            {
+              "name": "value",
+              "type": "string"
+            },
+            {
+              "name": "proposal",
+              "type": "SmartFieldProposal"
+            }
+          ],
+          "description": "Fired after the user explicitly accepts a proposal."
+        }
+      ]
+    }
   },
   "docs": "value/onValueChange are required — this is a controlled component only, matching ghost-input's contract. fetchProposal must resolve to the FULL proposed value (not a delta) plus optional confidence/provenance; return null/undefined for 'no proposal available' rather than throwing. triggerIcon is required with no bundled default — pass any size-4 SVG/icon element. autoPropose only fires once, on mount, and only when value is empty, so it can never silently overwrite existing data. Drops into <FieldControl> directly since id/aria-invalid/aria-describedby/ref all forward to the underlying <input>.",
   "categories": [

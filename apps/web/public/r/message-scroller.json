@@ -17,7 +17,80 @@
   ],
   "meta": {
     "engineeringNotes": "Auto-scroll is where chat interfaces most often break trust: a stream drags the view down while someone is reading an earlier answer. Here 'pinned' is a fact about the reader, recomputed from their own scroll position with a 48px tolerance. Following happens only while pinned, both when children are added (layout effect) and when the last message grows during streaming (a ResizeObserver on the content, since token growth adds no children). While unpinned, added children are counted into the jump pill. A smooth jump sets a guard, so the intermediate 'not at bottom' frames of the animation don't unpin and flash the pill back. A 700ms fallback lands on the bottom even if streaming moved the target mid-animation. Prepended history is detected by the first child's key changing alongside a higher count, and compensated by adding the height delta to scrollTop in a layout effect before paint. Native `overflow-anchor` is disabled, so browsers with and without support behave identically. Accessibility uses a named, focusable region for keyboard scrolling and a separate polite status for caller-supplied announcements, because a live log would read every streamed token.",
-    "motionNotes": "Following while pinned is instant, not smooth: animating toward a target that moves with every token lags behind and reads as sluggish. Smooth scrolling is reserved for the user's explicit 'Jump to latest', and falls back to instant under prefers-reduced-motion. The jump pill fades in at `--pd-duration-fast` on the decelerate curve when the reader leaves the bottom, and hover colour runs at `--pd-duration-instant`. History prepends are compensated before paint, so there is no visible jump. Everything becomes instant under prefers-reduced-motion."
+    "motionNotes": "Following while pinned is instant, not smooth: animating toward a target that moves with every token lags behind and reads as sluggish. Smooth scrolling is reserved for the user's explicit 'Jump to latest', and falls back to instant under prefers-reduced-motion. The jump pill fades in at `--pd-duration-fast` on the decelerate curve when the reader leaves the bottom, and hover colour runs at `--pd-duration-instant`. History prepends are compensated before paint, so there is no visible jump. Everything becomes instant under prefers-reduced-motion.",
+    "schema": {
+      "component": "MessageScroller",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "MessageScroller",
+        "type": "object",
+        "properties": {
+          "children": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode"
+          },
+          "announcement": {
+            "type": "string",
+            "description": "Text for screen readers when something worth hearing happens, e.g. \"Assistant replied:\nChurn rose in August…\". Set it once a message *finishes*, never per token."
+          },
+          "label": {
+            "type": "string",
+            "description": "Accessible name for the scroll region."
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onReachTop",
+          "required": false,
+          "params": [],
+          "description": "Called when the reader scrolls near the top. Load older messages here."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Give children stable `key`s, because history prepends are detected by the first key changing. Give the scroller a height (`h-[…]` or `flex-1` in a flex column). Set `announcement` when a reply finishes.",
   "categories": [

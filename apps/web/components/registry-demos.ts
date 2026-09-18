@@ -1,6 +1,21 @@
 import type { ComponentType } from "react";
 
 import AgentFigureDemo from "@pixeldosa/ui/registry/agent-figure/agent-figure.demo";
+import ActivityTrailDemo from "@pixeldosa/ui/registry/activity-trail/activity-trail.demo";
+import AgentScheduleDemo from "@pixeldosa/ui/registry/agent-schedule/agent-schedule.demo";
+import AIDisclosureDemo from "@pixeldosa/ui/registry/ai-disclosure/ai-disclosure.demo";
+import HumanHandoffDemo from "@pixeldosa/ui/registry/human-handoff/human-handoff.demo";
+import RunInboxDemo from "@pixeldosa/ui/registry/run-inbox/run-inbox.demo";
+import CompareViewDemo from "@pixeldosa/ui/registry/compare-view/compare-view.demo";
+import CreditsMeterDemo from "@pixeldosa/ui/registry/credits-meter/credits-meter.demo";
+import MediaResultDemo from "@pixeldosa/ui/registry/media-result/media-result.demo";
+import ParameterPanelDemo from "@pixeldosa/ui/registry/parameter-panel/parameter-panel.demo";
+import GenerationJobDemo from "@pixeldosa/ui/registry/generation-job/generation-job.demo";
+import VariationGridDemo from "@pixeldosa/ui/registry/variation-grid/variation-grid.demo";
+import CostEstimateDemo from "@pixeldosa/ui/registry/cost-estimate/cost-estimate.demo";
+import ResponseFeedbackDemo from "@pixeldosa/ui/registry/response-feedback/response-feedback.demo";
+import ResponseVersionsDemo from "@pixeldosa/ui/registry/response-versions/response-versions.demo";
+import DraftModeDemo from "@pixeldosa/ui/registry/draft-mode/draft-mode.demo";
 import AIActionToolbarDemo from "@pixeldosa/ui/registry/ai-action-toolbar/ai-action-toolbar.demo";
 import IntentPreviewDemo from "@pixeldosa/ui/registry/intent-preview/intent-preview.demo";
 import AgentPlanDemo from "@pixeldosa/ui/registry/agent-plan/agent-plan.demo";
@@ -314,6 +329,126 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A high-risk, irreversible send held for approval — scope, confidence and reasoning.",
       render: AIApprovalGateDemo,
+    },
+  ],
+  "run-inbox": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Six runs across five states, with the two waiting on a person at the top.",
+      render: RunInboxDemo,
+    },
+  ],
+  "activity-trail": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A morning's work, each line with what allowed it, the result, and Undo where it still applies.",
+      render: ActivityTrailDemo,
+    },
+  ],
+  "human-handoff": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A refund the agent can't decide, handed over with everything it already tried.",
+      render: HumanHandoffDemo,
+    },
+  ],
+  "agent-schedule": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Three triggers in plain words, including one whose last run failed.",
+      render: AgentScheduleDemo,
+    },
+  ],
+  "parameter-panel": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Look, shape and quantity chosen from previews, with the price of each option beside it.",
+      render: ParameterPanelDemo,
+    },
+  ],
+  "compare-view": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A sky replacement, compared with a keyboard-operable slider or side by side.",
+      render: CompareViewDemo,
+    },
+  ],
+  "media-result": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A finished image with what made it, its content credentials, and what happens when they're missing.",
+      render: MediaResultDemo,
+    },
+  ],
+  "generation-job": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A batch of images from the queue to done, with two ready before the rest.",
+      render: GenerationJobDemo,
+    },
+  ],
+  "variation-grid": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Four results: keep the ones you like and regenerate only the others.",
+      render: VariationGridDemo,
+    },
+  ],
+  "credits-meter": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A low balance, with the price of three different actions shown before the click.",
+      render: CreditsMeterDemo,
+    },
+  ],
+  "response-versions": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "An answer regenerated twice, with every version kept and two of them side by side.",
+      render: ResponseVersionsDemo,
+    },
+  ],
+  "response-feedback": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Thumbs under an answer, with reasons and an optional comment after a thumbs down.",
+      render: ResponseFeedbackDemo,
+    },
+  ],
+  "ai-disclosure": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A notice on an AI-written draft, and a consent question before recording a call.",
+      render: AIDisclosureDemo,
+    },
+  ],
+  "cost-estimate": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "What a research run will cost and how long it takes, with a narrower scope to compare.",
+      render: CostEstimateDemo,
+    },
+  ],
+  "draft-mode": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Three things the agent prepared, held for review, one of them irreversible.",
+      render: DraftModeDemo,
     },
   ],
   "agent-figure": [

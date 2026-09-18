@@ -17,7 +17,76 @@
   ],
   "meta": {
     "engineeringNotes": "The character is generated, not illustrated: each stroke is a polyline pushed off its true path by a seeded wobble and smoothed with Catmull-Rom curves. Seeds come from the pose, the stroke name and the frame, so the server and client render byte-identical paths and there is no hydration mismatch, and a new pose costs a few coordinates rather than an asset. Every colour is a theme token, so the figure follows light and dark mode and a host's palette. Poses map to things a run actually does, never to feelings: 'blocked' is a state, 'sad' is not, and the three result poses exist so confidence can be shown honestly rather than always looking pleased. The frame clock runs only while the pose is on the agent's turn, the figure is on screen (IntersectionObserver), and the tab is visible; otherwise nothing ticks.",
-    "motionNotes": "Two kinds of motion, both stepped at 280ms rather than eased, so the figure reads as drawn rather than rendered: the line boil (strokes re-seed every second frame) and a few discrete prop movements — eyes scanning a page, a key press, the thought bubble filling in. Both stop completely when the pose is the person's turn (`idle`, `asking`, `blocked`, `done` and the result poses), which is the system's rule that stillness means it's your turn. `still` holds the lines on the agent's turn too. Under `prefers-reduced-motion` nothing animates and each pose remains a distinct static drawing, so no information is lost."
+    "motionNotes": "Two kinds of motion, both stepped at 280ms rather than eased, so the figure reads as drawn rather than rendered: the line boil (strokes re-seed every second frame) and a few discrete prop movements — eyes scanning a page, a key press, the thought bubble filling in. Both stop completely when the pose is the person's turn (`idle`, `asking`, `blocked`, `done` and the result poses), which is the system's rule that stillness means it's your turn. `still` holds the lines on the agent's turn too. Under `prefers-reduced-motion` nothing animates and each pose remains a distinct static drawing, so no information is lost.",
+    "schema": {
+      "component": "AgentFigure",
+      "element": "span",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AgentFigure",
+        "type": "object",
+        "properties": {
+          "pose": {
+            "enum": [
+              "idle",
+              "listening",
+              "thinking",
+              "planning",
+              "searching",
+              "reading",
+              "comparing",
+              "working",
+              "asking",
+              "blocked",
+              "done",
+              "confident",
+              "probable",
+              "unsure"
+            ]
+          },
+          "variant": {
+            "enum": [
+              "figure",
+              "mark"
+            ],
+            "description": "`figure` is the whole character; `mark` is the head alone, for inline status and avatars."
+          },
+          "size": {
+            "enum": [
+              "sm",
+              "md",
+              "lg"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "What the pose means, in words. Defaults to the pose's own label. Read by assistive\ntechnology, and shown beside the figure unless `hideLabel` is set."
+          },
+          "hideLabel": {
+            "type": "boolean"
+          },
+          "labelPosition": {
+            "enum": [
+              "end",
+              "below"
+            ],
+            "description": "Where the visible label sits."
+          },
+          "announce": {
+            "type": "boolean",
+            "description": "Announce label changes through a polite live region. Off by default: most products\nalready announce status elsewhere (Live Status Line, Agent Presence), and two\nchannels saying the same thing is worse than one."
+          },
+          "still": {
+            "type": "boolean",
+            "description": "Hold the pen lines still even while the agent is busy."
+          }
+        },
+        "required": [
+          "pose"
+        ]
+      },
+      "events": []
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils` and the agent marker colours (`--agent-working`, `--agent-waiting`, `--agent-blocked`, `--agent-done` and their `-soft` fills) from @pixeldosa/pixeldosa-theme.",
   "categories": [

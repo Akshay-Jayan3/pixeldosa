@@ -1,0 +1,55 @@
+---
+title: Activity Trail
+description: What the agent did, why it was allowed to, and what came of it — readable, and exportable.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ActivityTrail } from "@/components/ui/activity-trail";
+
+<ActivityTrail entries={entries} onUndo={undo} onExport={exportTrail} />
+```
+
+## Why it exists
+
+Audit logging is becoming a legal requirement for high-risk AI, and regulated industries
+now expect months of retention. But those records are built for auditors. The person whose
+inbox the agent used needs a different thing: one readable line per action, and the answer
+to "who let it do that?".
+
+## Features
+
+- **The authority is a field.** "You approved it", "Autonomy: acts on low-risk changes",
+  "Schedule set by Dana" — the line every log leaves out.
+- **Actions read as consequences**, not function names.
+- **Undo where it still applies**, driven by your `undoable` flag, because only you know
+  what's still reversible.
+- **One array, two audiences.** `onExport` hands the same records to your compliance
+  process, so the readable view and the audit record can't drift apart.
+- **Oldest first**, the way a story is read, so causation runs forwards.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `entries` | `{ id, time, actor, actorName?, action, target?, authority?, result?, undoable? }[]` | `actor` is `agent`, `person` or `system`. `time` is formatted by you. |
+| `onUndo` | `(id: string) => void` | Shown on entries you mark `undoable`. |
+| `onExport` / `exportLabel` | `() => void` / `string` | |
+| `emptyLabel` | `string` | |
+| `title` | `string` | Defaults to `"What happened"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- An ordered list inside a labelled `<section>`.
+- Every field is text: actor, authority and result are read in order.
+- Nothing animates, so the record never looks like it's still being written.
+
+## When not to use
+
+- **A developer event log.** Raw tool calls belong in `Tool Call Card`.
+- **A chat transcript.** This is what was done, not what was said.
+- **As your only compliance store.** Export to a system built for retention.

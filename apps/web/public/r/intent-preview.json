@@ -18,7 +18,105 @@
   ],
   "meta": {
     "engineeringNotes": "Built from the model-side view of how agentic runs fail: interpretation happens before planning, and an early misreading compounds through every step that follows. Surfacing the interpretation in one sentence, together with the specific guesses that filled gaps in the request, moves correction to the single point where it is nearly free. Two decisions keep that from becoming friction. First, assumptions arrive pre-filled with the agent's best guess, so the common case — the guess is right — costs one click, and the start label changes to 'Start with changes' only when something was corrected, so the confirmation carries information rather than ceremony. Second, correction happens in place through a native select of alternative readings rather than by rephrasing the whole request, which is both faster and more precise. Boundaries ('I won't…') are included because what an agent will not do is part of its intent and is the thing users most want to know before a run with side effects. It is deliberately distinct from Agent Ask: Ask blocks on missing information the agent cannot guess, whereas Intent Preview is for requests the agent could act on immediately, where acting on a wrong guess would be expensive.",
-    "motionNotes": "Still, by design. This is a user-turn surface under the system's turn-taking grammar, so nothing moves or shimmers while it waits — the absence of motion is the signal that nothing proceeds until the user confirms. The only motion is the shared colour transition on hover and focus at `--pd-duration-instant`, inherited from the composed AI Action Toolbar and the select's own focus ring, and it drops to instant under prefers-reduced-motion. Entrance motion belongs to whatever surface reveals the preview, not to the component."
+    "motionNotes": "Still, by design. This is a user-turn surface under the system's turn-taking grammar, so nothing moves or shimmers while it waits — the absence of motion is the signal that nothing proceeds until the user confirms. The only motion is the shared colour transition on hover and focus at `--pd-duration-instant`, inherited from the composed AI Action Toolbar and the select's own focus ring, and it drops to instant under prefers-reduced-motion. Entrance motion belongs to whatever surface reveals the preview, not to the component.",
+    "schema": {
+      "component": "IntentPreview",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "IntentPreview",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "interpretation": {
+            "type": "string",
+            "description": "The request restated as the agent understood it — one plain sentence."
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/IntentAssumption"
+            },
+            "description": "The guesses the agent made to fill gaps in the request."
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What the agent will deliberately not do. Boundaries are part of intent."
+          },
+          "startLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "interpretation"
+        ],
+        "$defs": {
+          "IntentAssumption": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "What the agent had to decide, e.g. \"Dataset\"."
+              },
+              "value": {
+                "type": "string",
+                "description": "The agent's best guess."
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other reasonable readings. When present, the guess can be corrected in place."
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "value"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onStart",
+          "required": true,
+          "params": [
+            {
+              "name": "values",
+              "type": "Record<string, string>"
+            }
+          ]
+        },
+        {
+          "name": "onRephrase",
+          "required": false,
+          "params": [],
+          "description": "Send the user back to rephrase the request."
+        },
+        {
+          "name": "onCancel",
+          "required": false,
+          "params": []
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Use it only where misreading the request would be costly — long runs, side effects, ambiguous scope. On cheap, reversible actions it is friction.",
   "categories": [

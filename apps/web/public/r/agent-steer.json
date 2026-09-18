@@ -17,7 +17,109 @@
   ],
   "meta": {
     "engineeringNotes": "Built for the gap between Stop and wait: in real use, people change their minds mid-run, and today's agent UIs make them throw away the work so far to say so. Two decisions carry the trust. First, the component owns no status. Each redirect's status comes from the caller, meaning from the agent: it shows 'Sent — waiting for the agent' until the agent acknowledges, so pressing Enter never makes a redirect look like it has taken effect. Declined redirects show the agent's reason rather than disappearing. Second, the default applies at the next step boundary, where the agent can re-plan cleanly. Interrupting is a separate, secondary control, because abandoning a tool call mid-flight can leave half-written files or half-sent requests, and that risk should be chosen rather than triggered by the Enter key. Redirects that haven't been applied can be withdrawn. Suggestions fill the input rather than sending, so a one-tap redirect is still the user's sentence. The live region announces status changes to the latest redirect in words that match the visible text.",
-    "motionNotes": "Almost still. The agent's motion belongs to the status surface beside it, such as Live Status Line, not to the steer control. The one moving element is the shared `pd-shimmer` on a pending redirect's status. Under the turn-taking grammar that is the only state where work is genuinely happening on the machine's side for that redirect; queued, applied and declined are settled facts and hold still. Colour transitions on hover and focus run at `--pd-duration-instant`, and the shimmer falls back to static text under prefers-reduced-motion and where background-clip text is unsupported."
+    "motionNotes": "Almost still. The agent's motion belongs to the status surface beside it, such as Live Status Line, not to the steer control. The one moving element is the shared `pd-shimmer` on a pending redirect's status. Under the turn-taking grammar that is the only state where work is genuinely happening on the machine's side for that redirect; queued, applied and declined are settled facts and hold still. Colour transitions on hover and focus run at `--pd-duration-instant`, and the shimmer falls back to static text under prefers-reduced-motion and where background-clip text is unsupported.",
+    "schema": {
+      "component": "AgentSteer",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AgentSteer",
+        "type": "object",
+        "properties": {
+          "running": {
+            "type": "boolean",
+            "description": "Whether the agent is working. Steering only exists while there is a run to steer."
+          },
+          "currentStep": {
+            "type": "string",
+            "description": "What the agent is doing now, so a redirect has something to be relative to."
+          },
+          "steers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SteerMessage"
+            }
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "One-tap redirects that fill the input for editing — never sent without the user."
+          },
+          "placeholder": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "running"
+        ],
+        "$defs": {
+          "SteerMessage": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "mode": {
+                "enum": [
+                  "next",
+                  "now"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "queued",
+                  "applied",
+                  "declined"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "description": "Agent-supplied context: when it will apply, or why it couldn't."
+              }
+            },
+            "required": [
+              "id",
+              "text",
+              "mode",
+              "status"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onSteer",
+          "required": true,
+          "params": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "mode",
+              "type": "SteerMode"
+            }
+          ]
+        },
+        {
+          "name": "onWithdraw",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "description": "Take back a steer the agent hasn't applied yet."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. The steers list is yours: set each status from what the agent actually reports. Keep a Stop control visible next to it — steering is not a replacement for stopping.",
   "categories": [

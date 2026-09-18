@@ -21,7 +21,134 @@
   ],
   "meta": {
     "engineeringNotes": "The load-bearing decision is what this block refuses to add. Bulk filling makes an 'Accept all' control feel obvious, and it is exactly wrong: Smart Field exists so that a proposed value is reviewed with its confidence and source before it becomes real data, and a single click that accepts twelve values with three different confidence tiers silently discards that. So the request is bulk and the review stays per-field — which is the honest reading of the system's 'nothing commits silently' rule rather than a convenience compromise. Making fields propose together required a small, consumer-driven addition to Smart Field rather than a workaround here: a `proposeToken` prop whose change requests a proposal. The alternatives were worse — remounting each field to re-fire `autoPropose` would have destroyed focus and in-flight requests, and hoisting proposal state into this block would have taken ownership of confidence, undo and abort away from the component that already does all of it correctly. The token deliberately ignores its first render, so mounting fields with a token present is not a request; that keeps unannounced fetching opt-in behind `autoPropose`, which is the posture the AI tier holds. `onFill` exists so the whole batch is one round trip: without it, a five-field form would make five separate model calls for a single user action, which is both slow and expensive in a way the user never asked for.",
-    "motionNotes": "Almost nothing belongs to this block. Every moving part is inherited: Smart Field's proposal panel expands via the house grid-template-rows transition, Live Status Line swaps its status text and carries Agent Presence's indicator, and AI Action Toolbar supplies the fill button's colour transitions and its busy spinner during the batch request. The block itself adds no entrance animation and no motion of its own, which is the correct outcome for a composition — one rhythm, set once in the motion tokens, applied by the parts rather than re-stated by the whole. The one motion decision made here is that the status line appears only while a fill is actually in flight, so the surface is completely still whenever the agent is not working and the user is reviewing. Under prefers-reduced-motion every inherited transition drops to instant and each composed component handles its own fallback."
+    "motionNotes": "Almost nothing belongs to this block. Every moving part is inherited: Smart Field's proposal panel expands via the house grid-template-rows transition, Live Status Line swaps its status text and carries Agent Presence's indicator, and AI Action Toolbar supplies the fill button's colour transitions and its busy spinner during the batch request. The block itself adds no entrance animation and no motion of its own, which is the correct outcome for a composition — one rhythm, set once in the motion tokens, applied by the parts rather than re-stated by the whole. The one motion decision made here is that the status line appears only while a fill is actually in flight, so the surface is completely still whenever the agent is not working and the user is reviewing. Under prefers-reduced-motion every inherited transition drops to instant and each composed component handles its own fallback.",
+    "schema": {
+      "component": "AIFormFill",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AIFormFill",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/FormFillField"
+            }
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "triggerIcon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode",
+            "description": "No bundled icon set — supply your own `size-4` icon for each field's trigger."
+          },
+          "fillLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fields",
+          "values",
+          "triggerIcon"
+        ],
+        "$defs": {
+          "FormFillField": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "placeholder": {
+                "type": "string"
+              },
+              "fetchProposal": {
+                "x-function": true,
+                "x-host": true,
+                "description": "Resolves this field's proposal. Usually reads from one batch the parent fetched."
+              }
+            },
+            "required": [
+              "name",
+              "label",
+              "fetchProposal"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onValueChange",
+          "required": true,
+          "params": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onFill",
+          "required": false,
+          "params": [],
+          "description": "Called once per fill request, before the fields propose. Use it to fetch the whole\nbatch in a single round trip — each field's `fetchProposal` then resolves from it."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in Smart Field, Field, AI Action Toolbar and Live Status Line, plus Confidence Meter and Agent Presence transitively. Fetch the whole batch once in `onFill` and have each field's `fetchProposal` read from that result — otherwise a five-field form makes five round trips for one user action.",
   "categories": [

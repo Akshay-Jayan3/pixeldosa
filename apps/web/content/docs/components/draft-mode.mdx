@@ -1,0 +1,101 @@
+---
+title: Draft Mode
+description: The agent prepares everything and nothing leaves until a person sends it.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { DraftMode } from "@/components/ui/draft-mode";
+
+<DraftMode
+  enabled={draftMode}
+  onEnabledChange={setDraftMode}
+  items={held}
+  onSend={send}
+  onDiscard={discard}
+  onEdit={open}
+/>
+```
+
+## Why it exists
+
+An approval dialog interrupts once per action, which teaches people to click through it.
+Draft mode is the opposite: the agent works freely, its output collects in one place, and
+the person reviews a batch when they choose to. Same protection, far less interruption.
+
+## Features
+
+- **Nothing sends itself.** Items are chosen with checkboxes, and the button names the
+  count: "Send 3".
+- **Irreversible work is marked** on the item, and counted in the sentence under the
+  button as the selection changes.
+- **"Select all" is a visible step**, never a hidden accept-all.
+- **Off is explained, not silent.** With draft mode off, a still, orange-marked strip says
+  what happens instead and offers to turn it back on.
+- **Stale selections can't fire.** An item that leaves the list is dropped from the
+  selection, so a batch action can't send something that has already gone.
+- **Holds completely still.** Everything here is your turn.
+
+## Variants
+
+### Waiting for review
+
+<PreviewStack>
+  <DraftModeSpecimen
+    headingLevel={3}
+    items={[
+      { id: "1", title: "Email Dana about the renewal", target: "dana@acme.com" },
+      { id: "2", title: "Publish the release note", target: "acme.com/changelog · live", irreversible: true },
+    ]}
+  />
+</PreviewStack>
+
+### Nothing waiting
+
+<PreviewStack>
+  <DraftModeSpecimen headingLevel={3} />
+</PreviewStack>
+
+### Draft mode off
+
+<PreviewStack>
+  <DraftModeSpecimen
+    headingLevel={3}
+    enabled={false}
+    offWarning="The agent sends email as soon as it finishes drafting."
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `enabled` | `boolean` | Required. |
+| `onEnabledChange` | `(enabled: boolean) => void` | Required. |
+| `items` | `{ id, title, target?, detail?, irreversible? }[]` | Required. Phrase `title` as the consequence. |
+| `onSend` | `(ids: string[]) => void` | Required. |
+| `onDiscard` | `(ids: string[]) => void` | Adds a Discard action. |
+| `onEdit` | `(id: string) => void` | Adds Edit on each item. |
+| `offWarning` | `string` | What happens with the mode off, in your product's words. |
+| `emptyLabel` | `string` | Shown when nothing is waiting. |
+| `title` | `string` | Defaults to `"Draft mode"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- A labelled `<section>`; the mode control is a real `role="switch"` with its state in
+  words as well as position.
+- Each item is a checkbox with a full label, so the whole row is a hit target.
+- Sends and discards are announced through a polite live region, with the count.
+- "Can't be undone" is text, not only a colour.
+
+## When not to use
+
+- **One high-risk action awaiting a decision** is `AI Approval Gate`, which states the
+  consequence and takes the decision on its own.
+- **Many AI-proposed edits to review row by row** is `AI Triage Table`.
+- **Choosing how much the agent may do without asking** is `Autonomy Control`. Draft mode
+  is about what leaves, not about what the agent may attempt.

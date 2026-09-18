@@ -17,7 +17,43 @@
   ],
   "meta": {
     "engineeringNotes": "The component's thesis is the fold-away on completion, not the ticker. Reasoning text is long, low-value-per-token, and usually not what the user wants to read, which creates a bind: showing all of it buries the answer, showing none of it is the black box that destroys trust. Collapsing to a measured 'Thought for 12s' resolves both — the duration answers 'was this worth waiting for' better than any amount of reasoning text, and the disclosure keeps the trace available for anyone who actually wants it. Scroll anchoring is implemented as a correctness requirement rather than a nicety: the component tracks distance-from-end on scroll and only follows new content while the reader is within 24px of the bottom, because auto-scrolling someone who has deliberately scrolled up to read something is the most hostile thing a streaming surface can do. That behaviour came from a competitive scan of a peer library's Message Scroller and now applies as a standing requirement to every streaming surface in this system, not as a component of its own. Each step is its own keyed child component so React's reconciliation owns the entrance animation — a step already on screen keeps its DOM node and can never replay its fade however often the parent re-renders, which is the same mechanism Progressive Reveal uses and which a timer-based approach gets wrong on the first re-render. `steps` is an array rather than a raw accumulating string so the component never has to guess where one thought ends.",
-    "motionNotes": "Steps fade in whole over `--pd-duration-base` with `--pd-ease-decelerate`, exactly once each. They are never typed out character-by-character: the text has already been produced by the time it reaches this component, and animating it as though it were being composed live would misrepresent what actually happened — the same non-negotiable rule Ghost Input, Smart Field, Diff Accept and Progressive Reveal all hold. The expand/collapse uses the house `grid-template-rows` 0fr→1fr transition at `--pd-duration-fast`, so no height measurement or ResizeObserver is needed and the panel animates correctly at any content length. The ticker's top edge is a CSS mask rather than an animated fade, so older lines dissolve out without anything moving. Under `prefers-reduced-motion` the step fades and the expand transition are both dropped; steps appear instantly and the disclosure snaps, and since the information was never carried by the motion, nothing is lost."
+    "motionNotes": "Steps fade in whole over `--pd-duration-base` with `--pd-ease-decelerate`, exactly once each. They are never typed out character-by-character: the text has already been produced by the time it reaches this component, and animating it as though it were being composed live would misrepresent what actually happened — the same non-negotiable rule Ghost Input, Smart Field, Diff Accept and Progressive Reveal all hold. The expand/collapse uses the house `grid-template-rows` 0fr→1fr transition at `--pd-duration-fast`, so no height measurement or ResizeObserver is needed and the panel animates correctly at any content length. The ticker's top edge is a CSS mask rather than an animated fade, so older lines dissolve out without anything moving. Under `prefers-reduced-motion` the step fades and the expand transition are both dropped; steps appear instantly and the disclosure snaps, and since the information was never carried by the motion, nothing is lost.",
+    "schema": {
+      "component": "ReasoningStream",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ReasoningStream",
+        "type": "object",
+        "properties": {
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Reasoning summary lines, oldest first, appended as they arrive. An array rather\nthan a raw string because providers emit reasoning *summaries* as discrete parts,\nand deciding where one thought ends is the consumer's business, not this\ncomponent's."
+          },
+          "isStreaming": {
+            "type": "boolean"
+          },
+          "durationMs": {
+            "type": "number",
+            "description": "Measured elapsed time. Shown once streaming ends — never estimated."
+          },
+          "label": {
+            "type": "string",
+            "description": "Verb shown while streaming."
+          },
+          "defaultExpanded": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "steps"
+        ]
+      },
+      "events": []
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils` and the `pd-fade-in` keyframe supplied by @pixeldosa/pixeldosa-theme's css block. Show reasoning *summaries* where the provider exposes them; raw private chain-of-thought should not be presented to end users as fact.",
   "categories": [

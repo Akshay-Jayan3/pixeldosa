@@ -20,7 +20,133 @@
   ],
   "meta": {
     "engineeringNotes": "This is the payoff component for the system's trust thesis, and it is deliberately a composition rather than a new implementation: Confidence Meter, AI Context Surface and AI Action Toolbar are all consumed as-is, which is the 'compose existing trust primitives' rule (DESIGN.md §3.6) applied at the scale it was written for. Composing the toolbar rather than hand-rolling three buttons also means the decision strip inherits the real ARIA toolbar pattern — roving tabindex, arrow navigation, disabled-action skipping, busy handling — none of which a bespoke approval widget would have got right. Building it surfaced a genuine gap in that toolbar: it had no `destructive` intent, because nothing had needed one until an approval could be dangerous. Adding it there rather than special-casing here is the correct direction, since the house rule that a destructive action must never look identical to a harmless primary one applies system-wide. Two content decisions carry most of the value. `reversible` is a required prop rather than an optional flag: whether something can be undone determines how carefully the rest of the surface deserves to be read, and it renders as a plain sentence ('This cannot be undone') rather than an icon, because an icon is exactly the wrong weight for the most consequential fact present. The `impact` list exists because an approval without a scope is a yes/no question with the information removed — '243 recipients' is what makes the decision reviewable, and it uses tabular figures so the numbers align down the column.",
-    "motionNotes": "Deliberately still. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a): motion means the machine is busy, and animating an approval gate would put it in the same visual register as the agent's own working states — precisely backwards, since nothing here proceeds until the user acts. The only motion is inherited: the composed AI Action Toolbar's colour transitions on hover and focus at `--pd-duration-instant`, and its busy spinner while an approve or reject is in flight, which maps to a real request rather than decorating a wait. AI Context Surface brings its own grid-template-rows disclosure transition when expanded. Nothing animates on entrance — that belongs to whatever surface reveals this gate, the same rule Confidence Meter and AI Action Toolbar hold. Under prefers-reduced-motion every inherited transition drops to instant and the component loses nothing, because it never carried information in movement to begin with."
+    "motionNotes": "Deliberately still. This is a user-turn surface under the turn-taking grammar (DESIGN.md §3a): motion means the machine is busy, and animating an approval gate would put it in the same visual register as the agent's own working states — precisely backwards, since nothing here proceeds until the user acts. The only motion is inherited: the composed AI Action Toolbar's colour transitions on hover and focus at `--pd-duration-instant`, and its busy spinner while an approve or reject is in flight, which maps to a real request rather than decorating a wait. AI Context Surface brings its own grid-template-rows disclosure transition when expanded. Nothing animates on entrance — that belongs to whatever surface reveals this gate, the same rule Confidence Meter and AI Action Toolbar hold. Under prefers-reduced-motion every inherited transition drops to instant and the component loses nothing, because it never carried information in movement to begin with.",
+    "schema": {
+      "component": "AIApprovalGate",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AIApprovalGate",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "action": {
+            "type": "string",
+            "description": "What will happen, in consequence terms the user can evaluate — \"Send the Q3\nsummary to 243 contacts\", never \"Execute send_email\"."
+          },
+          "risk": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "reversible": {
+            "type": "boolean",
+            "description": "Whether this can be taken back. Stated plainly because it is the single most\ndecision-relevant fact on the surface, and almost nothing surfaces it."
+          },
+          "impact": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ApprovalImpact"
+            },
+            "description": "The blast radius as countable facts. This is what makes the action reviewable."
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "provenance": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Passed through to AI Context Surface — why the agent proposed this."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ProvenanceSource"
+            }
+          },
+          "busy": {
+            "enum": [
+              "approve",
+              "reject"
+            ],
+            "description": "Which action is in flight, owned by the caller as everywhere else in this system."
+          }
+        },
+        "required": [
+          "action",
+          "reversible"
+        ],
+        "$defs": {
+          "ApprovalImpact": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ]
+          },
+          "ProvenanceSource": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "snippet": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onApprove",
+          "required": true,
+          "params": []
+        },
+        {
+          "name": "onReject",
+          "required": true,
+          "params": []
+        },
+        {
+          "name": "onEdit",
+          "required": false,
+          "params": [],
+          "description": "Offer only when the action's payload is genuinely editable before it runs."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in AI Action Toolbar, AI Context Surface and Confidence Meter, which it composes. Phrase `action` as the consequence rather than the tool call — the whole component is worthless if the user cannot evaluate what they are approving.",
   "categories": [

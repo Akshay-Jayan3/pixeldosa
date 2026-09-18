@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "variation-grid",
+  "title": "Variation Grid",
+  "description": "The results of one prompt, with the good ones kept. Takes `items` (each with your own `preview` node, a `label`, a per-cell `status` of `running`, `done` or `failed`, and a `note` explaining a failure), the `keptIds` the user is holding with `onKeptChange`, `onRegenerateRest` which replaces only what isn't kept, a `regenerateCost` shown on the button before the click, plus `onUse`, `onMore` and a per-cell `onRetry`. Keeping is the point: research on how people use generation tools describes them keeping the two results they like and running the rest again, which almost no tool supports, so people download favourites and re-prompt by hand. Failures are per cell, so one timed-out result shows its own reason and Retry while the others stay usable. Purely presentational: you render the previews and own the generation. Use it for any prompt that returns several candidates — images, video takes, copy, layouts. Not for a single result (that is Generation Placeholder or Media Result), and not as a gallery of past work.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/variation-grid/variation-grid.tsx",
+      "target": "components/ui/variation-grid.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Render each `preview` yourself: an `img`, a poster frame, a card of text. Set `aspectRatio` to your output's shape so the grid never jumps.",
+  "meta": {
+    "engineeringNotes": "The kept set is caller-owned and passed in, because it has to survive the regeneration that replaces the other cells — holding it internally would lose the user's choices exactly when the component re-renders with new results. `onRegenerateRest` hands back the ids it is replacing rather than a bare signal, so the caller can keep positions stable and never has to diff two arrays to work out what the user meant. A cell that is still running is excluded from the replaceable set, which stops a second click from cancelling work already in flight. Per-cell status rather than a batch status comes from how these pipelines actually fail: partial success is the common case, and a grid that collapses to a single error state throws away results the user already paid for. The regeneration cost is a caller-formatted string on the button because unpriced iteration is the single most common complaint in this category.",
+    "motionNotes": "Only unfinished cells move: a running cell pulses its dot while the rest hold still, so a grid mid-regeneration reads as 'these two are working, the others are yours'. Kept cells change by border weight rather than by animation, since keeping is the user's turn and a celebratory motion there would be noise. Under `prefers-reduced-motion` the pulse stops and the running state is carried by its label."
+  }
+}

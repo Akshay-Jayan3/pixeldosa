@@ -1,0 +1,184 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "compare-view",
+  "title": "Compare View",
+  "description": "Before and after, without the usual accessibility failure. Takes `before` and `after`, each with your own `content` and a required `label` that doubles as its description, a starting `view` of `slider` or `side`, `allowViewChange`, an `aspectRatio` so nothing jumps while media loads, and an optional `onChoose` returning `before` or `after`. The slider is a native `input[type=range]`, which is the point: comparison sliders in AI editing tools are almost all mouse-only, built from pointer maths with no keyboard path and no announcement, while a range input gives arrow keys, Home and End, touch, and a labelled value screen readers can read (\"60% AI edit, clear sky\"). The after side is clipped rather than resized, so both halves stay pixel-aligned, and side-by-side is one click away for anyone who would rather see both at once. Purely presentational: you render both sides. Use it for edits, upscales, restorations and style transfers. Not for several results of one prompt (that is Variation Grid), and not for text, which needs Diff Accept.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/compare-view/compare-view.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport interface CompareViewProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  /** What it was. Give it a real description: this is also its alt text. */\n  before: { content: React.ReactNode; label: string };\n  /** What the AI made of it. */\n  after: { content: React.ReactNode; label: string };\n  /** Start in `slider` (one image, a handle) or `side` (both, at once). */\n  view?: \"slider\" | \"side\";\n  /** Locks the view when your layout only fits one of them. */\n  allowViewChange?: boolean;\n  /** Keeps whichever one the person picks. */\n  onChoose?: (choice: \"before\" | \"after\") => void;\n  chooseBeforeLabel?: string;\n  chooseAfterLabel?: string;\n  /** Aspect ratio of the frame, so nothing jumps while the media loads. */\n  aspectRatio?: string;\n}\n\n/**\n * Before and after, without the usual accessibility failure.\n *\n * Comparison sliders are everywhere in AI editing tools and almost all of them are\n * mouse-only: a draggable handle built from pointer maths, no keyboard, no announcement,\n * and often no description of either image. This one is a real `input[type=range]`, so\n * arrows, Home and End work, screen readers read a labelled slider, and the position is a\n * percentage anyone can hear. Both sides carry a required label, and a side-by-side view\n * is one click away for anyone who would rather see both at once.\n *\n * Holds still: comparing is the user's turn.\n */\nfunction CompareView({\n  headingLevel = 3,\n  title = \"Before and after\",\n  before,\n  after,\n  view: initialView = \"slider\",\n  allowViewChange = true,\n  onChoose,\n  chooseBeforeLabel = \"Keep the original\",\n  chooseAfterLabel = \"Keep the new one\",\n  aspectRatio = \"4 / 3\",\n  className,\n  ...props\n}: CompareViewProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const sliderId = React.useId();\n  const [view, setView] = React.useState(initialView);\n  const [position, setPosition] = React.useState(50);\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col gap-3\", className)}\n      {...props}\n    >\n      <div className=\"flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        {allowViewChange ? (\n          <div className=\"inline-flex rounded-md border p-0.5\">\n            {([\"slider\", \"side\"] as const).map((option) => (\n              <button\n                key={option}\n                type=\"button\"\n                aria-pressed={view === option}\n                onClick={() => setView(option)}\n                className={cn(\n                  \"rounded-[5px] px-2 py-0.5 text-xs outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none focus-visible:ring-[3px] focus-visible:ring-ring/40\",\n                  view === option ? \"bg-foreground text-background\" : \"text-muted-foreground hover:text-foreground\"\n                )}\n              >\n                {option === \"slider\" ? \"Slider\" : \"Side by side\"}\n              </button>\n            ))}\n          </div>\n        ) : null}\n      </div>\n\n      {view === \"side\" ? (\n        <div className=\"grid gap-3 sm:grid-cols-2\">\n          {[before, after].map((side, index) => (\n            <figure key={index} className=\"flex flex-col gap-1.5\">\n              <div style={{ aspectRatio }} className=\"overflow-hidden rounded-lg border bg-muted\">\n                {side.content}\n              </div>\n              <figcaption className=\"text-xs text-muted-foreground\">{side.label}</figcaption>\n            </figure>\n          ))}\n        </div>\n      ) : (\n        <div className=\"flex flex-col gap-2\">\n          <div style={{ aspectRatio }} className=\"relative overflow-hidden rounded-lg border bg-muted\">\n            <div className=\"absolute inset-0\">{before.content}</div>\n            {/* The \"after\" is clipped rather than resized, so both sides stay aligned. */}\n            <div className=\"absolute inset-0\" style={{ clipPath: `inset(0 0 0 ${position}%)` }}>\n              {after.content}\n            </div>\n            <div\n              aria-hidden=\"true\"\n              className=\"pointer-events-none absolute inset-y-0 w-0.5 bg-foreground\"\n              style={{ left: `${position}%` }}\n            />\n          </div>\n\n          {/* A native range: keyboard, touch and screen readers come free, and there is no\n              pointer maths to get wrong.\n\n              The handle *is* the divider, so a higher value uncovers more of the original\n              and less of the new one. `aria-valuetext` therefore counts down from the\n              value, not up with it — announcing the raw number told a screen-reader user\n              the opposite of what was on screen (at 0, the whole edit is visible). */}\n          <label htmlFor={sliderId} className=\"sr-only\">\n            Slide to compare {before.label} with {after.label}\n          </label>\n          <input\n            id={sliderId}\n            type=\"range\"\n            min={0}\n            max={100}\n            step={1}\n            value={position}\n            onChange={(event) => setPosition(Number(event.target.value))}\n            aria-valuetext={`${100 - position}% ${after.label} showing`}\n            className=\"w-full accent-[var(--foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          />\n          <p className=\"flex justify-between text-xs text-muted-foreground\">\n            <span>{before.label}</span>\n            <span>{after.label}</span>\n          </p>\n        </div>\n      )}\n\n      {onChoose ? (\n        <div className=\"flex flex-wrap gap-2\">\n          <button\n            type=\"button\"\n            onClick={() => onChoose(\"after\")}\n            className=\"rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            {chooseAfterLabel}\n          </button>\n          <button\n            type=\"button\"\n            onClick={() => onChoose(\"before\")}\n            className=\"rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            {chooseBeforeLabel}\n          </button>\n        </div>\n      ) : null}\n    </section>\n  );\n}\n\nexport { CompareView };\n",
+      "type": "registry:ui",
+      "target": "components/ui/compare-view.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "The slider is a real range input for one reason that outweighs the styling cost: every keyboard, touch and assistive-technology behaviour comes from the platform, and the custom handles these tools ship are the single most common accessibility failure in AI editing UIs. Revealing is done with `clip-path` on an absolutely positioned overlay rather than by resizing the after side, because resizing re-lays-out the media and the two halves drift apart by a pixel or two at every step — visible exactly where people are looking for differences. `aria-valuetext` counts down from the slider value — the handle is the divider, so a higher value uncovers *less* of the new image — and names the side it is measuring, so the announcement matches the screen instead of contradicting it. Labels are required rather than optional on both sides, since a comparison whose halves are unlabelled is meaningless to anyone not looking at it.",
+    "motionNotes": "Nothing animates. The handle follows the input directly with no easing, because a comparison is a direct-manipulation surface where a lagging reveal reads as broken rather than smooth. The view toggle changes layout instantly for the same reason, and `prefers-reduced-motion` has nothing to disable.",
+    "schema": {
+      "component": "CompareView",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "CompareView",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "before": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "content",
+              "label"
+            ],
+            "description": "What it was. Give it a real description: this is also its alt text."
+          },
+          "after": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "content",
+              "label"
+            ],
+            "description": "What the AI made of it."
+          },
+          "view": {
+            "enum": [
+              "slider",
+              "side"
+            ],
+            "description": "Start in `slider` (one image, a handle) or `side` (both, at once)."
+          },
+          "allowViewChange": {
+            "type": "boolean",
+            "description": "Locks the view when your layout only fits one of them."
+          },
+          "chooseBeforeLabel": {
+            "type": "string"
+          },
+          "chooseAfterLabel": {
+            "type": "string"
+          },
+          "aspectRatio": {
+            "type": "string",
+            "description": "Aspect ratio of the frame, so nothing jumps while the media loads."
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onChoose",
+          "required": false,
+          "params": [
+            {
+              "name": "choice",
+              "type": "\"before\" | \"after\""
+            }
+          ],
+          "description": "Keeps whichever one the person picks."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Write both `label`s as real descriptions: they are the accessible text for each side.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

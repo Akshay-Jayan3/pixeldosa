@@ -1,0 +1,147 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "draft-mode",
+  "title": "Draft Mode",
+  "description": "The agent prepares everything and nothing leaves until a person sends it. Takes `enabled` with `onEnabledChange` for the mode itself, the `items` the agent has prepared (each with a `title` phrased as the consequence, an optional `target` naming who or what it touches, a `detail`, and `irreversible` for anything that can't be taken back), then `onSend`, `onDiscard` and `onEdit`. Items are chosen explicitly with checkboxes; the send button names the count, the line beside it says how many of the chosen items can't be undone, and nothing is ever sent by a single glance-and-click. With the mode off, a still, orange-marked strip states what now happens instead and offers to turn it back on. It is the opposite failure mode to an approval dialog: an approval interrupts once per action and trains people to click through, while draft mode lets the agent work and collects the output for one review at a time the person chooses. Holds completely still — everything here is the user's turn. Use it for agents that send email, post, publish or change live data. Not for a single high-risk action awaiting a decision (that is AI Approval Gate), and not for reviewing many AI-proposed edits row by row (that is AI Triage Table).",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/draft-mode/draft-mode.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\n/** Something the agent prepared that hasn't left yet. */\nexport type DraftItem = {\n  id: string;\n  /** What it is, as the consequence of sending it: \"Email Dana about the renewal\". */\n  title: string;\n  /** Who or what it touches: \"dana@acme.com\", \"3 recipients\", \"the live pricing page\". */\n  target?: string;\n  detail?: string;\n  /** Marks an item that can't be taken back once it goes. */\n  irreversible?: boolean;\n};\n\nexport interface DraftModeProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"onChange\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  /** On: the agent prepares everything and nothing leaves until the user sends it. */\n  enabled: boolean;\n  onEnabledChange: (enabled: boolean) => void;\n  /** What's waiting. Empty is a normal, quiet state. */\n  items: DraftItem[];\n  /** Sends the chosen items. Phrase your confirmation as the consequence. */\n  onSend: (ids: string[]) => void;\n  onDiscard?: (ids: string[]) => void;\n  onEdit?: (id: string) => void;\n  title?: string;\n  /** What happens with draft mode off, in your product's words. */\n  offWarning?: string;\n  emptyLabel?: string;\n}\n\n/**\n * Draft mode: the agent prepares everything, and nothing leaves until a person sends it.\n *\n * It is the opposite failure mode to an approval dialog. An approval interrupts once per\n * action, which trains people to click through; draft mode lets the agent work freely and\n * collects what it produced in one place, so the person reviews a batch when they choose\n * to. Nothing here sends by itself: items are chosen explicitly, \"Send all\" names the\n * count, and anything irreversible is marked before it goes.\n *\n * Holds completely still: everything here is the user's turn.\n */\nfunction DraftMode({\n  headingLevel = 3,\n  enabled,\n  onEnabledChange,\n  items,\n  onSend,\n  onDiscard,\n  onEdit,\n  title = \"Draft mode\",\n  offWarning = \"The agent sends as soon as it finishes. Nothing is held for review.\",\n  emptyLabel = \"Nothing waiting. Anything the agent prepares will be held here.\",\n  className,\n  ...props\n}: DraftModeProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const [chosen, setChosen] = React.useState<string[]>([]);\n  const [announcement, setAnnouncement] = React.useState(\"\");\n\n  // An item that leaves the list must not stay selected: a stale id in `chosen` would\n  // silently send the wrong thing on the next click.\n  React.useEffect(() => {\n    setChosen((previous) => previous.filter((id) => items.some((item) => item.id === id)));\n  }, [items]);\n\n  const selected = items.filter((item) => chosen.includes(item.id));\n  const irreversible = selected.filter((item) => item.irreversible).length;\n  const toggle = (id: string) =>\n    setChosen((previous) => (previous.includes(id) ? previous.filter((value) => value !== id) : [...previous, id]));\n\n  const act = (action: \"send\" | \"discard\") => {\n    const ids = selected.map((item) => item.id);\n    if (ids.length === 0) return;\n    if (action === \"send\") onSend(ids);\n    else onDiscard?.(ids);\n    setAnnouncement(`${action === \"send\" ? \"Sent\" : \"Discarded\"} ${ids.length} of ${items.length}.`);\n    setChosen([]);\n  };\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col rounded-lg border bg-card\", className)}\n      {...props}\n    >\n      <header className=\"flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b p-4\">\n        <div className=\"flex min-w-0 flex-col gap-0.5\">\n          <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n            {title}\n          </Heading>\n          <p className=\"text-xs text-muted-foreground text-pretty\">\n            {enabled\n              ? \"The agent prepares everything. Nothing leaves until you send it.\"\n              : offWarning}\n          </p>\n        </div>\n\n        {/* A switch, not a menu: there are two states and the sentence above says what\n            each one does. */}\n        <button\n          type=\"button\"\n          role=\"switch\"\n          aria-checked={enabled}\n          onClick={() => onEnabledChange(!enabled)}\n          className=\"relative inline-flex shrink-0 items-center gap-2 rounded-md text-xs font-medium text-muted-foreground outline-none after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n        >\n          {enabled ? \"On\" : \"Off\"}\n          <span\n            aria-hidden=\"true\"\n            className={cn(\n              \"flex h-5 w-9 items-center rounded-full border p-0.5 transition-colors duration-[var(--pd-duration-fast)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none\",\n              enabled ? \"border-foreground bg-foreground\" : \"border-input bg-muted\"\n            )}\n          >\n            <span\n              className={cn(\n                \"block size-3.5 rounded-full transition-transform duration-[var(--pd-duration-fast)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none\",\n                enabled ? \"translate-x-4 bg-card\" : \"translate-x-0 bg-muted-foreground\"\n              )}\n            />\n          </span>\n        </button>\n      </header>\n\n      {!enabled ? (\n        <p className=\"border-b border-agent-waiting bg-agent-waiting-soft px-4 py-3 text-sm text-foreground text-pretty\">\n          Draft mode is off.{\" \"}\n          <button\n            type=\"button\"\n            onClick={() => onEnabledChange(true)}\n            className=\"rounded-sm font-medium underline underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            Turn it back on\n          </button>{\" \"}\n          to hold the agent's work for review.\n        </p>\n      ) : null}\n\n      {items.length === 0 ? (\n        <p className=\"p-4 text-sm text-muted-foreground text-pretty\">{emptyLabel}</p>\n      ) : (\n        <ul className=\"flex flex-col\">\n          {items.map((item) => {\n            const checked = chosen.includes(item.id);\n            return (\n              <li key={item.id} className=\"flex items-start gap-3 border-b px-4 py-3 last:border-b-0\">\n                <label className=\"flex min-w-0 flex-1 cursor-pointer items-start gap-3\">\n                  <input\n                    type=\"checkbox\"\n                    checked={checked}\n                    onChange={() => toggle(item.id)}\n                    className=\"mt-0.5 size-4 shrink-0 accent-[var(--foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                  />\n                  <span className=\"flex min-w-0 flex-col gap-0.5\">\n                    <span className=\"text-sm text-foreground text-pretty\">{item.title}</span>\n                    {item.target ? (\n                      <span className=\"font-mono text-xs text-muted-foreground\">{item.target}</span>\n                    ) : null}\n                    {item.detail ? (\n                      <span className=\"text-xs text-muted-foreground text-pretty\">{item.detail}</span>\n                    ) : null}\n                    {item.irreversible ? (\n                      <span className=\"pt-0.5\">\n                        <span className=\"rounded-full border border-agent-blocked px-2 py-0.5 text-xs text-agent-blocked\">\n                          Can't be undone\n                        </span>\n                      </span>\n                    ) : null}\n                  </span>\n                </label>\n\n                {onEdit ? (\n                  <button\n                    type=\"button\"\n                    onClick={() => onEdit(item.id)}\n                    className=\"relative shrink-0 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground underline-offset-2 outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] motion-reduce:transition-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                  >\n                    Edit\n                  </button>\n                ) : null}\n              </li>\n            );\n          })}\n        </ul>\n      )}\n\n      {items.length > 0 ? (\n        <footer className=\"flex flex-wrap items-center gap-x-3 gap-y-2 border-t p-4\">\n          <button\n            type=\"button\"\n            onClick={() => setChosen(chosen.length === items.length ? [] : items.map((item) => item.id))}\n            className=\"rounded-md text-xs font-medium text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            {chosen.length === items.length ? \"Clear selection\" : `Select all ${items.length}`}\n          </button>\n\n          <span className=\"flex-1\" />\n\n          {onDiscard ? (\n            <button\n              type=\"button\"\n              disabled={selected.length === 0}\n              onClick={() => act(\"discard\")}\n              className=\"rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50\"\n            >\n              Discard\n            </button>\n          ) : null}\n          <button\n            type=\"button\"\n            disabled={selected.length === 0}\n            onClick={() => act(\"send\")}\n            className=\"rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50\"\n          >\n            {selected.length === 0 ? \"Send\" : `Send ${selected.length}`}\n          </button>\n          {/* The consequence sits beside the button, not behind a second dialog. */}\n          <p className=\"w-full text-xs text-muted-foreground text-pretty\">\n            {selected.length === 0\n              ? \"Choose what to send. Nothing goes out on its own.\"\n              : irreversible > 0\n                ? `${irreversible} of these can't be undone once sent.`\n                : \"These go out as soon as you send them.\"}\n          </p>\n        </footer>\n      ) : null}\n\n      <span role=\"status\" aria-live=\"polite\" className=\"sr-only\">\n        {announcement}\n      </span>\n    </section>\n  );\n}\n\nexport { DraftMode };\n",
+      "type": "registry:ui",
+      "target": "components/ui/draft-mode.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Selection is the component's only state, and it is pruned against `items` on every change: an id that has left the list is dropped, because a stale id surviving in the selection is exactly how a batch action sends the wrong thing. There is no accept-all shortcut hiding behind a single control — 'Select all' is a visible, reversible selection step before the send, and the send button carries the count so the action names its own size. Irreversibility is counted from the chosen items rather than shown per row only, so the sentence under the button changes as the selection changes and the warning cannot be scrolled past. The mode switch is a real `role=\"switch\"` with an explanatory sentence that rewrites itself for each state, instead of a settings label that leaves people guessing what 'off' does; turning it off does not hide the consequence, it states it in the waiting colour and offers the way back.",
+    "motionNotes": "Nothing animates except the switch itself, which slides its thumb over `--pd-duration-fast` so the state change reads as a physical flip rather than a repaint. No item pulses, shimmers or slides in: this surface is entirely the user's turn, and motion here would imply the agent is still doing something. Under `prefers-reduced-motion` the switch transition is dropped and the state is carried by position, colour and the word On or Off.",
+    "schema": {
+      "component": "DraftMode",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "DraftMode",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "On: the agent prepares everything and nothing leaves until the user sends it."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/DraftItem"
+            },
+            "description": "What's waiting. Empty is a normal, quiet state."
+          },
+          "title": {
+            "type": "string"
+          },
+          "offWarning": {
+            "type": "string",
+            "description": "What happens with draft mode off, in your product's words."
+          },
+          "emptyLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "items"
+        ],
+        "$defs": {
+          "DraftItem": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string",
+                "description": "What it is, as the consequence of sending it: \"Email Dana about the renewal\"."
+              },
+              "target": {
+                "type": "string",
+                "description": "Who or what it touches: \"dana@acme.com\", \"3 recipients\", \"the live pricing page\"."
+              },
+              "detail": {
+                "type": "string"
+              },
+              "irreversible": {
+                "type": "boolean",
+                "description": "Marks an item that can't be taken back once it goes."
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onEnabledChange",
+          "required": true,
+          "params": [
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "onSend",
+          "required": true,
+          "params": [
+            {
+              "name": "ids",
+              "type": "string[]"
+            }
+          ],
+          "description": "Sends the chosen items. Phrase your confirmation as the consequence."
+        },
+        {
+          "name": "onDiscard",
+          "required": false,
+          "params": [
+            {
+              "name": "ids",
+              "type": "string[]"
+            }
+          ]
+        },
+        {
+          "name": "onEdit",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. The component owns only the selection; the held items, the mode and what sending means stay with you.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

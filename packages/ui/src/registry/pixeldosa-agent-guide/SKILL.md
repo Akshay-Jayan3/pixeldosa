@@ -51,7 +51,9 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | Agent needs structured input to continue | `agent-ask` | a chat message asking a question |
 | Agent wants to do something consequential | `ai-approval-gate` | a confirm() dialog |
 | Confirm how the agent read the request before a costly run | `intent-preview` | a "Are you sure?" dialog |
-| Let the user edit the steps before a run starts | `agent-plan` | a read-only checklist |
+| Let the user edit the steps before a run starts, then watch it run | `agent-plan` (give each step a `status` once it starts) | a read-only checklist, or a separate progress bar |
+| Show what a run will cost and how long it will take, before it starts | `cost-estimate` (a range, never one confident figure) | a token count |
+| Hold everything the agent produces until a person sends it | `draft-mode` | an approval dialog per action |
 | Redirect a running agent without stopping it | `agent-steer` | a chat input that silently queues |
 | Follow-up questions after an answer | `suggestions` (default `mode="fill"`; `send` only for exact prompts) | chips that silently send |
 | Code in an answer | `code-block` (`splitCodeFences` for streaming markdown; `streaming` while the fence is open) | a raw `<pre>` with a copy button that works mid-stream |
@@ -63,6 +65,9 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | Show and edit what the agent remembers about the user | `agent-memory` | a hidden memory store |
 | Show what the agent actually read, searched, or changed | `tool-call-card` (`ToolCallGroup` for a run) | a raw event log |
 | Review many AI changes at once, riskiest first | `ai-triage-table` | an "Accept all" button |
+| Regenerating an answer without losing the last one | `response-versions` (append a version; never replace) | a Regenerate button that overwrites |
+| Thumbs on an answer | `response-feedback` (reasons in your users' words, and name where it goes) | a bare thumbs-down |
+| Telling people something was AI-written, or asking before recording or remembering | `ai-disclosure` (`variant="consent"` to ask first) | a tooltip, or a preselected Allow |
 | Actions on an AI result: apply, regenerate, explain, report | `ai-action-toolbar` | loose buttons |
 | AI proposes a value for one field | `smart-field` | writing the value directly |
 | Inline completion while typing | `ghost-input` | auto-inserting text |
@@ -71,7 +76,17 @@ Blocks are complete, orchestrated experiences. Prefer one before assembling part
 | How sure the AI is | `confidence-meter` | a percentage |
 | Why the AI produced something | `ai-context-surface` | an "AI generated" badge |
 | Results arriving over time (rows, cards) | `progressive-reveal` | re-rendering the whole list |
-| Image, video, or audio being generated | `generation-placeholder` | a spinner over a grey box |
+| Image, video, or audio being generated (seconds) | `generation-placeholder` | a spinner over a grey box |
+| A generation that takes minutes | `generation-job` (queue position, typical wait, partial results, refund note) | a progress bar you invented |
+| Several results from one prompt | `variation-grid` (keep some, regenerate the rest, per-cell failures) | one result and a Regenerate button |
+| A home screen for background or scheduled agents | `run-inbox` (group by what needs a person, not by time) | a chronological feed |
+| What the agent did and who allowed it | `activity-trail` (state the authority for each action; export for compliance) | a developer event log |
+| A person taking over from the agent | `human-handoff` (pass the facts and what the agent already tried) | an "escalated" flag |
+| When an agent runs on its own | `agent-schedule` (plain sentences, next run, last result) | a cron field |
+| Style, shape and quantity beside a prompt | `parameter-panel` (previews to recognise, never icon-only, price on the option) | a row of unlabelled icons |
+| Before and after an AI edit | `compare-view` (a native range slider, so keyboard works) | a custom drag handle |
+| A finished image, video or audio clip | `media-result` (say what made it and whether content credentials are attached) | a bare image with a download button |
+| Credits or budget beside a generate button | `credits-meter` (name the action and its price together) | a balance with no price |
 
 Foundation: `button`, `card`, `field`, `overlay`, `command-menu`.
 
@@ -135,6 +150,15 @@ Components take no AI dependency — map your stack's events to props yourself.
 | Agent paused for approval (e.g. LangGraph `interrupt()`) | `state="awaitingApproval"` + `ai-approval-gate` |
 | Tool call started / returned / errored | `tool-call-card` `status="running"` / `"done"` with `output` / `"failed"` with `error` |
 | Redirect received / applied / rejected | `agent-steer` status `queued` / `applied` / `declined` (reason in `note`) |
+
+## Rendering from a model's output
+
+If the model produces UI at runtime rather than you writing it, fetch
+`https://pixeldosa.akshayjayan.com/r/catalog.json`: every component's props as JSON
+Schema, its callbacks with their arguments, and its design guidance. Constrain the
+model to those schemas rather than letting it invent prop values — `state` is one of
+five words, and an invented sixth renders as nothing. Events are listed separately
+because JSON cannot carry a function; map them in your renderer.
 
 ## Before you finish
 

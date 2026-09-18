@@ -17,7 +17,164 @@
   ],
   "meta": {
     "engineeringNotes": "Designed from one research finding: people rarely verify citations, so a numbered marker is mostly a comfort signal that makes answers look more trustworthy than they are. The design makes the check cheap enough to actually happen. The supporting passage itself appears in the popover beside the claim, so comparing the two needs no navigation. The link opens the source at that passage using a URL text fragment, with start and end words for long quotes because fragments must match exactly. Support is a tier, not a score: 'quoted' vs 'paraphrased'. A claim without a source is marked with a dashed '?' rather than left bare, because an uncited sentence sitting among cited ones borrows their credibility. Numbering comes from the order of the `sources` array rather than render-order registration, so it is identical on server and client. The popover stays in the DOM next to its marker, so Tab moves from marker into the link. It is displayed with the Popover API's top layer and fixed coordinates, which keeps it clear of overflow-hidden containers and transformed ancestors. Without Popover API support it falls back to fixed positioning. It opens on mouse hover after a short delay, with a grace period so the pointer can move into it, and on keyboard focus-visible or tap. Clicking outside dismisses it, and Escape closes it and returns focus. The always-visible reference list is the fallback where hover doesn't exist and the audit view where it does.",
-    "motionNotes": "Minimal, because reading is the user's turn. The popover fades in at `--pd-duration-fast` on the decelerate curve, with no scale or slide, so the quote is readable from its first frame. Hover opens after 180ms, so markers don't flash as the pointer crosses text, and closing waits 140ms so the pointer can travel into the popover. The claim highlight and the marker's active fill change colour at `--pd-duration-instant`. Nothing shimmers: citations describe finished content. All motion becomes instant under prefers-reduced-motion."
+    "motionNotes": "Minimal, because reading is the user's turn. The popover fades in at `--pd-duration-fast` on the decelerate curve, with no scale or slide, so the quote is readable from its first frame. Hover opens after 180ms, so markers don't flash as the pointer crosses text, and closing waits 140ms so the pointer can travel into the popover. The claim highlight and the marker's active fill change colour at `--pd-duration-instant`. Nothing shimmers: citations describe finished content. All motion becomes instant under prefers-reduced-motion.",
+    "schema": {
+      "component": "CitedText",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "CitedText",
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/CitationSource"
+            },
+            "description": "Numbered in this order, so numbers are stable across server and client renders."
+          },
+          "showReferences": {
+            "type": "boolean",
+            "description": "The numbered reference list under the text. On by default: it is the no-hover fallback."
+          },
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the \"Sources\" heading, so it fits the page's outline. Defaults to 4."
+          }
+        },
+        "required": [
+          "sources"
+        ],
+        "$defs": {
+          "CitationSource": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "publisher": {
+                "type": "string",
+                "description": "Who published it: \"Reuters\", \"Internal wiki\", \"Q3 board deck\"."
+              },
+              "date": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        }
+      },
+      "events": []
+    },
+    "subcomponents": [
+      {
+        "component": "Cite",
+        "element": "span",
+        "props": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "Cite",
+          "type": "object",
+          "properties": {
+            "children": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/UINode"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "x-react": "ReactNode"
+            },
+            "source": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "Source id, or ids. Omit to mark the claim as unsourced — honestly, rather than silently."
+            },
+            "quote": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "The passage that supports the claim, shown in place and used to deep-link to it. With\nseveral sources, pass `{ [sourceId]: passage }` — each source supports it in its own words."
+            },
+            "support": {
+              "enum": [
+                "quoted",
+                "paraphrased"
+              ]
+            }
+          },
+          "required": [
+            "children"
+          ],
+          "$defs": {
+            "UINode": {
+              "type": "object",
+              "description": "A nested component: a name from this catalogue, and the props to give it.",
+              "required": [
+                "component"
+              ],
+              "properties": {
+                "component": {
+                  "type": "string",
+                  "description": "The component's exported name, e.g. \"MediaResult\"."
+                },
+                "props": {
+                  "type": "object",
+                  "description": "That component's own props, matching its entry in this catalogue."
+                }
+              }
+            }
+          }
+        },
+        "events": []
+      }
+    ]
   },
   "docs": "Requires `cn` at `@/lib/utils`. Pass the exact retrieved passage as `quote` — that is what makes checking take one step. Set `support=\"paraphrased\"` when the claim is the model's summary. Leave `source` off rather than attaching a loosely related source.",
   "categories": [

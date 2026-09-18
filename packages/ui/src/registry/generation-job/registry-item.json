@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "generation-job",
+  "title": "Generation Job",
+  "description": "A generation that takes minutes, told honestly. Takes a `status` (`queued`, `running`, `partial`, `done`, `failed`, `cancelled`), the `title` of what's being made, a `queue` with `position` and the `typicalWait` at this moment, the current `stage` as replaceable text, a **measured** `progress` (leave it out and no bar is drawn), `startedAt` for a self-ticking elapsed counter, the `cost` and your `refundNote` stated before anything fails, an `error` carrying both the reason and what happened to the money, and a `notify` toggle so nobody has to watch the screen. Finished outputs are children and appear the moment they exist, so a batch where two of four are ready shows two. Purely presentational and provider-free: you own the job, the queue and the refunds. Use it for image, video, audio or long document generation. Not for sub-second work (that is Generation Placeholder), and not for an agent run with steps (that is Agent Plan).",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/generation-job/generation-job.tsx",
+      "target": "components/ui/generation-job.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Pass `progress` only when you measure it; the component deliberately draws nothing otherwise.",
+  "meta": {
+    "engineeringNotes": "Built against the complaints this category actually generates: reviews of image and video tools rank credits and unexplained waits above quality, and queue times of ten to thirty minutes at peak are normal. So the queue is a first-class state with a position and a typical wait rather than a spinner; `progress` is optional and a bar is drawn only when it is passed, because an invented bar on a job whose extent is unknown is the same lie as fake typing; `partial` exists as a status so a batch with two of four finished can show two, which the pipeline literature treats as the correct outcome rather than a pass or fail; and `error` carries a refund string beside the reason, because a failure that silently keeps someone's credits is the complaint underneath most one-star reviews. The elapsed counter ticks inside the component — the one place this system breaks its caller-owns-async rule — so a minutes-long job doesn't force a re-render a second on the consumer.",
+    "motionNotes": "Motion means the machine is busy. The status dot pulses while queued, running or partial, the stage verb shimmers while work is ongoing, and every bit of it stops the moment the job reaches a terminal state. A measured bar animates its width over `--pd-duration-slow` with a linear ease, because it tracks real progress rather than decorating a wait. Under `prefers-reduced-motion` the pulse and shimmer are dropped and the state is carried by the words and the colour."
+  }
+}

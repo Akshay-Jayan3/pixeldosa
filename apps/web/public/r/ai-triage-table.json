@@ -19,7 +19,110 @@
   ],
   "meta": {
     "engineeringNotes": "Built in direct response to the audit burden: AI now produces changes faster than people can check them, and every earlier component in this system enables review without reducing it, which at volume turns the user into a full-time auditor. Triage reduces review in three ways. It orders by attention rather than by arrival — low confidence first, high confidence collapsed — so effort lands where errors are likely. It collapses what the AI left unchanged into a count, since confirming that nothing happened is otherwise the most tedious part of reviewing a batch. And it states consequences at the point of commitment ('Apply 5', 'not reviewed will stay as they are'). The hard boundary is that it must not become Accept-all by another name. Bulk acceptance is limited to the high-confidence group, and gated on that group having been opened — tracked as an explicit inspected set, with the reason stated in text rather than hidden behind a disabled button. Decisions are staged rather than committed, so every row's Undo is simply removing a staged decision, with no undo timer to manage. Collapsed groups use the house grid-template-rows pattern with overflow-hidden, and are marked inert while closed: a 0fr row hides content visually but otherwise leaves its buttons focusable and exposed to assistive technology.",
-    "motionNotes": "Deliberately quiet: this is a user-turn surface, so nothing moves on its own and nothing shimmers. Groups expand and collapse through the house grid-template-rows transition at `--pd-duration-fast`, the disclosure chevrons rotate at `--pd-duration-instant`, and a decided row fades to reduced opacity over `--pd-duration-fast` so the eye moves on to what remains without the row disappearing — its Undo stays reachable. Action colours transition through the composed AI Action Toolbar. There is no entrance animation and no motion tied to counts changing, since numbers updating in a review surface should read as information rather than event. Under prefers-reduced-motion every transition drops to instant and the grouping, counts and decided-state opacity still carry all the information."
+    "motionNotes": "Deliberately quiet: this is a user-turn surface, so nothing moves on its own and nothing shimmers. Groups expand and collapse through the house grid-template-rows transition at `--pd-duration-fast`, the disclosure chevrons rotate at `--pd-duration-instant`, and a decided row fades to reduced opacity over `--pd-duration-fast` so the eye moves on to what remains without the row disappearing — its Undo stays reachable. Action colours transition through the composed AI Action Toolbar. There is no entrance animation and no motion tied to counts changing, since numbers updating in a review surface should read as information rather than event. Under prefers-reduced-motion every transition drops to instant and the grouping, counts and decided-state opacity still carry all the information.",
+    "schema": {
+      "component": "AITriageTable",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AITriageTable",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TriageItem"
+            }
+          },
+          "unchanged": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ]
+            },
+            "description": "Items the AI examined and chose not to change. Shown collapsed, so nobody scans for them."
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "$defs": {
+          "TriageItem": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "What is being changed — a record, a field, a row."
+              },
+              "before": {
+                "type": "string",
+                "description": "The current value, shown struck through when present."
+              },
+              "after": {
+                "type": "string",
+                "description": "The AI's proposed value."
+              },
+              "confidence": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "provenance": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "after",
+              "confidence"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onApply",
+          "required": true,
+          "params": [
+            {
+              "name": "acceptedIds",
+              "type": "string[]"
+            }
+          ],
+          "description": "Commits the accepted items. Nothing is written before this."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Installing this pulls in AI Action Toolbar and Confidence Meter. Pass `unchanged` whenever you have it — showing what the AI deliberately left alone is half of what makes review cheap.",
   "categories": [

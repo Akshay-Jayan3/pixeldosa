@@ -17,7 +17,104 @@
   ],
   "meta": {
     "engineeringNotes": "Research on agent products keeps finding people asking for lower automation and an off switch, while the 'match autonomy to risk' principle has no UI anywhere. Most autonomy settings fail because they are abstract. A slider labelled cautious-to-autonomous doesn't tell anyone what will happen to their inbox. So each level is explained through the agent's actual actions, with the outcome for each in words. The policy is a pure function of level and risk: 'ask' asks for everything, 'balanced' acts only on low risk, 'act' acts on low and medium. High risk asks at every level, and that is deliberately not configurable, because a setting that can turn off the approval for an irreversible send is a trap with a friendly label. User overrides only move in the safe direction: 'Always ask' pins an action to asking, and nothing un-pins the floor. Levels are native radios in a fieldset, so arrow keys, labels and form semantics come for free. The 'Does N of M without asking' count sits in a polite live region, because changing the level silently changes every row below it.",
-    "motionNotes": "Still. This is a settings surface and the user's turn, so nothing animates on its own. Selection and hover change background and border colour at `--pd-duration-instant`. Row outcomes swap text instantly when the level changes, not with a transition, so the new policy can be read the moment it applies. The focus ring follows the radio via `has-[:focus-visible]`. Under prefers-reduced-motion the colour transitions become instant."
+    "motionNotes": "Still. This is a settings surface and the user's turn, so nothing animates on its own. Selection and hover change background and border colour at `--pd-duration-instant`. Row outcomes swap text instantly when the level changes, not with a transition, so the new policy can be read the moment it applies. The focus ring follows the radio via `has-[:focus-visible]`. Under prefers-reduced-motion the colour transitions become instant.",
+    "schema": {
+      "component": "AutonomyControl",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AutonomyControl",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "level": {
+            "enum": [
+              "ask",
+              "balanced",
+              "act"
+            ]
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/AutonomyAction"
+            },
+            "description": "The agent's real actions. The level is explained through these, not in the abstract."
+          },
+          "alwaysAsk": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Action ids the user has pinned to \"Asks first\" regardless of level."
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "actions"
+        ],
+        "$defs": {
+          "AutonomyAction": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "A concrete action, in the user's words: \"Send an email\", \"Edit a draft\"."
+              },
+              "risk": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "risk"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onLevelChange",
+          "required": true,
+          "params": [
+            {
+              "name": "level",
+              "type": "AutonomyLevel"
+            }
+          ]
+        },
+        {
+          "name": "onAlwaysAskChange",
+          "required": false,
+          "params": [
+            {
+              "name": "ids",
+              "type": "string[]"
+            }
+          ]
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. List real actions in the user's words, and put anything irreversible or external at `risk: \"high\"`. Enforce the same rule server-side: this control shows the policy, it doesn't enforce it.",
   "categories": [

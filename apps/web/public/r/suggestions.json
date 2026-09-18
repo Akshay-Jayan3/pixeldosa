@@ -17,7 +17,86 @@
   ],
   "meta": {
     "engineeringNotes": "Most suggestion chips hide their most important property: whether tapping one sends a message. Sending words the user didn't write can't be taken back in a conversation, so the component makes mode explicit in three places: the trailing glyph (pencil for fill, arrow for send), the accessible name ('Edit before asking:' vs 'Ask:'), and the default, which is the safer `fill`. Items accept a separate `prompt`, so a short visible label can expand into a fuller question. Suggestions render nothing while `streaming`, because a follow-up to an unfinished answer is premature and often wrong once the answer completes. Keyboard behaviour follows the toolbar pattern already used in AI Action Toolbar: one tab stop with roving tabindex, arrows in both axes (so it works for wrapping chips and stacked lists), and Home and End. The active index resets if the list shrinks. Chips extend their hit area vertically with a transparent pseudo-element, and list rows are 44px tall.",
-    "motionNotes": "One entrance, then stillness, because choosing a follow-up is the user's turn. Items fade in with the shared `pd-fade-in` at `--pd-duration-base` on the decelerate curve, staggered 40ms per item so the row reads left to right rather than popping in as a block. There's no slide or scale, so text is readable from the first frame. Hover colour runs at `--pd-duration-instant`. Nothing shimmers or pulses. Under prefers-reduced-motion the entrance is removed and items appear immediately."
+    "motionNotes": "One entrance, then stillness, because choosing a follow-up is the user's turn. Items fade in with the shared `pd-fade-in` at `--pd-duration-base` on the decelerate curve, staggered 40ms per item so the row reads left to right rather than popping in as a block. There's no slide or scale, so text is readable from the first frame. Hover colour runs at `--pd-duration-instant`. Nothing shimmers or pulses. Under prefers-reduced-motion the entrance is removed and items appear immediately.",
+    "schema": {
+      "component": "Suggestions",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Suggestions",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "prompt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              ]
+            }
+          },
+          "mode": {
+            "enum": [
+              "fill",
+              "send"
+            ],
+            "description": "`fill` puts the text in the composer to edit; `send` sends it immediately. Each looks\ndifferent, so a tap never does something the user didn't expect."
+          },
+          "streaming": {
+            "type": "boolean",
+            "description": "Hides the suggestions: follow-ups for an answer that hasn't finished are premature."
+          },
+          "layout": {
+            "enum": [
+              "list",
+              "chips"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "events": [
+        {
+          "name": "onSelect",
+          "required": true,
+          "params": [
+            {
+              "name": "prompt",
+              "type": "string"
+            },
+            {
+              "name": "item",
+              "type": "Suggestion"
+            }
+          ],
+          "description": "Receives the suggestion's prompt (or label) and the item."
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Default to `mode=\"fill\"`. Use `send` only when the suggestions are exactly what the user would type. Pass `streaming` from the message status.",
   "categories": [

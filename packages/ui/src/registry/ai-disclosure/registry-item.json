@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ai-disclosure",
+  "title": "AI Disclosure",
+  "description": "What the AI did, what it used, and — when it matters — asking first. Two shapes in one component. `variant=\"notice\"` states a fact (\"Written by AI, from your project\") with the specifics one click away, so a label never becomes a wall of policy text; `variant=\"consent\"` asks before anything happens, shows the specifics up front, and gives both answers equal weight: same size, same prominence, nothing preselected, no styling that makes declining look like a mistake. Takes a `title`, a one-sentence `summary`, `facts` as label-and-value pairs (\"What it used\", \"How long it's kept\", \"Who can see it\"), an optional `learnMoreHref`, `onAllow` and `onDecline` for consent, and `onDismiss` for a notice. Purely presentational: it states what you tell it and reports the decision back. Use it on AI-written content, on recording or memory features, and anywhere a person should know or be asked. Not a cookie banner, and not a replacement for AI Approval Gate, which is about one consequential action rather than what the system does in general.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/ai-disclosure/ai-disclosure.tsx",
+      "target": "components/ui/ai-disclosure.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Write the `facts` as specifics about this feature, not policy boilerplate.",
+  "meta": {
+    "engineeringNotes": "Notice and consent are one component because they share a sentence, a set of facts and a visual home; splitting them produced two surfaces that drifted apart in wording, which is how products end up disclosing one thing and asking about another. What differs is only what the variant does with the facts: a notice hides them behind a disclosure button so the common case stays a single line, while consent renders them open, because a decision taken without the specifics is not consent and an expander is an easy thing to skip. Both consent buttons carry identical styling by construction rather than by convention — there is no primary variant available to the caller — so a product cannot make \"Allow\" the obvious answer. The consent variant intentionally offers no dismiss: a question you can close is a question that gets closed.",
+    "motionNotes": "Nothing animates in either variant. Consent is the user's turn at its most consequential, and a notice is a statement of fact, so neither has anything to express through motion; the only transitions are the standard instant colour changes on buttons, disabled under `prefers-reduced-motion`."
+  }
+}

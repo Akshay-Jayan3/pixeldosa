@@ -1,0 +1,55 @@
+---
+title: Run Inbox
+description: Every agent run in one place, with the ones that need a person at the top.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { RunInbox } from "@/components/ui/run-inbox";
+
+<RunInbox runs={runs} onOpen={open} onStop={stop} />
+```
+
+## Why it exists
+
+The way people work with background agents now is: give it a job, close the laptop, come
+back later. An inbox is the familiar shape for that — and its familiar failure is strict
+chronology, where the run that has been waiting three hours for an answer sits below the
+one that finished a minute ago.
+
+## Features
+
+- **Grouped by what the run needs**, not when it happened. Waiting on you comes first,
+  whatever its age, then problems, then finished, then scheduled.
+- **Counts per group**, so the size of the pile is visible before you scroll.
+- **Only running rows move.** Rows waiting on you hold still, in the waiting colour.
+- **Stop appears only on running rows**, so it can't be aimed at a finished one.
+- **Unread changes weight** and is announced, rather than creating a separate "new"
+  section.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `runs` | `{ id, title, state, agent?, note?, time?, unread? }[]` | `state` is `needsYou`, `running`, `scheduled`, `done` or `failed`. `time` is formatted by you. |
+| `onOpen` | `(id: string) => void` | Required. |
+| `onStop` | `(id: string) => void` | Shown on running rows. |
+| `emptyLabel` | `string` | Shown when there are no runs. |
+| `title` | `string` | Defaults to `"Runs"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- A labelled `<section>`; each group is a heading with its count.
+- Each run's title is a button, so keyboard users move through runs, not decorations.
+- "Not opened yet" is announced for unread rows rather than shown only as weight.
+- The running dot's pulse stops under `prefers-reduced-motion`.
+
+## When not to use
+
+- **The steps inside one run:** use `Agent Plan` with statuses.
+- **A notification feed:** this is a work queue, not an activity stream.
+- **Hundreds of runs:** at that size you need search and filters around it.

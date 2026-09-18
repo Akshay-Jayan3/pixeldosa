@@ -1,0 +1,89 @@
+---
+title: Response Versions
+description: Every answer the agent gave, kept — step between them, compare two, keep the one you want.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { ResponseVersions } from "@/components/ui/response-versions";
+
+<ResponseVersions
+  versions={versions}
+  activeId={activeId}
+  onActiveChange={setActiveId}
+  onRegenerate={regenerate}
+  onKeep={keep}
+  busy={regenerating}
+/>
+```
+
+Append a version when you regenerate. Never replace one.
+
+## Why it exists
+
+Regenerating is the most common thing people do with an AI answer, and in most products it
+destroys the previous one. That makes a better answer a gamble, and it's why people paste
+answers into a notes app before trying again.
+
+## Features
+
+- **Nothing is lost.** Regenerating appends. The count says how many you have.
+- **Compare with the previous one**, side by side, with the current version outlined.
+- **Keep one** and hand it back to your app as the answer.
+- **The old answer stays readable** while a new one is being written. The busy state lives
+  in the button, not over the text.
+- **Still**, except a single fade when you switch versions.
+
+## Examples
+
+Regenerating appends, so the list is the history:
+
+```tsx
+const regenerate = async () => {
+  setBusy(true);
+  const next = await model.regenerate();
+  setVersions((previous) => [...previous, { id: next.id, label: "Another try", content: next.text }]);
+  setActiveId(next.id);
+  setBusy(false);
+};
+```
+
+Inside a chat turn, under the answer:
+
+```tsx
+<Message role="assistant" author="Assistant">
+  <MessageContent>
+    <ResponseVersions versions={turn.versions} activeId={turn.activeId} onActiveChange={choose} />
+  </MessageContent>
+</Message>
+```
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `versions` | `{ id, content, label?, time? }[]` | Required, oldest first. `time` is formatted by you. |
+| `activeId` | `string` | Required. |
+| `onActiveChange` | `(id: string) => void` | Required. |
+| `onRegenerate` | `() => void` | Adds the Regenerate button. |
+| `onKeep` | `(id: string) => void` | Adds "Keep this one". |
+| `busy` | `boolean` | True while a new version is being produced. |
+| `label` | `string` | Names the control group. Defaults to `"Answer versions"`. |
+
+## Accessibility
+
+- The controls are a labelled group; the arrows are named "Previous version" and "Next
+  version" and disable at the ends.
+- The position ("Showing version 2 of 3") is announced, not the content, so switching
+  doesn't re-read the whole answer.
+- In compare mode each side is a labelled region, and the current one says "showing now"
+  rather than relying on the outline.
+
+## When not to use
+
+- **A document's revision history.** This is for a handful of attempts at one answer.
+- **Comparing two arbitrary versions.** Comparison is deliberately current-versus-previous;
+  the question people actually ask is "is this better than the last try?".

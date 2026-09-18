@@ -17,7 +17,188 @@
   ],
   "meta": {
     "engineeringNotes": "Exists because the system argues against making every AI feature a blank chat box and needed an alternative. The composer splits a request into what only words can say (the text) and what is really a specification (controls), because specifications typed as prose are inconsistent and invisible until the result comes back wrong. Controls are native selects inside labelled pills, so they are keyboard, screen reader and phone friendly with no custom listbox. A changed value gets a stronger outline, so the non-default parts of the request stand out. Details are handled where composers usually slip. Enter is ignored while `isComposing`, so IME users confirming a candidate don't send half a sentence. The text area autosizes from scrollHeight up to 240px, because `field-sizing: content` isn't universal yet. Send is `aria-disabled`, not `disabled`, so it stays focusable and the blocked reason ('Waiting for attachments to finish uploading') is shown and announced. The count appears only in the last 10% before `maxLength`. The file input is reset after each pick, so the same file can be picked again. Uploads are the caller's, and the composer only reflects their status. It stays headless about what happens next: the caller assembles the prompt from `values`.",
-    "motionNotes": "Quiet, because composing is the user's turn. The only moving element is the shared `pd-shimmer` on an uploading attachment's 'Uploading' label, which is real machine work. Borders and backgrounds change colour at `--pd-duration-instant` on focus, hover, drag-over and control changes. The text area grows instantly as lines are added, with no height transition, so the caret never lags the text. Send swaps to Stop without animation, so the control is usable the moment generation starts. Everything is instant or static under prefers-reduced-motion."
+    "motionNotes": "Quiet, because composing is the user's turn. The only moving element is the shared `pd-shimmer` on an uploading attachment's 'Uploading' label, which is real machine work. Borders and backgrounds change colour at `--pd-duration-instant` on focus, hover, drag-over and control changes. The text area grows instantly as lines are added, with no height transition, so the caret never lags the text. Send swaps to Stop without animation, so the control is usable the moment generation starts. Everything is instant or static under prefers-reduced-motion.",
+    "schema": {
+      "component": "PromptComposer",
+      "element": "form",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "PromptComposer",
+        "type": "object",
+        "properties": {
+          "controls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ComposerControl"
+            },
+            "description": "Structured parts of the request. The interface carries the specification, not the prompt."
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ComposerAttachment"
+            }
+          },
+          "accept": {
+            "type": "string"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Starting points that fill the text for editing. Never sent without the user."
+          },
+          "busy": {
+            "type": "boolean",
+            "description": "The result is being generated. Send becomes Stop."
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "maxLength": {
+            "type": "number"
+          },
+          "submitLabel": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "Visible label for the text area. Visually hidden by default."
+          },
+          "clearOnSubmit": {
+            "type": "boolean",
+            "description": "Clear the text after sending. Controls keep their values either way."
+          },
+          "value": {
+            "type": "string",
+            "description": "Controlled text, for filling the composer from outside (e.g. a follow-up suggestion)."
+          }
+        },
+        "$defs": {
+          "ComposerControl": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "Short label shown on the pill: \"Tone\", \"Length\", \"For\"."
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "label"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "defaultValue": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "options",
+              "defaultValue"
+            ]
+          },
+          "ComposerAttachment": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string",
+                "description": "e.g. \"PDF · 2.4 MB\"."
+              },
+              "status": {
+                "enum": [
+                  "failed",
+                  "uploading",
+                  "ready"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onSubmit",
+          "required": true,
+          "params": [
+            {
+              "name": "submission",
+              "type": "ComposerSubmission"
+            }
+          ]
+        },
+        {
+          "name": "onAttachFiles",
+          "required": false,
+          "params": [
+            {
+              "name": "files",
+              "type": "File[]"
+            }
+          ],
+          "description": "Enables the attach button, drop and paste. You upload; pass the results back as `attachments`."
+        },
+        {
+          "name": "onRemoveAttachment",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onStop",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onValueChange",
+          "required": false,
+          "params": [
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Put anything users would otherwise type as boilerplate (\"make it friendlier, keep it short\") into `controls`, and turn `values` into the prompt on your side. Upload in `onAttachFiles` and keep `attachments` in your state.",
   "categories": [

@@ -25,7 +25,9 @@ import { AgentPlan } from "@/components/ui/agent-plan";
 
 A plan is where an agent's misunderstanding becomes visible while it's still free to
 fix. Once execution starts, a wrong step costs a tool call, a side effect, or a cancel
-and restart. **This is the agreement. Running it is a different component.**
+and restart. **This is the agreement**, and then the record of what happened: give the
+steps a `status` and the same component follows the run, so people watch the plan they
+agreed to rather than a separate progress bar.
 
 ## Features
 
@@ -38,6 +40,11 @@ and restart. **This is the agreement. Running it is a different component.**
 - **Edits are visible.** "Run edited plan" once anything changed; steps you added are
   marked "Added by you".
 - **Holds still** — it's your turn.
+- **It follows the run.** Once any step has a `status`, editing stops and the plan shows
+  progress: the running step is marked and moves, a step waiting on you holds still in the
+  waiting colour, finished steps get a check, and a failed step offers Retry.
+- **Progress is counted, never invented.** The bar measures finished steps out of the
+  total, and Stop stays visible for the whole run.
 
 ## Examples
 
@@ -56,15 +63,34 @@ A fixed plan the user can trim and reorder but not extend:
 <AgentPlan steps={steps} allowAdd={false} onRun={execute} />
 ```
 
+### Running the plan
+
+Pass the same steps back with a `status` on each as the run moves. `pending` keeps a step
+quiet, `running` marks the current one, `waiting` means it needs you, and `done`,
+`failed` or `skipped` close it out. `note` explains a wait, a failure or a skip.
+
+```tsx
+<AgentPlan
+  steps={steps.map((step) => ({ ...step, status: run.status[step.id], note: run.note[step.id] }))}
+  runStatus="Reading pricing pages"
+  onRun={start}
+  onStop={run.abort}
+  onRetryStep={run.retry}
+/>
+```
+
 ## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `steps` | `{ id, title, detail?, needsApproval? }[]` | Required. The proposed plan, in order. |
+| `steps` | `{ id, title, detail?, needsApproval?, status?, note? }[]` | Required. The proposed plan, in order. A `status` on any step switches the component to its running view. |
 | `onRun` | `(steps) => void` | Required. Receives the plan as edited. |
 | `onCancel` | `() => void` | |
 | `title` | `string` | Defaults to `"Proposed plan"`. |
 | `allowAdd` | `boolean` | Defaults to `true`. |
+| `runStatus` | `string` | What's happening right now, shown beside the progress count while running. |
+| `onStop` | `() => void` | Shown throughout the run. |
+| `onRetryStep` | `(stepId) => void` | Offered on a failed step. |
 | `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Heading level, so the component fits your page's outline. Defaults to `3`. |
 
 ## Accessibility
@@ -74,11 +100,14 @@ A fixed plan the user can trim and reorder but not extend:
   ("Move 'Check billing contacts' up").
 - Moves, removals and additions are announced — including the new position, counting only
   steps that remain.
+- While running, each step is announced once as it finishes, fails, is skipped or starts
+  waiting on you. A status that hasn't changed never speaks again. The current step carries
+  `aria-current="step"`, and every state is in words, not colour alone.
 - Icon buttons have a 44px tall hit area, expanded vertically only, so neighbouring
   controls don't overlap.
 
 ## When not to use
 
-Showing progress through a plan that's already running is `Task Plan Runner` (planned) —
-a moving surface where this one is still. Confirming what the agent understood before
-there's a plan is `Intent Preview`.
+Confirming what the agent understood before there's a plan is `Intent Preview`. For the
+approval itself when a step stops for one, use `AI Approval Gate` beside this component:
+the plan says a step is waiting, the gate states the consequence and takes the decision.

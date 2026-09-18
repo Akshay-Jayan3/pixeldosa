@@ -23,6 +23,56 @@ const registryConfig = `"registries": {
   "@pixeldosa": "${SITE_URL}/r/{name}.json"
 }`;
 
+const catalogEntry = `{
+  "name": "run-inbox",
+  "component": "RunInbox",
+  "import": { "from": "@/components/ui/run-inbox", "named": "RunInbox" },
+  "element": "section",
+  "props": {
+    "type": "object",
+    "required": ["runs"],
+    "properties": {
+      "runs": { "type": "array", "items": { "$ref": "#/$defs/AgentRun" } }
+    },
+    "$defs": {
+      "AgentRun": {
+        "type": "object",
+        "required": ["id", "title", "state"],
+        "properties": {
+          "state": { "enum": ["needsYou", "running", "scheduled", "done", "failed"] },
+          "note": {
+            "type": "string",
+            "description": "Why it needs you, what it's doing, or what it produced. One line."
+          }
+        }
+      }
+    }
+  },
+  "events": [
+    { "name": "onOpen", "required": true, "params": [{ "name": "id", "type": "string" }] }
+  ]
+}`;
+
+const renderer = `const registry = { RunInbox, AgentPlan, AIApprovalGate /* … */ };
+
+// catalog.json, indexed by component name
+const spec = Object.fromEntries(catalog.components.map((c) => [c.component, c]));
+
+// The model emits { component, props }; events come back out as messages.
+function Render({ node, onEvent }) {
+  const Component = registry[node.component];
+  if (!Component) return null; // not in the catalogue, not rendered
+
+  const handlers = Object.fromEntries(
+    (spec[node.component]?.events ?? []).map((event) => [
+      event.name,
+      (...args) => onEvent({ component: node.component, event: event.name, args }),
+    ])
+  );
+
+  return <Component {...node.props} {...handlers} />;
+}`;
+
 const prompts = [
   "Add an agent panel to the sidebar that shows the run's status, reasoning and any approvals, using @pixeldosa.",
   "Let the AI fill in the customer form, but make the user review every field before it's saved.",
@@ -115,6 +165,50 @@ export default function BuildWithAIPage() {
             .
           </li>
         </ul>
+      </Step>
+
+      <Step n={5} title="Render from JSON, not from generated code">
+        <p>
+          The steps above are for an agent that writes code you review. Generative UI is the
+          other shape: the model emits a payload, your app renders it, and nobody reads a
+          diff in between. For that, a model needs the prop contract in a format it can be
+          held to — that <code className="font-mono text-foreground">state</code> is one of
+          five words, not a free string. Every component publishes one, generated from its
+          TypeScript at build time:
+        </p>
+        <ul className="flex flex-col gap-2">
+          <li>
+            <a className="font-mono text-foreground underline underline-offset-4" href="/r/catalog.json">
+              /r/catalog.json
+            </a>{" "}
+            — every component&apos;s props, events and design guidance in one document.
+          </li>
+          <li>
+            <code className="font-mono text-foreground">/r/&lt;component&gt;.json</code> — the
+            same contract under <code className="font-mono text-foreground">meta.schema</code>,
+            alongside the source.
+          </li>
+        </ul>
+        <CodeBlock code={catalogEntry} language="catalog.json (excerpt)" />
+        <p>
+          The descriptions are the point. &ldquo;Why it needs you, what it&apos;s doing, or
+          what it produced. One line.&rdquo; is the kind of guidance that otherwise lives in a
+          docs page no runtime will ever read — here it reaches the model at the moment it
+          writes the field.
+        </p>
+        <p>
+          Callbacks are listed separately as{" "}
+          <code className="font-mono text-foreground">events</code>, because no JSON format
+          can carry a function. Each one gives its arguments, so a runtime can map them onto
+          however it sends interactions home:
+        </p>
+        <CodeBlock code={renderer} language="tsx" />
+        <p>
+          Nothing in the catalogue names a protocol. It is plain JSON Schema, so it can back
+          an A2UI or AG-UI component catalogue, an MCP server that returns UI, or your own
+          renderer — the mapping lives in your adapter, where it can be changed when those
+          specs change, rather than in the components.
+        </p>
       </Step>
 
       <section className="mt-12">

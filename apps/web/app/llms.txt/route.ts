@@ -61,6 +61,7 @@ export function GET() {
     "",
     `- [Full documentation](${SITE_URL}/llms-full.txt): every component's usage, props and design rationale in one file`,
     `- [Registry index](${SITE_URL}/r/registry.json): machine-readable shadcn registry`,
+    `- [Component catalogue](${SITE_URL}/r/catalog.json): every component's props as JSON Schema, its callbacks with their arguments, and its design guidance — for rendering components from a model's output rather than writing code. Plain JSON Schema, not tied to any protocol.`,
     "",
     "---",
     "",

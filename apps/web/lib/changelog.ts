@@ -27,6 +27,95 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-09-18-catalog",
+    date: "2026-09-18",
+    title: "Every component, described in a format a model can be held to",
+    summary:
+      "A new catalogue at /r/catalog.json gives each component's props as JSON Schema, its callbacks with their arguments, and the design reasoning behind it — generated from the TypeScript, so it can't drift. For products where the model produces the interface rather than the code. Plain JSON Schema, tied to no protocol.",
+    changes: [
+      {
+        kind: "new",
+        note: "/r/catalog.json — 51 components with validated prop schemas, and the same contract under meta.schema in every registry item.",
+      },
+      {
+        kind: "improved",
+        note: "The agent guide and llms.txt now point at the catalogue, so a runtime can constrain a model to real prop values instead of letting it invent them.",
+      },
+    ],
+  },
+  {
+    id: "2026-09-18-agent-ops",
+    date: "2026-09-18",
+    title: "Agents that work while you're away",
+    summary:
+      "Four components for agents that run in the background: an inbox that puts what needs you first, a readable record of what the agent did and who allowed it, a handover that carries the context, and schedules written as sentences.",
+    changes: [
+      { kind: "new", component: "run-inbox" },
+      { kind: "new", component: "activity-trail" },
+      { kind: "new", component: "human-handoff" },
+      { kind: "new", component: "agent-schedule" },
+    ],
+  },
+  {
+    id: "2026-09-18-generation-two",
+    date: "2026-09-18",
+    title: "Pick it, compare it, ship it",
+    summary:
+      "Three more generation pieces: controls you choose from previews instead of naming, a before-and-after that works with a keyboard, and a result frame that states what made it and whether content credentials are attached.",
+    changes: [
+      { kind: "new", component: "parameter-panel" },
+      { kind: "new", component: "compare-view" },
+      { kind: "new", component: "media-result" },
+    ],
+  },
+  {
+    id: "2026-09-18-generation",
+    date: "2026-09-18",
+    title: "Generation, without the waiting and the guesswork",
+    summary:
+      "The first three pieces for products that make images, video or audio: a job that tells you where you are in the queue and refunds honestly, a grid where you keep the good results and regenerate the rest, and a credits meter that names the price before the click.",
+    changes: [
+      { kind: "new", component: "generation-job" },
+      { kind: "new", component: "variation-grid" },
+      { kind: "new", component: "credits-meter" },
+    ],
+  },
+  {
+    id: "2026-09-18-after-the-answer",
+    date: "2026-09-18",
+    title: "Regenerate without regret",
+    summary:
+      "Three components for what happens around an answer: keep every version you generate, say why a bad one was bad, and tell people when AI wrote something — or ask them first.",
+    changes: [
+      { kind: "new", component: "response-versions" },
+      { kind: "new", component: "response-feedback" },
+      { kind: "new", component: "ai-disclosure" },
+    ],
+  },
+  {
+    id: "2026-09-18-before-it-runs",
+    date: "2026-09-18",
+    title: "Before it runs, and before it sends",
+    summary:
+      "Two new components for the moments either side of a run: what it will cost before you start it, and a place where everything the agent prepares waits until you send it.",
+    changes: [
+      { kind: "new", component: "cost-estimate" },
+      { kind: "new", component: "draft-mode" },
+    ],
+  },
+  {
+    id: "2026-09-18-live-plan",
+    date: "2026-09-18",
+    title: "Watch the plan happen",
+    summary:
+      "Agent Plan now follows the run. The plan people agreed to becomes the progress view: the current step moves, a step waiting on you holds still, finished steps get a check, and a failed one offers Retry.",
+    changes: [
+      { kind: "improved", component: "agent-plan", note: "New per-step `status` (`pending`, `running`, `waiting`, `done`, `failed`, `skipped`) and `note`. Any status past pending switches the plan from editing to running." },
+      { kind: "improved", component: "agent-plan", note: "`runStatus` names what's happening now, `onStop` stays visible for the whole run, and `onRetryStep` is offered on a failed step." },
+      { kind: "improved", component: "agent-plan", note: "Progress counts finished steps instead of inventing a percentage, and each step is announced once as it finishes, fails, is skipped or starts waiting." },
+    ],
+  },
+  {
     id: "2026-09-17-next",
     date: "2026-09-17",
     title: "What's next, and how to help shape it",

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "human-handoff",
+  "title": "Human Handoff",
+  "description": "When a person takes over from the agent, and what they're handed. Takes a `stage` (`agentHandling`, `waitingForPerson`, `personHandling`, `returnedToAgent`), the agent's `reason` for stepping back in its own words, a `context` list of the facts a person would otherwise have to ask for again, the `person` who has it now, a `waitingFor` duration, and `onTakeOver` / `onReturnToAgent`. The context is the component, not the button: handoffs usually lose everything, so the customer repeats themselves and whoever takes over re-reads a transcript to find three facts. Listing what the agent already tried is part of that, since offering a customer the same rejected remedy twice is the most common way a handoff goes wrong. It also works in both directions, because handing a finished job back to the agent is the half products forget. Purely presentational. Use it in support, operations and any agent that can reach the end of what it may decide. Not for a single approval (that is AI Approval Gate), and not for a question the agent could answer itself (that is Agent Ask).",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/human-handoff/human-handoff.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type HandoffStage = \"agentHandling\" | \"waitingForPerson\" | \"personHandling\" | \"returnedToAgent\";\n\nexport type HandoffFact = {\n  id: string;\n  /** \"Customer\", \"Order\", \"Tried already\". */\n  label: string;\n  value: string;\n};\n\nexport interface HumanHandoffProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  stage: HandoffStage;\n  /** Why the agent is stepping back, in its own words. */\n  reason?: string;\n  /** What the person receives: the facts they'd otherwise have to ask for again. */\n  context?: HandoffFact[];\n  /** Who has it now, once a person took over: \"Dana in support\". */\n  person?: string;\n  /** How long the person has been waiting, formatted by you. */\n  waitingFor?: string;\n  onTakeOver?: () => void;\n  takeOverLabel?: string;\n  onReturnToAgent?: () => void;\n  returnLabel?: string;\n}\n\nconst STAGE_TEXT: Record<HandoffStage, string> = {\n  agentHandling: \"The agent is handling this.\",\n  waitingForPerson: \"Waiting for a person to take over.\",\n  personHandling: \"A person has taken over.\",\n  returnedToAgent: \"Handed back to the agent.\",\n};\n\n/**\n * When a person takes over from the agent — and what they're handed.\n *\n * Handoffs usually lose everything: the customer repeats themselves, the person taking\n * over re-reads a transcript to find three facts, and nobody records what the agent\n * already tried. So the useful part of this component isn't the button, it's the\n * context: the facts a person would otherwise ask for again, stated as a short list, with\n * the reason the agent stepped back. The handoff also works in both directions, because a\n * person finishing a job and returning it to the agent is the half that products forget.\n *\n * Holds completely still while it waits: it's a person's turn.\n */\nfunction HumanHandoff({\n  headingLevel = 3,\n  title = \"Handover\",\n  stage,\n  reason,\n  context,\n  person,\n  waitingFor,\n  onTakeOver,\n  takeOverLabel = \"Take over\",\n  onReturnToAgent,\n  returnLabel = \"Hand back to the agent\",\n  className,\n  ...props\n}: HumanHandoffProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const waiting = stage === \"waitingForPerson\";\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\n        \"flex flex-col gap-3 rounded-lg border bg-card p-4\",\n        waiting && \"border-[1.5px] border-agent-waiting bg-agent-waiting-soft\",\n        className\n      )}\n      {...props}\n    >\n      <div className=\"flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        <p className=\"text-xs text-muted-foreground\">\n          {STAGE_TEXT[stage]}\n          {waiting && waitingFor ? ` ${waitingFor}.` : \"\"}\n          {stage === \"personHandling\" && person ? ` ${person}.` : \"\"}\n        </p>\n      </div>\n\n      {reason ? <p className=\"text-sm text-foreground text-pretty\">{reason}</p> : null}\n\n      {context && context.length > 0 ? (\n        <dl className=\"grid gap-x-4 gap-y-1.5 rounded-md border bg-card p-3 text-xs sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]\">\n          {context.map((fact) => (\n            <React.Fragment key={fact.id}>\n              <dt className=\"text-muted-foreground\">{fact.label}</dt>\n              <dd className=\"text-foreground text-pretty\">{fact.value}</dd>\n            </React.Fragment>\n          ))}\n        </dl>\n      ) : null}\n\n      {onTakeOver || onReturnToAgent ? (\n        <div className=\"flex flex-wrap gap-2\">\n          {onTakeOver && stage !== \"personHandling\" ? (\n            <button\n              type=\"button\"\n              onClick={onTakeOver}\n              className=\"rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {takeOverLabel}\n            </button>\n          ) : null}\n          {onReturnToAgent && stage === \"personHandling\" ? (\n            <button\n              type=\"button\"\n              onClick={onReturnToAgent}\n              className=\"rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n            >\n              {returnLabel}\n            </button>\n          ) : null}\n        </div>\n      ) : null}\n    </section>\n  );\n}\n\nexport { HumanHandoff };\n",
+      "type": "registry:ui",
+      "target": "components/ui/human-handoff.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Stage is a four-value enum rather than a boolean because the return leg is a real state with its own copy, and products that model handoff as 'escalated: true' have nowhere to put the moment a person finishes and the agent resumes. Waiting is styled in the waiting colour with full stillness, the same treatment approvals get, so a queue of handoffs reads at a glance without a separate legend. The context list is `dl` markup rather than free text so a caller can render five facts consistently and a screen reader hears label-and-value pairs, and it sits inside the component rather than being left to a slot because the whole failure mode is teams shipping a handoff button with no payload.",
+    "motionNotes": "Nothing animates, in any stage. A waiting handoff is a person's turn and the strongest signal available is complete stillness; a pulsing 'needs attention' badge here would compete with the queue around it and train people to ignore it.",
+    "schema": {
+      "component": "HumanHandoff",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "HumanHandoff",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "agentHandling",
+              "waitingForPerson",
+              "personHandling",
+              "returnedToAgent"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the agent is stepping back, in its own words."
+          },
+          "context": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/HandoffFact"
+            },
+            "description": "What the person receives: the facts they'd otherwise have to ask for again."
+          },
+          "person": {
+            "type": "string",
+            "description": "Who has it now, once a person took over: \"Dana in support\"."
+          },
+          "waitingFor": {
+            "type": "string",
+            "description": "How long the person has been waiting, formatted by you."
+          },
+          "takeOverLabel": {
+            "type": "string"
+          },
+          "returnLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage"
+        ],
+        "$defs": {
+          "HandoffFact": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "\"Customer\", \"Order\", \"Tried already\"."
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "value"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onTakeOver",
+          "required": false,
+          "params": []
+        },
+        {
+          "name": "onReturnToAgent",
+          "required": false,
+          "params": []
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Fill `context` with the facts a colleague would ask for in the first thirty seconds, including what the agent already tried.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

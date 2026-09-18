@@ -1,0 +1,116 @@
+---
+title: Cost Estimate
+description: What a run will cost and how long it will take, before it starts — as a range, with the basis named.
+---
+
+## Usage
+
+```tsx
+import { CostEstimate } from "@/components/ui/cost-estimate";
+
+<CostEstimate
+  task="Research the top 5 competitors"
+  cost={{ low: "$1.10", high: "$1.80" }}
+  duration="4 to 6 minutes"
+  confidence="medium"
+  basis="your last 20 runs"
+  balance={{ label: "$8.20 of $50 left this month", used: 0.82 }}
+  onRun={start}
+  onCancel={dismiss}
+/>
+```
+
+You format every figure. The component never guesses a currency, a credit unit or a
+duration.
+
+## Why it exists
+
+People decide whether to let an agent run on two numbers nobody usually shows them:
+money and time. Showing them turns "just try it and see" into a decision, and it is the
+honest moment to admit an estimate is an estimate.
+
+## Features
+
+- **A range, not a figure.** `cost` takes `low` and an optional `high`. Passing only
+  `low` is a deliberate claim that you know the price.
+- **Confidence in tiers.** Reuses `Confidence Meter`, never a percentage.
+- **The basis is named.** "Based on your last 20 runs" lets someone judge the number
+  instead of taking it on faith.
+- **A breakdown in words.** A short list of what the spend is made of: pages read,
+  images generated. No chart.
+- **Budget stated before the button.** With `balance.exceeds`, the component says the run
+  would go over the budget, in the blocked colour, above the actions.
+- **Holds completely still.** It's your turn, and this one is about money.
+
+## Variants
+
+### With a breakdown and a budget
+
+<PreviewStack>
+  <CostEstimateSpecimen
+    headingLevel={3}
+    task="Generate 40 product images"
+    cost={{ low: "480 credits", high: "600 credits" }}
+    duration="about 8 minutes"
+    confidence="high"
+    basis="the last 200 images"
+    items={[
+      { id: "gen", label: "40 images at 1024×1024", amount: "400 credits" },
+      { id: "upscale", label: "Upscaling the 10 you keep", detail: "Only if you upscale", amount: "80 to 200 credits" },
+    ]}
+    balance={{ label: "1,250 credits left", used: 0.4 }}
+  />
+</PreviewStack>
+
+### Over budget
+
+<PreviewStack>
+  <CostEstimateSpecimen
+    headingLevel={3}
+    task="Re-run the full catalogue"
+    cost={{ low: "$62", high: "$78" }}
+    duration="about 40 minutes"
+    confidence="low"
+    basis="one similar run"
+    balance={{ label: "$18.40 of $50 left this month", used: 0.97, exceeds: true }}
+    runLabel="Run anyway"
+    adjustLabel="Narrow the scope"
+  />
+</PreviewStack>
+
+### A single figure you're sure of
+
+<PreviewStack>
+  <CostEstimateSpecimen headingLevel={3} task="Summarise this thread" cost={{ low: "2 credits" }} duration="a few seconds" />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `cost` | `{ low: string; high?: string }` | Required, formatted by you. Omit `high` only when the price is known. |
+| `task` | `string` | What the run is, in the user's words. |
+| `duration` | `string` | Plain words: "4 to 6 minutes". |
+| `confidence` | `"low" \| "medium" \| "high"` | Renders `Confidence Meter`. |
+| `basis` | `string` | Where the estimate comes from. |
+| `items` | `{ id, label, amount?, detail? }[]` | What the spend is made of. |
+| `balance` | `{ label, used?, exceeds? }` | Budget or credits left. `used` is measured, 0–1. |
+| `onRun` / `runLabel` | `() => void` / `string` | Defaults to "Run it". |
+| `onAdjust` / `adjustLabel` | `() => void` / `string` | For "Narrow the scope". |
+| `onCancel` | `() => void` | |
+| `title` | `string` | Defaults to `"Before this runs"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- A labelled `<section>` with a real heading, so it fits your page outline.
+- Every state is in words. The over-budget warning is a sentence, not a colour.
+- The budget bar is decorative and hidden; its label carries the same information.
+- Nothing animates, so there is nothing to pause.
+
+## When not to use
+
+- **During a run.** Live spend belongs to a meter beside the run, not to this.
+- **On a billing page.** This is a decision surface, not an invoice.
+- **For token counts.** Tokens aren't a unit people can judge. Convert to money, credits
+  or time first.

@@ -215,3 +215,69 @@ export {
   type AgentFigureProps,
   type AgentPose,
 } from "./registry/agent-figure/agent-figure";
+export {
+  CostEstimate,
+  type CostEstimateProps,
+  type CostItem,
+  type CostRange,
+} from "./registry/cost-estimate/cost-estimate";
+export {
+  DraftMode,
+  type DraftModeProps,
+  type DraftItem,
+} from "./registry/draft-mode/draft-mode";
+export {
+  ResponseVersions,
+  type ResponseVersionsProps,
+  type ResponseVersion,
+} from "./registry/response-versions/response-versions";
+export {
+  ResponseFeedback,
+  type ResponseFeedbackProps,
+  type FeedbackReason,
+  type FeedbackSubmission,
+  type FeedbackVerdict,
+} from "./registry/response-feedback/response-feedback";
+export {
+  AIDisclosure,
+  type AIDisclosureProps,
+  type DisclosureFact,
+} from "./registry/ai-disclosure/ai-disclosure";
+export {
+  GenerationJob,
+  type GenerationJobProps,
+  type GenerationJobStatus,
+} from "./registry/generation-job/generation-job";
+export {
+  VariationGrid,
+  type VariationGridProps,
+  type Variation,
+  type VariationStatus,
+} from "./registry/variation-grid/variation-grid";
+export { CreditsMeter, type CreditsMeterProps } from "./registry/credits-meter/credits-meter";
+export {
+  ParameterPanel,
+  type ParameterPanelProps,
+  type ParameterGroup,
+  type ParameterOption,
+} from "./registry/parameter-panel/parameter-panel";
+export { CompareView, type CompareViewProps } from "./registry/compare-view/compare-view";
+export { MediaResult, type MediaResultProps, type MediaAction } from "./registry/media-result/media-result";
+export { RunInbox, type RunInboxProps, type AgentRun, type RunState } from "./registry/run-inbox/run-inbox";
+export {
+  ActivityTrail,
+  type ActivityTrailProps,
+  type TrailEntry,
+  type TrailActor,
+} from "./registry/activity-trail/activity-trail";
+export {
+  HumanHandoff,
+  type HumanHandoffProps,
+  type HandoffStage,
+  type HandoffFact,
+} from "./registry/human-handoff/human-handoff";
+export {
+  AgentSchedule,
+  type AgentScheduleProps,
+  type ScheduleTrigger,
+} from "./registry/agent-schedule/agent-schedule";

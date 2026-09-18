@@ -1,0 +1,145 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-schedule",
+  "title": "Agent Schedule",
+  "description": "When the agent runs on its own, in words anyone can check. Takes `triggers` (each a plain-words `when` — \"Every weekday at 9:00\", \"When an invoice arrives from a new supplier\", never a cron string — a `does` line phrased as the consequence, `enabled`, a pre-formatted `nextRun`, a `lastRun` summary with `lastFailed`, and `asksFirst` when a run will stop for approval), plus `onEnabledChange`, `onEdit` and `onRunNow`. Scheduled agents are where trust quietly breaks: the thing that runs at 9:00 every morning is the thing nobody is watching, and a schedule that has been failing for a week usually looks identical to one that is fine. So the last run's outcome sits on the row in the blocked colour when it failed, the next run is stated, and turning a trigger off is one control. Purely presentational: you own the scheduling, and you write the sentences. Use it in an agent's settings, or beside a Run Inbox. Not a cron editor, and not a calendar.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/agent-schedule/agent-schedule.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nexport type ScheduleTrigger = {\n  id: string;\n  /**\n   * When it runs, in plain words: \"Every weekday at 9:00\", \"When an invoice arrives\n   * from a new supplier\". Never a cron string.\n   */\n  when: string;\n  /** What it will do, phrased as the consequence. */\n  does: string;\n  enabled: boolean;\n  /** Formatted by you: \"Tomorrow at 9:00\". Left out when it's off. */\n  nextRun?: string;\n  /** How the last one went: \"Ran yesterday · 3 invoices matched\". */\n  lastRun?: string;\n  /** Set when the last run had a problem, so an off-schedule failure is visible. */\n  lastFailed?: boolean;\n  /** Set when a run of this will pause for approval. */\n  asksFirst?: boolean;\n};\n\nimport { cn } from \"@/lib/utils\";\n\nexport interface AgentScheduleProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  triggers: ScheduleTrigger[];\n  onEnabledChange: (id: string, enabled: boolean) => void;\n  onEdit?: (id: string) => void;\n  /** Runs one now, without waiting for its schedule. */\n  onRunNow?: (id: string) => void;\n  emptyLabel?: string;\n}\n\n/**\n * When the agent runs on its own, in words anyone can check.\n *\n * Scheduled and triggered agents are where trust quietly breaks: the thing that runs at\n * 9:00 every morning is the thing nobody is watching, and most products express it as a\n * cron string or a rule builder that only its author can read. So every trigger here is a\n * sentence — when it runs, what it does — with the next run, how the last one went, and\n * whether it will stop and ask. Turning one off is one control, and a failed last run is\n * visible without opening anything, because a silent schedule that has been failing for a\n * week is the worst state this surface can hide.\n *\n * Holds completely still: it's a settings surface, not a run.\n */\nfunction AgentSchedule({\n  headingLevel = 3,\n  title = \"When this agent runs\",\n  triggers,\n  onEnabledChange,\n  onEdit,\n  onRunNow,\n  emptyLabel = \"Nothing scheduled. This agent only runs when you ask it to.\",\n  className,\n  ...props\n}: AgentScheduleProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n  const active = triggers.filter((trigger) => trigger.enabled).length;\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col rounded-lg border bg-card\", className)}\n      {...props}\n    >\n      <header className=\"flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b p-4\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        <p className=\"text-xs text-muted-foreground tabular-nums\">\n          {active} of {triggers.length} on\n        </p>\n      </header>\n\n      {triggers.length === 0 ? (\n        <p className=\"p-4 text-sm text-muted-foreground text-pretty\">{emptyLabel}</p>\n      ) : (\n        <ul className=\"flex flex-col\">\n          {triggers.map((trigger) => (\n            <li key={trigger.id} className=\"flex items-start gap-3 border-b px-4 py-3 last:border-b-0\">\n              {/* The accessible name says which schedule this is; `aria-checked` says\n                  whether it's on. Carrying the state in both read it out twice (\"Every\n                  weekday at 9:00 on, switch, on\") and renamed the control every time\n                  someone used it, so it couldn't be found again by name. */}\n              <button\n                type=\"button\"\n                role=\"switch\"\n                aria-checked={trigger.enabled}\n                aria-label={`${trigger.when}: ${trigger.does}`}\n                onClick={() => onEnabledChange(trigger.id, !trigger.enabled)}\n                className=\"relative mt-0.5 shrink-0 rounded-md outline-none after:absolute after:-inset-2 after:content-[''] focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n              >\n                <span\n                  aria-hidden=\"true\"\n                  className={cn(\n                    \"flex h-5 w-9 items-center rounded-full border p-0.5 transition-colors duration-[var(--pd-duration-fast)] motion-reduce:transition-none\",\n                    trigger.enabled ? \"border-foreground bg-foreground\" : \"border-input bg-muted\"\n                  )}\n                >\n                  <span\n                    className={cn(\n                      \"block size-3.5 rounded-full transition-transform duration-[var(--pd-duration-fast)] motion-reduce:transition-none\",\n                      trigger.enabled ? \"translate-x-4 bg-card\" : \"translate-x-0 bg-muted-foreground\"\n                    )}\n                  />\n                </span>\n              </button>\n\n              <div className=\"flex min-w-0 flex-1 flex-col gap-0.5\">\n                {/* A sentence, not a cron string. */}\n                <p className={cn(\"text-sm text-pretty\", trigger.enabled ? \"text-foreground\" : \"text-muted-foreground\")}>\n                  {trigger.when}\n                </p>\n                <p className=\"text-xs text-muted-foreground text-pretty\">{trigger.does}</p>\n                <p className=\"flex flex-wrap gap-x-3 text-xs\">\n                  {trigger.enabled && trigger.nextRun ? (\n                    <span className=\"text-muted-foreground\">Next: {trigger.nextRun}</span>\n                  ) : null}\n                  {trigger.lastRun ? (\n                    <span className={trigger.lastFailed ? \"text-agent-blocked\" : \"text-muted-foreground\"}>\n                      {trigger.lastRun}\n                    </span>\n                  ) : null}\n                  {trigger.asksFirst ? (\n                    <span className=\"text-agent-waiting\">Stops to ask you</span>\n                  ) : null}\n                </p>\n              </div>\n\n              <div className=\"flex shrink-0 flex-wrap items-center gap-1.5\">\n                {onRunNow ? (\n                  <button\n                    type=\"button\"\n                    onClick={() => onRunNow(trigger.id)}\n                    className=\"rounded-md border border-input px-2 py-1 text-xs font-medium text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                  >\n                    Run now\n                  </button>\n                ) : null}\n                {onEdit ? (\n                  <button\n                    type=\"button\"\n                    onClick={() => onEdit(trigger.id)}\n                    className=\"rounded-md px-2 py-1 text-xs font-medium text-muted-foreground underline-offset-2 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n                  >\n                    Edit\n                  </button>\n                ) : null}\n              </div>\n            </li>\n          ))}\n        </ul>\n      )}\n    </section>\n  );\n}\n\nexport { AgentSchedule };\n",
+      "type": "registry:ui",
+      "target": "components/ui/agent-schedule.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Every trigger is caller-written prose rather than a structure the component renders into English, which is a deliberate trade: generated sentences from a rule object read fluently for simple cases and become nonsense at the first compound condition, and the person this surface protects is the one who has to verify that the sentence matches what the system does. The failed last run is rendered inline in the blocked colour rather than behind a status filter, because the state this component exists to prevent is a silent schedule failing unnoticed for a week. `asksFirst` is shown on the row so the approval behaviour of an unattended run is visible while it is being switched on, not discovered later. The switch is a real `role=\"switch\"` with an accessible name that includes the trigger's own sentence, so a screen-reader user hears which schedule they are turning off.",
+    "motionNotes": "Only the switch moves, sliding its thumb over `--pd-duration-fast` so flipping one reads as a physical change rather than a repaint. Nothing else animates: this is a settings surface, and a schedule row that pulsed would imply the agent is running right now. Under `prefers-reduced-motion` the slide is dropped and the state is carried by position, colour and the accessible name.",
+    "schema": {
+      "component": "AgentSchedule",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "AgentSchedule",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ScheduleTrigger"
+            }
+          },
+          "emptyLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "triggers"
+        ],
+        "$defs": {
+          "ScheduleTrigger": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "when": {
+                "type": "string",
+                "description": "When it runs, in plain words: \"Every weekday at 9:00\", \"When an invoice arrives\nfrom a new supplier\". Never a cron string."
+              },
+              "does": {
+                "type": "string",
+                "description": "What it will do, phrased as the consequence."
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "nextRun": {
+                "type": "string",
+                "description": "Formatted by you: \"Tomorrow at 9:00\". Left out when it's off."
+              },
+              "lastRun": {
+                "type": "string",
+                "description": "How the last one went: \"Ran yesterday · 3 invoices matched\"."
+              },
+              "lastFailed": {
+                "type": "boolean",
+                "description": "Set when the last run had a problem, so an off-schedule failure is visible."
+              },
+              "asksFirst": {
+                "type": "boolean",
+                "description": "Set when a run of this will pause for approval."
+              }
+            },
+            "required": [
+              "id",
+              "when",
+              "does",
+              "enabled"
+            ]
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onEnabledChange",
+          "required": true,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "onEdit",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onRunNow",
+          "required": false,
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "description": "Runs one now, without waiting for its schedule."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Write `when` as a sentence a non-technical colleague could check, and keep the cron expression in your backend.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

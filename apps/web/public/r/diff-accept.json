@@ -19,7 +19,57 @@
   ],
   "meta": {
     "engineeringNotes": "Uses diff (jsdiff) for the actual word-level diff computation rather than hand-rolling a diff algorithm — the same relationship command-menu has with cmdk: a solved problem with real edge cases (Unicode, whitespace runs, word-boundary detection) not worth re-solving here. Hunks are grouped from the raw diff parts by merging consecutive added/removed runs into one reviewable unit, so a 'replace X with Y' shows as a single hunk with both the removal and the replacement, not two separate uncoordinated changes. Unresolved (pending) hunks default to the original text when merging, never the proposed one — an AI change only lands in the final result if a hunk is explicitly accepted, matching the system-wide 'never silently commit' rule. The status model is a three-state machine (reviewing/applied/done) rather than a single boolean: collapsing 'applied' and 'done' into one flag caused a real bug during development, where the conflict check (value !== baseValue, which becomes true immediately after Apply changes the live value) would incorrectly override the Undo affordance and show a conflict banner instead — the fix was ordering status checks so 'applied'/'done' short-circuit before the conflict check ever runs, since conflict is only a meaningful question while still reviewing.",
-    "motionNotes": "The system has no 'success'/'added' hue — destructive is the only token keeping real chroma — so additions and removals are distinguished primarily by text decoration (strikethrough for removed, underline plus a bg-accent/40 tint for added), not a red/green colour scheme, with destructive reserved for the removed text only since deletion is the one case that's legitimately danger-adjacent. This is also more accessible than colour alone, not just a token-budget workaround. Colour and background transitions on hunk resolution use --pd-duration-instant/--pd-ease-standard, matching Button's press-feedback timing, since resolving a hunk is an immediate state confirmation. Apply's brief settle state mirrors Smart Field's accept feedback for the same component family consistency. Under prefers-reduced-motion, all colour and background transitions drop via motion-reduce:transition-none, leaving the underlying decoration (strikethrough/underline) and resolved text fully legible without animation."
+    "motionNotes": "The system has no 'success'/'added' hue — destructive is the only token keeping real chroma — so additions and removals are distinguished primarily by text decoration (strikethrough for removed, underline plus a bg-accent/40 tint for added), not a red/green colour scheme, with destructive reserved for the removed text only since deletion is the one case that's legitimately danger-adjacent. This is also more accessible than colour alone, not just a token-budget workaround. Colour and background transitions on hunk resolution use --pd-duration-instant/--pd-ease-standard, matching Button's press-feedback timing, since resolving a hunk is an immediate state confirmation. Apply's brief settle state mirrors Smart Field's accept feedback for the same component family consistency. Under prefers-reduced-motion, all colour and background transitions drop via motion-reduce:transition-none, leaving the underlying decoration (strikethrough/underline) and resolved text fully legible without animation.",
+    "schema": {
+      "component": "DiffAccept",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "DiffAccept",
+        "type": "object",
+        "properties": {
+          "baseValue": {
+            "type": "string",
+            "description": "The text the proposal was generated against. Compared to `value` to detect conflicts."
+          },
+          "value": {
+            "type": "string",
+            "description": "The current live value. If it no longer matches `baseValue`, a conflict banner renders instead of the diff."
+          },
+          "proposedValue": {
+            "type": "string",
+            "description": "The AI-proposed replacement text."
+          },
+          "undoWindowMs": {
+            "type": "number",
+            "description": "How long the Undo affordance stays visible after applying, in ms."
+          }
+        },
+        "required": [
+          "baseValue",
+          "value",
+          "proposedValue"
+        ]
+      },
+      "events": [
+        {
+          "name": "onApply",
+          "required": true,
+          "params": [
+            {
+              "name": "mergedValue",
+              "type": "string"
+            }
+          ],
+          "description": "Fires with the merged result once the user applies their resolutions."
+        },
+        {
+          "name": "onRegenerate",
+          "required": false,
+          "params": [],
+          "description": "Shown on conflict instead of the diff. Typically re-requests a fresh proposal against the current value."
+        }
+      ]
+    }
   },
   "docs": "Uses diffWords from the diff package for word-level diffing — not a line-level diff, since this targets prose fields, not code. Unlike smart-field/ghost-input, this component does not call an AI provider itself; the consumer supplies an already-generated proposedValue (which may itself come from a smart-field-style fetch). baseValue must be exactly the text the proposal was generated against, not the current value, or the conflict guard will trigger on every render.",
   "categories": [

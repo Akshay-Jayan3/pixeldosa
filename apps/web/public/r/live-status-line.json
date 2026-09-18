@@ -18,7 +18,70 @@
   ],
   "meta": {
     "engineeringNotes": "The defining constraint is that this component replaces rather than accumulates. Accumulation is what makes agent activity surfaces expensive — a growing list needs scroll management, virtualisation at length, and a decision about when to collapse. Holding exactly one line keeps it cheap enough to live permanently in product chrome, and pushes the history question to Reasoning Stream and Chain-of-Thought Timeline where it belongs. It composes Agent Presence's `line` form rather than drawing its own dots, which is the system's compose-don't-reinvent rule applied where it genuinely fits: the turn-taking grammar then holds here for free, including the fact that a `suggesting` or `awaitingApproval` status stops moving. Two layout decisions prevent the jitter this pattern usually has: a minimum row height, so text of varying length cannot reflow the container around it, and truncation applied to the detail rather than the verb, so 'Reading' remains legible when a long filename cannot be. The elapsed counter is the one place this system deliberately breaks its own 'the caller owns async state' convention — every other component takes progress, busy and duration as props — because a live counter would otherwise force the consumer to re-render once a second purely for a display detail. The interval is only started while the agent is actually active, and never when no `startedAt` was supplied.",
-    "motionNotes": "One animation, and it maps to one state change: when the status text is replaced, the new text fades up three pixels over `--pd-duration-fast` with `--pd-ease-decelerate`. Short deliberately — micro-actions can change every second or two, and anything longer would read as churn rather than as replacement. It is keyed on the status string so React's reconciliation fires it exactly once per genuine change; an unchanged status that re-renders does not re-animate, which is the same mechanism Progressive Reveal and Reasoning Stream use. The indicator's own motion is inherited from Agent Presence and is not duplicated here. Under `prefers-reduced-motion` the swap is dropped entirely: text simply changes, which loses nothing, because the information was always the words rather than the transition between them."
+    "motionNotes": "One animation, and it maps to one state change: when the status text is replaced, the new text fades up three pixels over `--pd-duration-fast` with `--pd-ease-decelerate`. Short deliberately — micro-actions can change every second or two, and anything longer would read as churn rather than as replacement. It is keyed on the status string so React's reconciliation fires it exactly once per genuine change; an unchanged status that re-renders does not re-animate, which is the same mechanism Progressive Reveal and Reasoning Stream use. The indicator's own motion is inherited from Agent Presence and is not duplicated here. Under `prefers-reduced-motion` the swap is dropped entirely: text simply changes, which loses nothing, because the information was always the words rather than the transition between them.",
+    "schema": {
+      "component": "LiveStatusLine",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "LiveStatusLine",
+        "type": "object",
+        "properties": {
+          "state": {
+            "enum": [
+              "thinking",
+              "working",
+              "asking",
+              "done",
+              "failed",
+              "queued",
+              "deciding",
+              "streaming",
+              "cancelled",
+              "suggesting",
+              "awaitingApproval"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The current micro-action. Replaced wholesale as work moves on — never accumulated."
+          },
+          "detail": {
+            "type": "string",
+            "description": "What the action is acting on — a filename, a query, a table. Truncates before the verb does."
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "x-type": "Date"
+              }
+            ],
+            "description": "When the run started. The component ticks the elapsed counter itself rather than\nmaking the caller re-render once a second for a display detail — a deliberate\nexception to this system's usual \"the caller owns async state\" rule."
+          },
+          "indicator": {
+            "enum": [
+              "mark",
+              "line"
+            ],
+            "description": "The indicator before the status. `mark` (default) is the agent's drawn head, whose\nface follows the state; `line` is three dots, for the densest rows."
+          }
+        },
+        "required": [
+          "state",
+          "status"
+        ]
+      },
+      "events": [
+        {
+          "name": "onCancel",
+          "required": false,
+          "params": []
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`, the `pd-status-swap` keyframe from @pixeldosa/pixeldosa-theme, and @pixeldosa/agent-presence, which it composes for the indicator. Installing this pulls Agent Presence in automatically.",
   "categories": [

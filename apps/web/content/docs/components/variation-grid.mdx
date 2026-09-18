@@ -1,0 +1,73 @@
+---
+title: Variation Grid
+description: The results of one prompt — keep the good ones and regenerate only the rest.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { VariationGrid } from "@/components/ui/variation-grid";
+
+<VariationGrid
+  title="A dark bottle on a stone surface"
+  items={results.map((result) => ({
+    id: result.id,
+    label: result.label,
+    status: result.status,
+    preview: <img src={result.url} alt="" className="size-full object-cover" />,
+  }))}
+  keptIds={kept}
+  onKeptChange={setKept}
+  onRegenerateRest={regenerate}
+  regenerateCost="30 credits"
+  onUse={insert}
+/>
+```
+
+## Why it exists
+
+Research on how people use generation tools calls it apple picking: they keep the two
+results they like and run the rest again. Almost no tool supports it, so people download
+their favourites, re-prompt, and lose track of which was which — paying for the good ones
+twice.
+
+## Features
+
+- **Keeping is a state.** Kept results are marked and survive the next regeneration.
+- **"Regenerate the other 3"** replaces only what isn't kept, and says so.
+- **The price is on the button**, before the click. Unpriced iteration is the loudest
+  complaint in this category.
+- **Failures are per cell.** One timed-out result shows its own reason and its own Retry;
+  the others stay usable.
+- **The grid never jumps.** Set `aspectRatio` to your output's shape.
+- **Only unfinished cells move.** Kept ones hold still.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `items` | `{ id, preview?, label?, status?, note? }[]` | Required. You render the previews. |
+| `keptIds` / `onKeptChange` | `string[]` / `(ids) => void` | Required. Caller-owned, so keeping survives a regeneration. |
+| `onRegenerateRest` | `(idsToReplace) => void` | Receives exactly the ids being replaced. |
+| `regenerateCost` | `string` | Shown beside the button. |
+| `onUse` / `useLabel` | `(id) => void` / `string` | Takes one result forward. |
+| `onMore` | `(id) => void` | More like this one. |
+| `onRetry` | `(id) => void` | Retries a single failed cell. |
+| `aspectRatio` | `string` | Defaults to `"1 / 1"`. |
+| `title` | `string` | Defaults to `"Results"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- A labelled `<section>`; the count says how many are kept and how many can be replaced.
+- Keep is a toggle button with `aria-pressed` and a label naming the result.
+- A failed cell states its reason in text, not only in colour.
+- Running cells say "Generating…"; their pulse stops under `prefers-reduced-motion`.
+
+## When not to use
+
+- **A single result:** use `Generation Placeholder` while it renders, then your own frame.
+- **A gallery of past work:** this belongs to one prompt.
+- **Text alternatives in a chat:** use `Response Versions`.

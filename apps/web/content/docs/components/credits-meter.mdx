@@ -1,0 +1,92 @@
+---
+title: Credits Meter
+description: What's left, and what this action will cost — named together, before the click.
+---
+
+## Usage
+
+```tsx
+import { CreditsMeter } from "@/components/ui/credits-meter";
+
+<CreditsMeter
+  remaining="120 credits"
+  allowance="2,000 this month"
+  used={0.94}
+  low
+  nextAction={{ label: "4 images · 1024 × 1024", cost: "40 credits", affordable: true }}
+  resets="Resets on 1 October"
+  recent="12 refunded yesterday when a batch failed"
+  onTopUp={openBilling}
+/>
+```
+
+## Why it exists
+
+Credit opacity is the first frustration buyers name in reviews of these tools. The
+specific complaint isn't the price, it's that you can't tell what an action will cost
+until it's already gone — and refunds, when they happen, are invisible.
+
+## Features
+
+- **The action and its price are one object**, so they can never be rendered apart.
+- **"More than you have"** is stated when the next action exceeds the balance, before the
+  click.
+- **Refunds have somewhere to appear.** Pipelines refund routinely; interfaces rarely say
+  so.
+- **Expiry in plain words:** "Resets on 1 October".
+- **Measured only.** The bar is drawn from a real `used` value, never an estimate.
+- **The bar empties as the balance falls.** You pass what's been spent; it draws what's
+  left, so the graphic and the figure above it never say opposite things.
+
+## Variants
+
+### Enough left
+
+<PreviewStack>
+  <CreditsMeter
+    remaining="1,250 credits"
+    allowance="2,000 this month"
+    used={0.38}
+    nextAction={{ label: "8 images · 1024 × 1024", cost: "80 credits", affordable: true }}
+    resets="Resets on 1 October"
+  />
+</PreviewStack>
+
+### Not enough for this action
+
+<PreviewStack>
+  <CreditsMeter
+    remaining="20 credits"
+    allowance="2,000 this month"
+    used={0.99}
+    low
+    nextAction={{ label: "4 images · upscaled to 4K", cost: "260 credits", affordable: false }}
+    resets="Resets on 1 October"
+    recent="12 refunded yesterday when a batch failed"
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `remaining` | `string` | Required, formatted by you. |
+| `allowance` | `string` | The full allowance, when there is one. |
+| `used` | `number` | Measured, 0–1, the share already spent. The bar draws the remainder. |
+| `nextAction` | `{ label, cost, affordable? }` | The click this sits beside, and its price. |
+| `resets` | `string` | When the balance renews or expires. |
+| `recent` | `string` | Recent movement, including refunds. |
+| `low` | `boolean` | Marks a balance worth flagging. |
+| `onTopUp` / `topUpLabel` | `() => void` / `string` | |
+| `label` | `string` | Defaults to `"Credits"`. |
+
+## Accessibility
+
+- A labelled group; every figure is text, and the bar is decorative.
+- "More than you have" is a sentence, not only a colour.
+
+## When not to use
+
+- **A billing page.** This is a decision aid beside an action.
+- **Raw token counts.** Convert to the unit people are charged in.
+- **A whole run's estimate** before it starts: use `Cost Estimate`.

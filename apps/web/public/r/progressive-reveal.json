@@ -17,7 +17,65 @@
   ],
   "meta": {
     "engineeringNotes": "Enforces 'animate a new item in exactly once' by relying on React's own keyed reconciliation instead of hand-rolled 'already seen' tracking: each item is wrapped in a small RevealItem component keyed by keyExtractor (or index), which mounts fresh — and therefore plays its entrance transition — only the first time its key appears in the list; on every subsequent render where that key was already present, React reuses the existing DOM node and the component is not remounted, so the animation structurally cannot replay. This is simpler and more reliable than maintaining a Set of seen keys by hand, which is easy to get subtly wrong around React's own re-render timing. Scoped deliberately to structured collections (rows, cards), not prose — an append-only list of discrete items is inherently more layout-stable than a single growing text block, since new rows appear below existing content without reflowing it, which is also why this differs from and does not compete with Vercel AI Elements' prose-streaming components (see the roadmap's North Star Reconciliation table).",
-    "motionNotes": "Per-item entrance is a plain opacity + small upward translate (translate-y-1 to 0) using the same two-phase-mount pattern (mount closed, flip to open on the next animation frame) Command Menu and Selection Actions already use, on --pd-duration-fast/--pd-ease-standard. No item's own content is ever revealed character-by-character — the full item value already exists at arrival time, so a typewriter effect would misrepresent it as being generated live, the same reasoning every other AI-tier component in this system has already established independently. The trailing streaming indicator uses Tailwind's built-in animate-pulse (core Tailwind, no plugin required) gated by motion-safe:, falling back to a static reduced-opacity dot under motion-reduce: — the 'more is coming' text itself is unaffected either way, so the signal survives motion removal."
+    "motionNotes": "Per-item entrance is a plain opacity + small upward translate (translate-y-1 to 0) using the same two-phase-mount pattern (mount closed, flip to open on the next animation frame) Command Menu and Selection Actions already use, on --pd-duration-fast/--pd-ease-standard. No item's own content is ever revealed character-by-character — the full item value already exists at arrival time, so a typewriter effect would misrepresent it as being generated live, the same reasoning every other AI-tier component in this system has already established independently. The trailing streaming indicator uses Tailwind's built-in animate-pulse (core Tailwind, no plugin required) gated by motion-safe:, falling back to a static reduced-opacity dot under motion-reduce: — the 'more is coming' text itself is unaffected either way, so the signal survives motion removal.",
+    "schema": {
+      "component": "ProgressiveReveal",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ProgressiveReveal",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {}
+          },
+          "isStreaming": {
+            "type": "boolean",
+            "description": "Shows a trailing \"more incoming\" indicator while true."
+          },
+          "layout": {
+            "enum": [
+              "stack",
+              "grid"
+            ],
+            "description": "`\"stack\"` (default) lays items in a vertical flex column; `\"grid\"` uses a CSS grid."
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "events": [
+        {
+          "name": "renderItem",
+          "required": true,
+          "params": [
+            {
+              "name": "item",
+              "type": "T"
+            },
+            {
+              "name": "index",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "name": "keyExtractor",
+          "required": false,
+          "params": [
+            {
+              "name": "item",
+              "type": "T"
+            },
+            {
+              "name": "index",
+              "type": "number"
+            }
+          ]
+        }
+      ]
+    }
   },
   "docs": "Requires `cn` at `@/lib/utils`. Is a plain generic function component (no `forwardRef`) since nothing here needs an imperative handle and `forwardRef` has poor generic-type ergonomics. Pass a real `keyExtractor` whenever the source array might ever be spliced rather than purely appended — without one, index-based keys can misattribute 'already seen' identity to the wrong item if earlier entries are removed or reordered.",
   "categories": [

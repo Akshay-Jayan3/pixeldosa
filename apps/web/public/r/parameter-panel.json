@@ -1,0 +1,186 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "parameter-panel",
+  "title": "Parameter Panel",
+  "description": "The controls beside the prompt: pick, don't describe. Takes `groups` (each a label and a set of `options` with a plain `label`, an optional `preview` thumbnail, a `costNote` and a `detail` line), the chosen `values` per group, `onChange`, a `summary` of what the choices add up to, and `onReset`. It answers the articulation barrier research directly: people can picture what they want but cannot name it, and style vocabulary is exactly the knowledge they lack, so options are shown as small previews they can recognise instead of words they must recall. Two further findings are built in: every option keeps a text label, because novel icons are misread almost universally, and any option that changes the price says so where it is chosen rather than in a bill afterwards. Purely presentational: you own the options, the previews and the pricing. Use it beside a prompt box for image, video or audio generation. Not for a settings page, and not for free-text parameters, which belong in Prompt Composer's controls.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/parameter-panel/parameter-panel.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type ParameterOption = {\n  id: string;\n  /** Plain words, never a branded name: \"Wide, 16:9\", not \"Cinemascope Pro\". */\n  label: string;\n  /** A small preview: a thumbnail, a shape, a swatch. Recognition beats recall. */\n  preview?: React.ReactNode;\n  /** What choosing this does to the price or the wait: \"+20 credits\". */\n  costNote?: string;\n  /** One line of help, shown under the group when this option is chosen. */\n  detail?: string;\n};\n\nexport type ParameterGroup = {\n  id: string;\n  /** \"Style\", \"Shape\", \"How many\". */\n  label: string;\n  options: ParameterOption[];\n};\n\nexport interface ParameterPanelProps extends Omit<React.ComponentPropsWithoutRef<\"section\">, \"title\" | \"onChange\"> {\n  /** Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3. */\n  headingLevel?: 2 | 3 | 4 | 5 | 6;\n  title?: string;\n  groups: ParameterGroup[];\n  /** Chosen option id per group id. */\n  values: Record<string, string>;\n  onChange: (groupId: string, optionId: string) => void;\n  /** What the current choices add up to: \"4 images · 1024 × 1024 · 40 credits\". */\n  summary?: string;\n  onReset?: () => void;\n}\n\n/**\n * The controls beside the prompt: pick, don't describe.\n *\n * Research on generative tools calls the core problem the articulation barrier — people\n * can picture what they want but can't name it, and style vocabulary (\"synth-wave\",\n * \"tilt-shift\") is exactly the knowledge they lack. The fix is recognition instead of\n * recall: small previews they can point at, with plain labels beside them. Two further\n * findings shape the API: novel icons are universally misread, so every option carries a\n * text label, and options that change the price say so where they're chosen rather than\n * in a bill afterwards.\n *\n * Holds completely still: it's the user's turn.\n */\nfunction ParameterPanel({\n  headingLevel = 3,\n  title = \"Settings\",\n  groups,\n  values,\n  onChange,\n  summary,\n  onReset,\n  className,\n  ...props\n}: ParameterPanelProps) {\n  const Heading = `h${headingLevel}` as \"h3\";\n  const headingId = React.useId();\n\n  return (\n    <section\n      aria-labelledby={headingId}\n      className={cn(\"flex flex-col gap-4 rounded-lg border bg-card p-4\", className)}\n      {...props}\n    >\n      <div className=\"flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1\">\n        <Heading id={headingId} className=\"text-sm font-medium text-foreground\">\n          {title}\n        </Heading>\n        {onReset ? (\n          <button\n            type=\"button\"\n            onClick={onReset}\n            className=\"rounded-md text-xs font-medium text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/40\"\n          >\n            Reset\n          </button>\n        ) : null}\n      </div>\n\n      {groups.map((group) => {\n        const chosenId = values[group.id];\n        const chosen = group.options.find((option) => option.id === chosenId);\n        return (\n          <fieldset key={group.id} className=\"flex flex-col gap-2\">\n            <legend className=\"text-xs text-muted-foreground\">{group.label}</legend>\n            <div className=\"flex flex-wrap gap-2\">\n              {group.options.map((option) => {\n                const active = option.id === chosenId;\n                return (\n                  <label\n                    key={option.id}\n                    className={cn(\n                      \"flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-1.5 transition-colors duration-[var(--pd-duration-instant)] motion-reduce:transition-none\",\n                      active ? \"border-[1.5px] border-foreground\" : \"border-input hover:bg-accent\",\n                      \"has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-ring/40\"\n                    )}\n                  >\n                    <input\n                      type=\"radio\"\n                      name={group.id}\n                      value={option.id}\n                      checked={active}\n                      onChange={() => onChange(group.id, option.id)}\n                      className=\"sr-only\"\n                    />\n                    {option.preview ? (\n                      <span\n                        aria-hidden=\"true\"\n                        className=\"flex h-12 w-16 items-center justify-center overflow-hidden rounded-md bg-muted\"\n                      >\n                        {option.preview}\n                      </span>\n                    ) : null}\n                    {/* The label always ships: an icon or a thumbnail alone is read wrong. */}\n                    <span className=\"flex flex-col px-0.5\">\n                      <span className={cn(\"text-xs\", active ? \"font-medium text-foreground\" : \"text-muted-foreground\")}>\n                        {option.label}\n                      </span>\n                      {option.costNote ? (\n                        <span className=\"text-[0.6875rem] text-muted-foreground tabular-nums\">{option.costNote}</span>\n                      ) : null}\n                    </span>\n                  </label>\n                );\n              })}\n            </div>\n            {chosen?.detail ? (\n              <p className=\"text-xs text-muted-foreground text-pretty\">{chosen.detail}</p>\n            ) : null}\n          </fieldset>\n        );\n      })}\n\n      {summary ? (\n        <p className=\"border-t pt-3 text-xs text-foreground text-pretty\">{summary}</p>\n      ) : null}\n    </section>\n  );\n}\n\nexport { ParameterPanel };\n",
+      "type": "registry:ui",
+      "target": "components/ui/parameter-panel.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Each group is a real `fieldset` of radio inputs with the input visually hidden behind its label, so arrow-key navigation, grouping and announcement come from the platform rather than from a custom roving-tabindex implementation that would have to be re-tested in every host app. The chosen value is caller-owned per group id, which lets a product persist presets, share them in a URL, or drive them from a model's suggestion without the component holding a second source of truth. `costNote` sits on the option rather than being derived, because only the caller knows how its pricing composes — quality multiplied by count multiplied by resolution is not something a component can infer from labels. `detail` renders once per group under the current choice instead of on every option, which keeps a panel of twelve options from becoming a wall of help text.",
+    "motionNotes": "Nothing animates beyond the standard instant colour change on a choice. Selection is carried by border weight and label weight rather than motion: this is the user's turn, and a panel that animates under a moving cursor invites mis-clicks. Under `prefers-reduced-motion` even those transitions are dropped.",
+    "schema": {
+      "component": "ParameterPanel",
+      "element": "section",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ParameterPanel",
+        "type": "object",
+        "properties": {
+          "headingLevel": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "description": "Level of the title heading, so it fits the outline of the page it's placed in. Defaults to 3."
+          },
+          "title": {
+            "type": "string"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ParameterGroup"
+            }
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Chosen option id per group id."
+          },
+          "summary": {
+            "type": "string",
+            "description": "What the current choices add up to: \"4 images · 1024 × 1024 · 40 credits\"."
+          }
+        },
+        "required": [
+          "groups",
+          "values"
+        ],
+        "$defs": {
+          "ParameterGroup": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "\"Style\", \"Shape\", \"How many\"."
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ParameterOption"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "options"
+            ]
+          },
+          "ParameterOption": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "Plain words, never a branded name: \"Wide, 16:9\", not \"Cinemascope Pro\"."
+              },
+              "preview": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "A small preview: a thumbnail, a shape, a swatch. Recognition beats recall."
+              },
+              "costNote": {
+                "type": "string",
+                "description": "What choosing this does to the price or the wait: \"+20 credits\"."
+              },
+              "detail": {
+                "type": "string",
+                "description": "One line of help, shown under the group when this option is chosen."
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onChange",
+          "required": true,
+          "params": [
+            {
+              "name": "groupId",
+              "type": "string"
+            },
+            {
+              "name": "optionId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "onReset",
+          "required": false,
+          "params": []
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Give every option a real `preview` where you can — a thumbnail of that style, a shape for an aspect ratio — and never ship an option that is only an icon.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

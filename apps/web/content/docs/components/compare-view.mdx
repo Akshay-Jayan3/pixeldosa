@@ -1,0 +1,66 @@
+---
+title: Compare View
+description: Before and after an AI edit — with a slider that actually works from the keyboard.
+---
+
+## Usage
+
+```tsx
+"use client";
+
+import { CompareView } from "@/components/ui/compare-view";
+
+<CompareView
+  title="Sky replaced"
+  aspectRatio="16 / 9"
+  before={{ label: "Original photo, overcast sky", content: <img src={original} alt="" /> }}
+  after={{ label: "AI edit, clear sky at golden hour", content: <img src={edited} alt="" /> }}
+  onChoose={keep}
+/>
+```
+
+## Why it exists
+
+Comparison sliders are everywhere in AI editing tools, and nearly all of them are
+mouse-only: a drag handle built from pointer maths, no keyboard, no announcement, often no
+description of either image.
+
+## Features
+
+- **A real `input[type=range]`.** Arrow keys, Home and End, touch and screen readers come
+  from the platform, not from custom code.
+- **It says what's being revealed:** "60% AI edit, clear sky at golden hour".
+- **Clipped, not resized,** so both halves stay pixel-aligned where people are looking for
+  differences.
+- **Side by side is one click away**, for anyone who'd rather see both at once.
+- **Labels are required** on both sides, because an unlabelled comparison means nothing to
+  anyone not looking at it.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `before` / `after` | `{ content, label }` | Required. `label` doubles as the description. |
+| `view` | `"slider" \| "side"` | Starting view. Defaults to `"slider"`. |
+| `allowViewChange` | `boolean` | Defaults to `true`. |
+| `onChoose` | `(choice) => void` | Adds "Keep the new one" / "Keep the original". |
+| `chooseAfterLabel` / `chooseBeforeLabel` | `string` | Say what keeping means. |
+| `aspectRatio` | `string` | Defaults to `"4 / 3"`. |
+| `title` | `string` | Defaults to `"Before and after"`. |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Defaults to `3`. |
+
+## Accessibility
+
+- The slider is a labelled range input: "Slide to compare original photo with AI edit".
+- `aria-valuetext` names how much of the new image is showing — "40% AI edit showing" —
+  not a bare number. The handle is the divider, so the announcement counts down as the
+  value goes up; reading the raw value out would tell a screen-reader user the opposite
+  of what is on screen.
+- Side-by-side uses `figure` and `figcaption`, so each side keeps its description.
+- Nothing animates, so the handle never lags behind the pointer or the arrow key.
+
+## When not to use
+
+- **Several results from one prompt:** use `Variation Grid`.
+- **Rewritten text:** use `Diff Accept`, which shows what changed word by word.
+- **Three or more versions:** this is a pair. Use `Response Versions` for a history.

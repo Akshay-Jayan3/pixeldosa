@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "response-feedback",
+  "title": "Response Feedback",
+  "description": "Thumbs with a reason that goes somewhere. Takes `reasons` (yours, in the user's words; a sensible default set ships), `onSubmit` receiving `{ verdict, reasonIds, comment }`, an optional `destination` naming where the feedback goes, `askOnUp` to ask after praise too, and `submitted` when you've already recorded feedback for this answer. A thumbs up sends on its own — praise shouldn't cost a form — while a thumbs down opens a small panel of reasons as multi-select chips with an optional comment, then a single Send. The confirmation names the destination, because a product that collects feedback without saying what happens to it is asking a favour it never repays. Purely presentational: you route the submission. Use it under an answer, beside AI Action Toolbar. Not for a support ticket, not for a rating that decides what the model does next, and not as the only route for reporting something harmful — that needs a path a person reads.",
+  "type": "registry:ui",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/response-feedback/response-feedback.tsx",
+      "target": "components/ui/response-feedback.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Route `onSubmit` somewhere a person actually reads.",
+  "meta": {
+    "engineeringNotes": "The asymmetry between up and down is the design: a thumbs up submits immediately and a thumbs down opens the reason panel, because the useful signal is concentrated in what went wrong and a form after praise costs goodwill for data nobody reads. Reasons are multi-select rather than a single choice, since an answer is usually wrong in more than one way, and they arrive as ids so the caller can route and aggregate them without parsing labels. The comment stays optional and is trimmed to undefined when empty, so a submission never carries a whitespace string that looks like feedback in a dashboard. After sending, the component collapses to a single sentence naming the destination instead of leaving the controls in place, which prevents the double-submit that turns one opinion into three.",
+    "motionNotes": "Nothing moves except the confirmation, which fades in once over `--pd-duration-base`. The reason panel appears without a slide or a height animation: it is the user's turn, and an animating panel under a cursor that is already moving toward a chip costs a mis-click. Under `prefers-reduced-motion` the fade is dropped."
+  }
+}

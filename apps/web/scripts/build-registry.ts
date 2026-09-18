@@ -20,6 +20,7 @@ const webRoot = resolve(here, "..");
 const repoRoot = resolve(webRoot, "../..");
 const registrySrc = resolve(repoRoot, "packages/ui/src/registry");
 const tokensCssVars = resolve(repoRoot, "packages/tokens/dist/theme-cssvars.json");
+const generatedSchemas = resolve(webRoot, "schemas.generated.json");
 
 type RegistryItem = {
   name: string;
@@ -39,6 +40,17 @@ if (!existsSync(tokensCssVars)) {
 }
 
 const themeVars = readJson<Record<string, Record<string, string>>>(tokensCssVars);
+
+if (!existsSync(generatedSchemas)) {
+  throw new Error(`Missing ${generatedSchemas}. Run \`tsx scripts/build-schemas.ts\` first.`);
+}
+
+type ItemSchema = {
+  primary: string;
+  components: Record<string, { component: string; element?: string; props: unknown; events: unknown[] }>;
+};
+
+const schemas = readJson<Record<string, ItemSchema>>(generatedSchemas);
 
 const dirs = readdirSync(registrySrc, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -82,6 +94,21 @@ for (const dir of dirs) {
 
   if (item.type === "registry:theme") {
     item.cssVars = { ...themeVars, ...(item.cssVars ?? {}) };
+  }
+
+  // The generated prop contract rides along with the item, so anything that installs
+  // or reads a component gets the same description of it that the compiler has.
+  const itemSchema = schemas[item.name];
+  if (itemSchema) {
+    const { primary, components } = itemSchema;
+    const subcomponents = Object.values(components).filter((c) => c.component !== primary);
+    item.meta = {
+      ...(item.meta ?? {}),
+      schema: components[primary],
+      ...(subcomponents.length > 0 ? { subcomponents } : {}),
+    };
+  } else if (item.type === "registry:ui") {
+    problems.push(`${item.name}: no generated schema — is the component file named ${item.name}.tsx?`);
   }
 
   items.push(item);

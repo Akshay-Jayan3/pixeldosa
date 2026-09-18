@@ -2,7 +2,22 @@
 
 import * as React from "react";
 
-import { AIActionToolbar, AIFormFill, type AIAction, type SmartFieldProposal } from "@pixeldosa/ui";
+import {
+  AIActionToolbar,
+  AIFormFill,
+  AIDisclosure,
+  CostEstimate,
+  DraftMode,
+  MediaResult,
+  ResponseFeedback,
+  type AIAction,
+  type AIDisclosureProps,
+  type CostEstimateProps,
+  type DraftItem,
+  type MediaResultProps,
+  type ResponseFeedbackProps,
+  type SmartFieldProposal,
+} from "@pixeldosa/ui";
 
 /**
  * Docs-only wrappers for components whose real API requires a function prop.
@@ -72,5 +87,97 @@ export function ActionToolbarSpecimen({
         {lastAction ? `Last action: ${lastAction}` : "Try the arrow keys — the strip is one tab stop."}
       </span>
     </div>
+  );
+}
+
+/** Cost Estimate with its buttons wired to nothing, for the docs previews. */
+export function CostEstimateSpecimen(props: Omit<CostEstimateProps, "onRun" | "onCancel" | "onAdjust"> & { withActions?: boolean; adjustLabel?: string }) {
+  const { withActions = true, adjustLabel, ...rest } = props;
+  return (
+    <CostEstimate
+      {...rest}
+      adjustLabel={adjustLabel}
+      onRun={withActions ? () => undefined : undefined}
+      onAdjust={adjustLabel ? () => undefined : undefined}
+      onCancel={withActions ? () => undefined : undefined}
+      className="w-full max-w-md"
+    />
+  );
+}
+
+/** Draft Mode holding real items, with its own state, for the docs previews. */
+export function DraftModeSpecimen({
+  items: initial = [],
+  enabled: initialEnabled = true,
+  offWarning,
+  headingLevel = 3,
+}: {
+  items?: DraftItem[];
+  enabled?: boolean;
+  offWarning?: string;
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
+}) {
+  const [enabled, setEnabled] = React.useState(initialEnabled);
+  const [items, setItems] = React.useState(initial);
+  return (
+    <DraftMode
+      className="w-full max-w-lg"
+      headingLevel={headingLevel}
+      enabled={enabled}
+      onEnabledChange={setEnabled}
+      items={items}
+      offWarning={offWarning}
+      onSend={(ids) => setItems((previous) => previous.filter((item) => !ids.includes(item.id)))}
+      onDiscard={(ids) => setItems((previous) => previous.filter((item) => !ids.includes(item.id)))}
+    />
+  );
+}
+
+/** Response Feedback with a no-op submit, for the docs previews. */
+export function ResponseFeedbackSpecimen(props: Omit<ResponseFeedbackProps, "onSubmit">) {
+  return <ResponseFeedback {...props} onSubmit={() => undefined} className="w-full max-w-md" />;
+}
+
+/** AI Disclosure with its consent buttons wired to local state, for the docs previews. */
+export function AIDisclosureSpecimen(props: Omit<AIDisclosureProps, "onAllow" | "onDecline" | "onDismiss">) {
+  const [answered, setAnswered] = React.useState<string | null>(null);
+  if (props.variant === "consent" && answered) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        You chose “{answered}”.{" "}
+        <button
+          type="button"
+          onClick={() => setAnswered(null)}
+          className="font-medium underline underline-offset-2 hover:no-underline"
+        >
+          Ask again
+        </button>
+      </p>
+    );
+  }
+  return (
+    <AIDisclosure
+      {...props}
+      className="w-full max-w-md"
+      onAllow={props.variant === "consent" ? () => setAnswered(props.allowLabel ?? "Allow") : undefined}
+      onDecline={props.variant === "consent" ? () => setAnswered(props.declineLabel ?? "Not now") : undefined}
+    />
+  );
+}
+
+/** Media Result with a stand-in image and no wired actions, for the docs previews. */
+export function MediaResultSpecimen(props: Omit<MediaResultProps, "children" | "onAction" | "actions">) {
+  return (
+    <MediaResult
+      {...props}
+      aspectRatio="4 / 5"
+      className="w-full max-w-[16rem]"
+      actions={[{ id: "use", label: "Use in the post", primary: true }, { id: "download", label: "Download" }]}
+      onAction={() => undefined}
+    >
+      <span aria-hidden="true" className="flex size-full items-end justify-center bg-agent-working-soft p-4">
+        <span className="h-3/4 w-1/3 rounded-t-full bg-foreground/70" />
+      </span>
+    </MediaResult>
   );
 }
