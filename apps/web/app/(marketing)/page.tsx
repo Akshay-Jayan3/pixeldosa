@@ -122,9 +122,7 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="max-w-2xl text-lg text-muted-foreground text-pretty">
-              Components, blocks and agent skills for AI products that do real work: plans people can edit, runs
-              they can steer, approvals that say what can't be undone, and an agent they can read. Pure React, no
-              SDK lock-in, installable by you or your coding agent.
+              A React component system for building clear, controllable AI agent interfaces.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 mt-6">
