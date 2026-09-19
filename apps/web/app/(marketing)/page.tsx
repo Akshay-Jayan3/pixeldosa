@@ -8,6 +8,7 @@ import { CastStrip } from "@/components/cast-strip";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentThumbnail } from "@/components/component-thumbnail";
 import { HeroAgent } from "@/components/hero-agent";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteGuide, type GuideStop } from "@/components/site-guide";
 import { MarkerSwatch } from "@/components/sketch";
 import { demos } from "@/components/registry-demos";
@@ -94,7 +95,8 @@ export default function HomePage() {
   const HeroDemo = demos["ai-chat-experience"];
 
   return (
-    <main>
+    <>
+      <main>
       {/* Hero */}
       <section data-guide="hero" className="border-b">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-16 sm:px-6 sm:pt-24 lg:grid-cols-[1.3fr_1fr]">
@@ -375,6 +377,8 @@ export default function HomePage() {
         </div>
       </section>
       <SiteGuide stops={GUIDE} />
-    </main>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

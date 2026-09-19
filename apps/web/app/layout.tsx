@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
-import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 import "@fontsource/kalam/400.css";
@@ -41,7 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-svh font-sans antialiased ">
         <SiteHeader />
         {children}
-        <SiteFooter />
         <Analytics />
       </body>
     </html>

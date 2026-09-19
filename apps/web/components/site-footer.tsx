@@ -2,10 +2,8 @@ import Link from "next/link";
 
 import { AgentFigure } from "@pixeldosa/ui";
 
-import { CodeBlock } from "@/components/code-block";
 import { CHANGELOG } from "@/lib/changelog";
 import { PORTFOLIO_URL, WORK_EMAIL_URL } from "@/lib/links";
-import { installCommand } from "@/lib/registry";
 
 const REPO_URL = "https://github.com/Akshay-Jayan3/pixeldosa";
 
@@ -54,9 +52,8 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
  *
  * Three decisions separate this from the standard four-column link footer:
  *
- * - **It leads with the next action.** Someone who has just read a component page wants
- *   the install line, not sixteen links. So the install command is the first thing here,
- *   copyable, and the links come after it.
+ * - **It keeps the next action visible.** Someone who has just read a component page can
+ *   find the relevant docs and project links here without a padded sitemap.
  * - **The counts are read from the registry and the changelog**, not typed in. A footer
  *   that claims "50+ components" is a maintenance promise nobody keeps; this one cannot
  *   say a number the build doesn't agree with.
@@ -73,12 +70,8 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-16 border-t">
-
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
-          {/* min-w-0: a grid item will not shrink below its content, and the install
-              command is one long unbreakable string — without this the column grows to
-              fit it and the whole page scrolls sideways on a phone. */}
           <div className="flex min-w-0 flex-col gap-4">
             <div className="flex items-center gap-2 font-semibold tracking-tight">
               <AgentFigure variant="mark" size="md" pose="idle" hideLabel aria-hidden="true" still />
@@ -89,9 +82,6 @@ export function SiteFooter() {
               trust an agent. Plain React, no SDK or protocol required. Copy the source and
               keep the craft.
             </p>
-            <div>
-              <CodeBlock code={installCommand("pixeldosa-theme")} language="bash" />
-            </div>
           </div>
 
           <nav

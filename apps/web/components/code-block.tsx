@@ -33,7 +33,7 @@ export function CodeBlock({ code, language, className, collapsible }: CodeBlockP
       <button
         type="button"
         onClick={copy}
-        className="absolute right-2 top-2 z-10 rounded-md border bg-card px-2 py-1 font-mono text-xs text-muted-foreground transition-colors duration-[var(--pd-duration-instant)] hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
+        className="absolute right-4 top-2 z-10 rounded-md border bg-card px-2 py-1 font-mono text-xs text-muted-foreground transition-colors duration-[var(--pd-duration-instant)] hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
       >
         {copied ? "copied" : "copy"}
       </button>
