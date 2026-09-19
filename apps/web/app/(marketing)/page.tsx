@@ -166,7 +166,12 @@ export default function HomePage() {
               href="/docs/components/ai-chat-experience"
               className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
-              View block →
+              <span className="inline-flex items-center gap-1.5">
+                View block
+                <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5">
+                  <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
             </Link>
           </div>
           <div className="relative">
@@ -274,7 +279,12 @@ export default function HomePage() {
             href="/docs/components/agent-figure"
             className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            Agent Figure →
+            <span className="inline-flex items-center gap-1.5">
+              Agent Figure
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5">
+                <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
           </Link>
         </div>
         <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">

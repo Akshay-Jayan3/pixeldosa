@@ -20,12 +20,9 @@ function BentoCard({ name, className }: { name: string; className: string }) {
       <ComponentThumbnail name={name} eager className="min-h-0 flex-1 aspect-auto" />
       <div className="flex items-center justify-between gap-3 border-t px-4 py-3">
         <p className="truncate text-sm font-medium text-foreground">{title}</p>
-        <span
-          aria-hidden="true"
-          className="text-sm text-muted-foreground transition-transform duration-[var(--pd-duration-fast)] group-hover:translate-x-0.5 group-hover:text-foreground"
-        >
-          ↗
-        </span>
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground">
+          <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </div>
     </Link>
   );
@@ -43,7 +40,12 @@ export function ComponentBento() {
             </h2>
           </div>
           <Link href="/docs/components" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-            Browse all components →
+            <span className="inline-flex items-center gap-1.5">
+              Browse all components
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5">
+                <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
           </Link>
         </div>
         <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
