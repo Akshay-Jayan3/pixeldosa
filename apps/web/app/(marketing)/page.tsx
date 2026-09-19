@@ -135,13 +135,6 @@ export default function HomePage() {
                 <Link href="/docs/ai">Build with AI</Link>
               </Button>
             </div>
-
-            {/* The position is worth stating; the handwriting and the struck-through jabs
-                at everyone else were not. Said plainly it reads as a standard held, rather
-                than a swipe. */}
-            <p className="text-sm text-muted-foreground text-pretty">
-              Human-friendly, never human-deceptive. No glowing orbs, no glass, no gradient blobs.
-            </p>
           </div>
 
           <HeroWorkbench />
