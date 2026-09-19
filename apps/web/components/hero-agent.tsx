@@ -47,12 +47,6 @@ export function HeroAgent() {
           <path d="M50 1 L50 6" stroke="var(--foreground)" strokeWidth="1.2" strokeLinecap="round" />
         </svg>
         <AgentFigure pose={current.pose} size="lg" hideLabel label={current.note} className="[&_svg]:size-48" />
-        <span
-          aria-hidden="true"
-          className="absolute -right-24 top-6 hidden w-24 rotate-3 font-hand text-sm leading-tight text-muted-foreground xl:block"
-        >
-          {current.yourTurn ? "still means your turn" : "moving means it's working"}
-        </span>
       </div>
       <p className="min-h-8 text-center font-hand text-xl leading-snug text-foreground" aria-live="polite">
         {current.note}

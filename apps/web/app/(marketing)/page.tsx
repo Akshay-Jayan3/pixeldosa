@@ -9,7 +9,7 @@ import { CodeBlock } from "@/components/code-block";
 import { ComponentThumbnail } from "@/components/component-thumbnail";
 import { HeroAgent } from "@/components/hero-agent";
 import { SiteGuide, type GuideStop } from "@/components/site-guide";
-import { MarginNote, MarkerSwatch, Scribble } from "@/components/sketch";
+import { MarkerSwatch } from "@/components/sketch";
 import { demos } from "@/components/registry-demos";
 import { isFoundation } from "@/lib/component-groups";
 import { EARLY_ACCESS_URL } from "@/lib/links";
@@ -68,15 +68,16 @@ const MARKERS = [
   { name: "Green", role: "done", body: "A finished result being handed to you. Used sparingly.", color: "done" },
 ] as const;
 
+/** In page order — the cast now sits after the rules, not before the chat block. */
 const GUIDE: GuideStop[] = [
   { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through PixelDosa. Scroll whenever you like." },
-  { id: "cast", pose: "listening", text: "This is me. Each pose matches something a real run is doing." },
   { id: "chat", pose: "working", text: "Here I'm inside a full assistant screen. Pick a question and watch." },
   { id: "stages", pose: "planning", text: "Trust gets decided before, during and after a run. Each moment has its own pieces." },
   { id: "rules", pose: "thinking", text: "Four colours, four rules. Orange is the only one that asks you for something." },
+  { id: "cast", pose: "listening", text: "This is me. Each pose matches something a real run is doing." },
   { id: "agents", pose: "reading", text: "Your coding agent can install all of this by name." },
   { id: "next", pose: "asking", text: "Templates are next, and early access is free. Want one?" },
-  { id: "beta", pose: "done", text: "That's the tour. New pieces land every week." },
+  { id: "beta", pose: "done", text: "That's the tour. Everything here is in the changelog." },
 ];
 
 const AGENT_SETUP = `npx shadcn@latest add @pixeldosa/ai-chat-experience
@@ -104,21 +105,25 @@ export default function HomePage() {
             >
               <span className="rounded-full bg-foreground px-2 py-0.5 font-medium text-background">Beta</span>
               <span className="tabular-nums">
-                {componentCount} components · {blockCount} blocks · new every week
+                {componentCount} components · {blockCount} blocks
               </span>
             </Link>
 
-            <h1 className="max-w-3xl font-hand text-5xl font-bold leading-[1.05] text-balance sm:text-7xl">
+            {/* Plain type, not the hand font. The headline is where a component library is
+                judged on seriousness before a single component is read, and a handwritten
+                one at this size reads as a personal project. The character stays as a mark;
+                it is not the argument. */}
+            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl">
               {/* The space sits outside each word: inline-blocks drop trailing whitespace. */}
-              {["Give", "your", "agents"].map((word, index) => (
+              {["Agent", "interfaces", "people", "can"].map((word, index) => (
                 <Fragment key={word}>
                   <span className="pd-word" style={{ "--i": index } as React.CSSProperties}>
                     {word}
                   </span>{" "}
                 </Fragment>
               ))}
-              <span className="pd-word" style={{ "--i": 3 } as React.CSSProperties}>
-                <Scribble delay={0.7}>life</Scribble>.
+              <span className="pd-word" style={{ "--i": 4 } as React.CSSProperties}>
+                trust.
               </span>
             </h1>
             <p className="max-w-2xl text-lg text-muted-foreground text-pretty">
@@ -136,34 +141,16 @@ export default function HomePage() {
               </Button>
             </div>
 
-            <p className="font-hand text-lg text-muted-foreground">
-              Human-friendly, never human-deceptive. No <s>glowing orbs</s>, no <s>glass</s>, no{" "}
-              <s>gradient blobs</s>.
+            {/* The position is worth stating; the handwriting and the struck-through jabs
+                at everyone else were not. Said plainly it reads as a standard held, rather
+                than a swipe. */}
+            <p className="text-sm text-muted-foreground text-pretty">
+              Human-friendly, never human-deceptive. No glowing orbs, no glass, no gradient blobs.
             </p>
           </div>
 
           <HeroAgent />
         </div>
-      </section>
-
-      {/* The cast */}
-      <section data-guide="cast" aria-labelledby="cast" className="pd-reveal mx-auto max-w-6xl px-4 pt-20 sm:px-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <h2 id="cast" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            An agent with a <Scribble variant="swoosh">body</Scribble>.
-          </h2>
-          <Link
-            href="/docs/components/agent-figure"
-            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Agent Figure →
-          </Link>
-        </div>
-        <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
-          Its pose shows what a run is doing, how sure it is, and when it needs you. It moves while it works and
-          holds still when it's your turn.
-        </p>
-        <CastStrip />
       </section>
 
       {/* The live block */}
@@ -184,9 +171,6 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="relative">
-            <MarginNote arrow="down-left" className="absolute -right-44 top-10 hidden xl:inline-flex">
-              pick a question and watch it work
-            </MarginNote>
             {HeroDemo ? <HeroDemo /> : null}
           </div>
         </div>
@@ -196,7 +180,7 @@ export default function HomePage() {
       <section data-guide="stages" aria-labelledby="stages" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="pd-reveal max-w-2xl">
           <h2 id="stages" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            Trust is decided in <Scribble variant="loop" color="waiting">three moments</Scribble>.
+            Trust is decided in three moments.
           </h2>
           <p className="mt-3 text-muted-foreground text-pretty">
             A chat box covers none of them. Each moment has its own components, designed from research on where
@@ -243,7 +227,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="max-w-2xl">
             <h2 id="grammar" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              One set of <Scribble variant="swoosh" color="ink">rules</Scribble>, in every component.
+              One set of rules, in every component.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
               Components agree with each other because they share rules. That's what makes a screen built from
@@ -264,7 +248,7 @@ export default function HomePage() {
             ))}
           </ul>
 
-          <h3 className="mt-14 font-hand text-2xl font-bold">Four markers, four meanings. Everything else is ink.</h3>
+          <h3 className="mt-14 text-xl font-medium tracking-tight">Four markers, four meanings. Everything else is ink.</h3>
           <ul className="pd-reveal mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {MARKERS.map((marker) => (
               <li key={marker.color} className="flex gap-3">
@@ -281,12 +265,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* The cast */}
+      <section data-guide="cast" aria-labelledby="cast" className="pd-reveal mx-auto max-w-6xl px-4 pt-20 sm:px-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <h2 id="cast" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            You can tell whose turn it is.
+          </h2>
+          <Link
+            href="/docs/components/agent-figure"
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Agent Figure →
+          </Link>
+        </div>
+        <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
+          The agent's pose is driven by the real run state, so it moves while it works and holds still when the
+          next move is yours. Optional — every other component states the same thing in words.
+        </p>
+        <CastStrip />
+      </section>
+
       {/* Build with a coding agent */}
       <section data-guide="agents" aria-labelledby="agents" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="pd-reveal grid items-center gap-10 lg:grid-cols-2">
           <div>
             <h2 id="agents" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              Your coding agent <Scribble color="done">knows</Scribble> how to use it.
+              Your coding agent knows how to use it.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
               Install through the shadcn CLI, and add the agent guide so Claude Code, Cursor or Copilot pick the
@@ -323,7 +327,7 @@ export default function HomePage() {
       <section data-guide="next" aria-labelledby="next" className="border-t">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <h2 id="next" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            Coming next: <Scribble variant="loop">whole products</Scribble>, not just parts.
+            Coming next: whole products, not just parts.
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
             Templates are full starter apps built from PixelDosa, for AI that makes and does: an image studio, a
@@ -360,7 +364,7 @@ export default function HomePage() {
       <section data-guide="beta" className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-14 sm:flex-row sm:items-center sm:px-6">
           <div>
-            <h2 className="text-lg font-medium tracking-tight">In beta, shipping weekly.</h2>
+            <h2 className="text-lg font-medium tracking-tight">In beta.</h2>
             <p className="mt-1 text-sm text-muted-foreground text-pretty">
               APIs may change between drops, and every change is noted. Tell us what you'd use next.
             </p>

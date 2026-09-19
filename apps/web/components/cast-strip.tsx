@@ -31,7 +31,7 @@ export function CastStrip() {
   return (
     <div className="mt-8 flex flex-col gap-4">
       <div role="group" aria-label="Whose turn" className="flex items-center gap-3 self-start">
-        <span className="font-hand text-base text-muted-foreground">Try it:</span>
+        <span className="text-sm text-muted-foreground">Try it:</span>
         <div className="inline-flex rounded-md border p-0.5">
           {[
             { value: false, label: "Agent's turn" },
