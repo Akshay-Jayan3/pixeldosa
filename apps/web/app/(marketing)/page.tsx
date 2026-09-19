@@ -6,14 +6,14 @@ import { Button } from "@pixeldosa/ui";
 
 import { CastStrip } from "@/components/cast-strip";
 import { CodeBlock } from "@/components/code-block";
+import { ComponentBento } from "@/components/component-bento";
 import { ComponentThumbnail } from "@/components/component-thumbnail";
-import { HeroAgent } from "@/components/hero-agent";
+import { HeroWorkbench } from "@/components/hero-workbench";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteGuide, type GuideStop } from "@/components/site-guide";
 import { MarkerSwatch } from "@/components/sketch";
 import { demos } from "@/components/registry-demos";
-import { isFoundation } from "@/lib/component-groups";
-import { getComponents, getRegistryItem, isBlock } from "@/lib/registry";
+import { getRegistryItem } from "@/lib/registry";
 
 const STAGES = [
   {
@@ -71,13 +71,12 @@ const MARKERS = [
 /** In page order — the cast now sits after the rules, not before the chat block. */
 const GUIDE: GuideStop[] = [
   { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through PixelDosa. Scroll whenever you like." },
+  { id: "showcase", pose: "working", text: "Every moment has a component. Browse the moving set, then open any piece." },
   { id: "chat", pose: "working", text: "Here I'm inside a full assistant screen. Pick a question and watch." },
   { id: "stages", pose: "planning", text: "Trust gets decided before, during and after a run. Each moment has its own pieces." },
   { id: "rules", pose: "thinking", text: "Four colours, four rules. Orange is the only one that asks you for something." },
   { id: "cast", pose: "listening", text: "This is me. Each pose matches something a real run is doing." },
   { id: "agents", pose: "reading", text: "Your coding agent can install all of this by name." },
-  { id: "next", pose: "asking", text: "Templates are next, and early access is free. Want one?" },
-  { id: "beta", pose: "done", text: "That's the tour. Everything here is in the changelog." },
 ];
 
 const AGENT_SETUP = `npx shadcn@latest add @pixeldosa/ai-chat-experience
@@ -88,9 +87,6 @@ function titleFor(name: string) {
 }
 
 export default function HomePage() {
-  const documented = getComponents().filter((item) => !isFoundation(item));
-  const blockCount = documented.filter(isBlock).length;
-  const componentCount = documented.length - blockCount;
   const HeroDemo = demos["ai-chat-experience"];
 
   return (
@@ -98,16 +94,14 @@ export default function HomePage() {
       <main>
       {/* Hero */}
       <section data-guide="hero" className="border-b">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-16 sm:px-6 sm:pt-24 lg:grid-cols-[1.3fr_1fr]">
-          <div className="flex flex-col items-start gap-5">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24">
+          <div className="flex max-w-3xl flex-col items-center gap-8">
             <Link
               href="/changelog"
               className="group inline-flex items-center gap-2 rounded-full border bg-card py-1 pl-1 pr-3 text-xs text-muted-foreground transition-colors duration-[var(--pd-duration-instant)] hover:text-foreground"
             >
               <span className="rounded-full bg-foreground px-2 py-0.5 font-medium text-background">Beta</span>
-              <span className="tabular-nums">
-                {componentCount} components · {blockCount} blocks
-              </span>
+              <span className="tabular-nums">Version 0.1.0</span>
             </Link>
 
             {/* Plain type, not the hand font. The headline is where a component library is
@@ -133,11 +127,11 @@ export default function HomePage() {
               SDK lock-in, installable by you or your coding agent.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Button asChild size="lg">
+            <div className="flex flex-wrap items-center gap-3 mt-6">
+              <Button asChild size="default">
                 <Link href="/docs/components">Browse components</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button asChild size="default" variant="outline">
                 <Link href="/docs/ai">Build with AI</Link>
               </Button>
             </div>
@@ -150,9 +144,13 @@ export default function HomePage() {
             </p>
           </div>
 
-          <HeroAgent />
+          <HeroWorkbench />
         </div>
       </section>
+
+      <div id="showcase">
+        <ComponentBento />
+      </div>
 
       {/* The live block */}
       <section data-guide="chat" aria-labelledby="chat" className="mx-auto max-w-6xl px-4 pt-20 sm:px-6">

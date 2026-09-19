@@ -32,7 +32,7 @@ function ComponentCard({ item, wide, isNew }: { item: RegistryItem; wide: boolea
         wide && "sm:col-span-2"
       )}
     >
-      <ComponentThumbnail name={item.name} tall={wide} />
+      <ComponentThumbnail name={item.name} title={item.title} tall={wide} staticPreview={wide} />
       <div className="flex flex-col gap-1 border-t px-5 py-4">
         <h3 className="flex items-center gap-1.5 font-medium text-foreground">
           {item.title}

@@ -19,14 +19,14 @@ export const metadata: Metadata = {
 /**
  * Applied before first paint so the correct theme is already on <html> when the
  * document renders. Doing this in an effect instead produces a light-mode flash
- * on every dark-mode load. Light (ink on paper) is the default identity — an
- * explicit stored preference is the only thing that overrides it, system preference
- * is not consulted.
+ * on every dark-mode load. Dark (near-black ground, near-white ink) is the default
+ * identity — an explicit stored light preference is the only thing that overrides it;
+ * system preference is not consulted.
  */
 const themeScript = `
 try {
   var stored = localStorage.getItem('pd-theme');
-  var dark = stored === 'dark';
+  var dark = stored !== 'light';
   document.documentElement.classList.toggle('dark', dark);
 } catch (e) {}
 `;
