@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import type * as React from "react";
 import Link from "next/link";
 
-import { AgentFigure, Button } from "@pixeldosa/ui";
+import { Button } from "@pixeldosa/ui";
 
 import { CastStrip } from "@/components/cast-strip";
 import { CodeBlock } from "@/components/code-block";
@@ -13,7 +13,6 @@ import { SiteGuide, type GuideStop } from "@/components/site-guide";
 import { MarkerSwatch } from "@/components/sketch";
 import { demos } from "@/components/registry-demos";
 import { isFoundation } from "@/lib/component-groups";
-import { EARLY_ACCESS_URL } from "@/lib/links";
 import { getComponents, getRegistryItem, isBlock } from "@/lib/registry";
 
 const STAGES = [
@@ -325,57 +324,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What's next: free early access, and working with me */}
-      <section data-guide="next" aria-labelledby="next" className="border-t">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <h2 id="next" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            Coming next: whole products, not just parts.
-          </h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
-            Templates are full starter apps built from PixelDosa, for AI that makes and does: an image studio, a
-            video studio, a research agent, an inbox for background agents.
-          </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="pd-lift pd-reveal flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
-              <AgentFigure pose="asking" size="sm" hideLabel aria-hidden="true" />
-              <h3 className="text-lg font-medium">Get early access, free</h3>
-              <p className="text-sm text-muted-foreground text-pretty">
-                Tell us what you're building and which templates you'd use. The first ones will be shaped by the
-                answers.
-              </p>
-              <Button asChild className="mt-auto">
-                <a href={EARLY_ACCESS_URL}>Request early access</a>
-              </Button>
-            </div>
-            <div className="pd-lift pd-reveal flex flex-col items-start gap-3 rounded-xl border bg-card p-6">
-              <AgentFigure pose="working" size="sm" hideLabel aria-hidden="true" />
-              <h3 className="text-lg font-medium">Building an AI product now?</h3>
-              <p className="text-sm text-muted-foreground text-pretty">
-                I build interfaces for agents and generation features, custom components on PixelDosa, and the
-                design systems underneath.
-              </p>
-              <Button asChild variant="outline" className="mt-auto">
-                <Link href="/work-with-me">Work with me</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Beta */}
-      <section data-guide="beta" className="border-t">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-14 sm:flex-row sm:items-center sm:px-6">
-          <div>
-            <h2 className="text-lg font-medium tracking-tight">In beta.</h2>
-            <p className="mt-1 text-sm text-muted-foreground text-pretty">
-              APIs may change between drops, and every change is noted. Tell us what you'd use next.
-            </p>
-          </div>
-          <Button asChild variant="outline">
-            <Link href="/changelog">See the changelog</Link>
-          </Button>
-        </div>
-      </section>
       <SiteGuide stops={GUIDE} />
       </main>
       <SiteFooter />
