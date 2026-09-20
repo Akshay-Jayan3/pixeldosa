@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     siteName: "PixelDosa",
     title: "PixelDosa — Agent interfaces people can trust",
     description:
-      "Open-source React components and interaction patterns for building clear, controllable AI agent interfaces.",
+      "React components and interaction patterns for building clear, controllable AI agent interfaces.",
     locale: "en_US",
     images: [
       {
