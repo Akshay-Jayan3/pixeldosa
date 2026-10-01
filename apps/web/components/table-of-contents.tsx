@@ -8,8 +8,8 @@ import type { TocHeading } from "@/lib/toc";
 /**
  * The right-hand "On this page" rail, tracked to scroll position via
  * IntersectionObserver rather than a scroll-position calculation — cheaper,
- * and it stays correct if section heights change (e.g. a collapsible source
- * block expanding).
+ * and it stays correct if section heights change (e.g. an example preview
+ * resizing).
  */
 export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   const [activeId, setActiveId] = React.useState<string | null>(headings[0]?.id ?? null);

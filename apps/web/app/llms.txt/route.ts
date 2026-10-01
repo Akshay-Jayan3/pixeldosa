@@ -1,6 +1,6 @@
 import { isFoundation, groupFor } from "@/lib/component-groups";
 import { SITE_URL, getAgentGuide, getComponentDoc } from "@/lib/docs";
-import { getComponents, installCommand, type RegistryItem } from "@/lib/registry";
+import { getComponents, installCommand, isPro, PRO_REGISTRY_CONFIG, type RegistryItem } from "@/lib/registry";
 
 export const dynamic = "force-static";
 
@@ -11,7 +11,7 @@ export const dynamic = "force-static";
  */
 function line(item: RegistryItem): string {
   const summary = getComponentDoc(item.name)?.frontmatter.description || item.description;
-  return `- [${item.title}](${SITE_URL}/llms/${item.name}.md): ${summary}`;
+  return `- [${item.title}](${SITE_URL}/llms/${item.name}.md)${isPro(item) ? " (Pro)" : ""}: ${summary}`;
 }
 
 /**
@@ -44,6 +44,18 @@ export function GET() {
     "```",
     "",
     "Install `pixeldosa-theme` explicitly: as a dependency of a component it adds motion tokens but keeps colours the project already defines. Installed directly, it applies PixelDosa's WCAG AA palette.",
+    // Said only once something is Pro: an agent told about a registry with nothing in it
+    // would go looking for components that don't exist.
+    ...(items.some(isPro)
+      ? [
+          "",
+          "Components marked (Pro) install from a second registry that needs a PixelDosa Pro licence key. Add both registries, and set `PIXELDOSA_PRO_KEY` in `.env.local`. Only install a Pro component when that key is set; otherwise tell the user it's Pro, or use a free component.",
+          "",
+          "```json",
+          PRO_REGISTRY_CONFIG,
+          "```",
+        ]
+      : []),
     "",
     "## Blocks",
     "",

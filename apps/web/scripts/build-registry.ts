@@ -10,15 +10,21 @@
  *
  * The theme item's cssVars are injected from `@pixeldosa/tokens` build output so
  * the published theme can never drift from the token modules.
+ *
+ * `--pro` builds the Pro registry instead: `packages/ui/src/registry-pro` into
+ * `registry-pro.json`, which `shadcn build` turns into `.registry-pro/`. That folder is
+ * never under `public/`; the site serves it only through the key-checked
+ * `/api/registry/[name]` route. Validation is the same either way.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "..");
 const repoRoot = resolve(webRoot, "../..");
-const registrySrc = resolve(repoRoot, "packages/ui/src/registry");
+const pro = process.argv.includes("--pro");
+const registrySrc = resolve(repoRoot, pro ? "packages/ui/src/registry-pro" : "packages/ui/src/registry");
 const tokensCssVars = resolve(repoRoot, "packages/tokens/dist/theme-cssvars.json");
 const generatedSchemas = resolve(webRoot, "schemas.generated.json");
 
@@ -52,10 +58,14 @@ type ItemSchema = {
 
 const schemas = readJson<Record<string, ItemSchema>>(generatedSchemas);
 
-const dirs = readdirSync(registrySrc, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .sort();
+// The Pro folder holds nothing until the first Pro component exists; that is an empty
+// registry, not an error.
+const dirs = existsSync(registrySrc)
+  ? readdirSync(registrySrc, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort()
+  : [];
 
 const items: RegistryItem[] = [];
 const problems: string[] = [];
@@ -92,6 +102,12 @@ for (const dir of dirs) {
     }
   }
 
+  // A free item that pulled in a Pro one would fail to install for everyone without a key.
+  const dependencies = (item.registryDependencies ?? []) as string[];
+  if (!pro && dependencies.some((dependency) => dependency.startsWith("@pixeldosa-pro/"))) {
+    problems.push(`${item.name}: a free item can't depend on a Pro item`);
+  }
+
   if (item.type === "registry:theme") {
     item.cssVars = { ...themeVars, ...(item.cssVars ?? {}) };
   }
@@ -121,15 +137,16 @@ if (problems.length > 0) {
 
 const registry = {
   $schema: "https://ui.shadcn.com/schema/registry.json",
-  name: "pixeldosa",
+  name: pro ? "pixeldosa-pro" : "pixeldosa",
   homepage: "https://pixeldosa.akshayjayan.com",
   items,
 };
 
-writeFileSync(
-  resolve(webRoot, "registry.json"),
-  `${JSON.stringify(registry, null, 2)}\n`,
-  "utf8"
-);
+// The Pro output must mirror the source exactly: an item deleted from registry-pro
+// can't keep being served from an earlier build.
+if (pro) rmSync(resolve(webRoot, ".registry-pro"), { recursive: true, force: true });
 
-console.log(`registry.json → ${items.length} item(s): ${items.map((i) => i.name).join(", ")}`);
+const outName = pro ? "registry-pro.json" : "registry.json";
+writeFileSync(resolve(webRoot, outName), `${JSON.stringify(registry, null, 2)}\n`, "utf8");
+
+console.log(`${outName} → ${items.length} item(s): ${items.map((i) => i.name).join(", ")}`);

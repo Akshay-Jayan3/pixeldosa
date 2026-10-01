@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   // several V8 heaps at once against ~170 pages, and the build dies with an allocation
   // failure rather than a useful error. One worker is slower and finishes.
   experimental: { cpus: 1, workerThreads: false },
+  // The Pro registry route reads its JSON at request time from a computed path, which
+  // file tracing can't follow; without this the folder wouldn't exist on Vercel.
+  outputFileTracingIncludes: { "/api/registry/[name]": ["./.registry-pro/**/*"] },
 };
 
 export default nextConfig;

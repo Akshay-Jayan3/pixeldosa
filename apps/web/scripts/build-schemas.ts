@@ -33,7 +33,8 @@ import ts from "typescript";
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "..");
 const repoRoot = resolve(webRoot, "../..");
-const registrySrc = resolve(repoRoot, "packages/ui/src/registry");
+/** Free and Pro items get the same contract; only where each is published differs. */
+const registryRoots = ["registry", "registry-pro"].map((dir) => resolve(repoRoot, "packages/ui/src", dir));
 
 type JsonSchema = Record<string, unknown>;
 
@@ -65,14 +66,28 @@ const pascal = (dir: string) =>
     .join("")
     .replace(/^Ai(?=[A-Z])/, "AI");
 
-const dirs = readdirSync(registrySrc, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .sort();
+/**
+ * Every item directory, free and Pro. The name is the key everywhere (schema, docs URL,
+ * install command), so a name used in both folders would let one shadow the other.
+ */
+const items = registryRoots
+  .filter((root) => existsSync(root))
+  .flatMap((root) =>
+    readdirSync(root, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => ({ dir: entry.name, path: join(root, entry.name, `${entry.name}.tsx`) }))
+  )
+  .sort((a, b) => (a.dir < b.dir ? -1 : a.dir > b.dir ? 1 : 0));
 
-const sources = dirs
-  .map((dir) => join(registrySrc, dir, `${dir}.tsx`))
-  .filter((path) => existsSync(path));
+const duplicates = items.filter((item, index) => items.findIndex((other) => other.dir === item.dir) !== index);
+if (duplicates.length > 0) {
+  console.error(
+    `Schema generation failed: ${duplicates.map((item) => item.dir).join(", ")} exists in both registry and registry-pro`
+  );
+  process.exit(1);
+}
+
+const sources = items.map((item) => item.path).filter((path) => existsSync(path));
 
 const program = ts.createProgram(sources, {
   jsx: ts.JsxEmit.ReactJSX,
@@ -361,8 +376,7 @@ function schemaFor(declaration: ts.InterfaceDeclaration): ComponentSchema {
 const output: Record<string, ItemSchema> = {};
 const problems: string[] = [];
 
-for (const dir of dirs) {
-  const path = join(registrySrc, dir, `${dir}.tsx`);
+for (const { dir, path } of items) {
   if (!existsSync(path)) continue; // theme and skill items have no component
 
   const source = program.getSourceFile(path);

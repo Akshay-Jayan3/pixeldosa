@@ -26,6 +26,8 @@ export type RegistryItem = {
     engineeringNotes: string;
     motionNotes?: string;
   };
+  /** Set from the folder an item lives in, never authored: free, or Pro behind a key. */
+  access: "free" | "pro";
 };
 
 /**
@@ -34,6 +36,16 @@ export type RegistryItem = {
  * share one authored source; if a doc page renders, the registry item exists.
  */
 const REGISTRY_SRC = resolve(process.cwd(), "../../packages/ui/src/registry");
+const REGISTRY_PRO_SRC = resolve(process.cwd(), "../../packages/ui/src/registry-pro");
+
+/** What a buyer adds to components.json so `@pixeldosa-pro/<name>` installs with their key. */
+export const PRO_REGISTRY_CONFIG = `"registries": {
+  "@pixeldosa": "https://pixeldosa.akshayjayan.com/r/{name}.json",
+  "@pixeldosa-pro": {
+    "url": "https://pixeldosa.akshayjayan.com/api/registry/{name}",
+    "headers": { "Authorization": "Bearer \${PIXELDOSA_PRO_KEY}" }
+  }
+}`;
 
 export const COMPONENT_CATEGORIES = [
   { id: "actions", label: "Actions" },
@@ -45,15 +57,21 @@ export const COMPONENT_CATEGORIES = [
 
 let cache: RegistryItem[] | null = null;
 
+function readItems(root: string, access: RegistryItem["access"]): RegistryItem[] {
+  if (!existsSync(root)) return [];
+  return readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join(root, entry.name, "registry-item.json"))
+    .filter((path) => existsSync(path))
+    .map((path) => ({ ...(JSON.parse(readFileSync(path, "utf8")) as RegistryItem), access }));
+}
+
 export function getRegistryItems(): RegistryItem[] {
   if (cache) return cache;
 
-  const items = readdirSync(REGISTRY_SRC, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => join(REGISTRY_SRC, entry.name, "registry-item.json"))
-    .filter((path) => existsSync(path))
-    .map((path) => JSON.parse(readFileSync(path, "utf8")) as RegistryItem)
-    .sort((a, b) => a.title.localeCompare(b.title));
+  const items = [...readItems(REGISTRY_SRC, "free"), ...readItems(REGISTRY_PRO_SRC, "pro")].sort(
+    (a, b) => a.title.localeCompare(b.title)
+  );
 
   cache = items;
   return items;
@@ -62,6 +80,12 @@ export function getRegistryItems(): RegistryItem[] {
 export function getRegistryItem(name: string): RegistryItem | undefined {
   return getRegistryItems().find((item) => item.name === name);
 }
+
+export function isPro(item: { access?: RegistryItem["access"] }): boolean {
+  return item.access === "pro";
+}
+
+const itemRoot = (name: string) => (getRegistryItem(name)?.access === "pro" ? REGISTRY_PRO_SRC : REGISTRY_SRC);
 
 /**
  * Items with a docs page — Level 1 components and Level 2 Blocks. Excludes theme and
@@ -110,30 +134,21 @@ export function getAdjacentComponents(name: string): {
   };
 }
 
-/** The literal source of the component's first file, for the docs source view. */
-export function getComponentSource(name: string): string | null {
-  const file = getRegistryItem(name)?.files?.[0];
-  if (!file) return null;
-
-  const path = resolve(process.cwd(), file.path);
-  // Shown as the file someone gets after install, so composed imports use installed paths.
-  return existsSync(path) ? toInstalledImports(readFileSync(path, "utf8")) : null;
-}
-
 /**
  * Source for one example: `examples/[slug].tsx` if the component has that
  * directory (multi-example components like card), otherwise the component's
  * single `[name].demo.tsx` (every other component's one and only example).
  */
 function readExampleSource(name: string, slug: string): string | null {
-  const examplePath = join(REGISTRY_SRC, name, "examples", `${slug}.tsx`);
+  const root = itemRoot(name);
+  const examplePath = join(root, name, "examples", `${slug}.tsx`);
   if (existsSync(examplePath)) return readFileSync(examplePath, "utf8");
 
-  const demoPath = join(REGISTRY_SRC, name, `${name}.demo.tsx`);
+  const demoPath = join(root, name, `${name}.demo.tsx`);
   return existsSync(demoPath) ? readFileSync(demoPath, "utf8") : null;
 }
 
-const REGISTRY_IMPORT = /@\/registry\/([a-z0-9-]+)\/[a-z0-9-]+(?=["'])/g;
+const REGISTRY_IMPORT = /@\/registry(?:-pro)?\/([a-z0-9-]+)\/[a-z0-9-]+(?=["'])/g;
 
 /**
  * Example source as someone would paste it into their own project. Demos import siblings
@@ -159,7 +174,7 @@ function installedWith(name: string, seen = new Set<string>()): Set<string> {
   if (seen.has(name)) return seen;
   seen.add(name);
   for (const dependency of getRegistryItem(name)?.registryDependencies ?? []) {
-    installedWith(dependency.replace(/^@pixeldosa\//, ""), seen);
+    installedWith(dependency.replace(/^@pixeldosa(?:-pro)?\//, ""), seen);
   }
   return seen;
 }
@@ -178,5 +193,6 @@ export function getExampleExtras(name: string, slug: string): string[] {
 
 export function installCommand(name: string | string[]): string {
   const names = Array.isArray(name) ? name : [name];
-  return `npx shadcn@latest add ${names.map((item) => `@pixeldosa/${item}`).join(" ")}`;
+  const namespace = (item: string) => (getRegistryItem(item)?.access === "pro" ? "@pixeldosa-pro" : "@pixeldosa");
+  return `npx shadcn@latest add ${names.map((item) => `${namespace(item)}/${item}`).join(" ")}`;
 }

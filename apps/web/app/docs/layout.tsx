@@ -2,7 +2,7 @@ import { DocsSidebarNav, type SidebarGroup } from "@/components/docs-sidebar-nav
 import { demoExamples } from "@/components/registry-demos";
 import { GROUP_LABELS, GROUP_ORDER, groupFor, isFoundation } from "@/lib/component-groups";
 import { getNewComponents } from "@/lib/changelog";
-import { getComponents } from "@/lib/registry";
+import { getComponents, isPro } from "@/lib/registry";
 
 /**
  * Navigation reads directly from the registry, so a new component appears without a
@@ -23,6 +23,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       name: item.name,
       title: item.title,
       isNew: recent.has(item.name),
+      isPro: isPro(item),
       group: groupFor(item),
       examples: (demoExamples[item.name] ?? []).map((example) => ({
         slug: example.slug,

@@ -21,10 +21,20 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const outDir = resolve(here, "../public/r");
+
+/**
+ * `--pro` processes the Pro output in `.registry-pro/`, where a component may also import
+ * another Pro component. The free output never rewrites `@/registry-pro/`, so such an
+ * import survives and fails the check below: free code can't reach into Pro.
+ */
+const pro = process.argv.includes("--pro");
+const outDir = resolve(here, pro ? "../.registry-pro" : "../public/r");
 
 /** `@/registry/<name>/<name>` → `@/components/ui/<name>`, where dir and file agree. */
-const CROSS_COMPONENT = /@\/registry\/([a-z0-9-]+)\/\1(?=["'])/g;
+const CROSS_COMPONENT = pro
+  ? /@\/registry(?:-pro)?\/([a-z0-9-]+)\/\1(?=["'])/g
+  : /@\/registry\/([a-z0-9-]+)\/\1(?=["'])/g;
+const REPO_PATH = /@\/registry(?:-pro)?\//;
 
 type RegistryFile = { path: string; target?: string; type: string; content?: string };
 type Published = { name: string; files?: RegistryFile[] };
@@ -50,10 +60,10 @@ for (const fileName of files) {
     }
 
     // Anything still pointing into this repo's layout would 404 in a consumer project.
-    if (file.content.includes("@/registry/")) {
+    if (REPO_PATH.test(file.content)) {
       const offending = file.content
         .split("\n")
-        .filter((line) => line.includes("@/registry/"))
+        .filter((line) => REPO_PATH.test(line))
         .map((line) => line.trim());
       leftovers.push(`${item.name} → ${offending.join(" | ")}`);
     }

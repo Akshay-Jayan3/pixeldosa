@@ -15,12 +15,13 @@ import { buildComponentMarkdown, getComponentDoc } from "@/lib/docs";
 import {
   DOCUMENTED_TYPES,
   getAdjacentComponents,
-  getComponentSource,
   getComponents,
   getExampleExtras,
   getExampleSource,
   getRegistryItem,
   installCommand,
+  isPro,
+  PRO_REGISTRY_CONFIG,
   type RegistryItem,
 } from "@/lib/registry";
 import { extractHeadings, type TocHeading } from "@/lib/toc";
@@ -83,7 +84,6 @@ export default async function ComponentDocPage({ params }: Params) {
 
   if (!item || !DOCUMENTED_TYPES.includes(item.type)) notFound();
 
-  const source = getComponentSource(name);
   const { prev, next } = getAdjacentComponents(name);
   const markdown = buildComponentMarkdown(item, doc);
   const examples = demoExamples[name] ?? [];
@@ -96,7 +96,6 @@ export default async function ComponentDocPage({ params }: Params) {
       ? [{ id: "engineering-notes", text: "Engineering Notes", level: 2 as const }]
       : []),
     ...(item.meta?.motionNotes ? [{ id: "motion-notes", text: "Motion Notes", level: 2 as const }] : []),
-    ...(source ? [{ id: "source", text: "Source", level: 2 as const }] : []),
   ];
 
   return (
@@ -112,7 +111,14 @@ export default async function ComponentDocPage({ params }: Params) {
           </div>
         </div>
 
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{item.title}</h1>
+        <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+          {item.title}
+          {isPro(item) ? (
+            <span className="ml-3 inline-block rounded-sm border px-1.5 align-middle text-xs font-medium uppercase leading-5 tracking-wide text-muted-foreground">
+              Pro
+            </span>
+          ) : null}
+        </h1>
         <SketchRule className="mt-2" />
         <p className="mt-3 max-w-xl text-muted-foreground text-pretty">
           {doc?.frontmatter.description || item.description}
@@ -148,6 +154,17 @@ export default async function ComponentDocPage({ params }: Params) {
             <div className="mt-3">
               <CodeBlock code={installCommand(item.name)} language="bash" />
             </div>
+            {isPro(item) ? (
+              <div className="mt-4 flex flex-col gap-2">
+                <p className="text-sm text-muted-foreground text-pretty">
+                  A PixelDosa Pro component, so it installs with a licence key. Add both registries
+                  to <code className="font-mono">components.json</code>, and put your key in{" "}
+                  <code className="font-mono">.env.local</code> as{" "}
+                  <code className="font-mono">PIXELDOSA_PRO_KEY</code>.
+                </p>
+                <CodeBlock code={PRO_REGISTRY_CONFIG} language="json" />
+              </div>
+            ) : null}
             {exampleExtras.length > 0 ? (
               <div className="mt-4 flex flex-col gap-2">
                 <p className="text-sm text-muted-foreground text-pretty">
@@ -206,21 +223,6 @@ export default async function ComponentDocPage({ params }: Params) {
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
                 {item.meta.motionNotes}
               </p>
-            </section>
-          ) : null}
-
-          {source ? (
-            <section className="mt-12">
-              <h2 id="source" className="scroll-mt-20 text-xl font-medium tracking-tight">
-                Source
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                The exact file <code className="font-mono">shadcn add</code> writes into your
-                project.
-              </p>
-              <div className="mt-3">
-                <CodeBlock code={source} language={`${item.name}.tsx`} collapsible />
-              </div>
             </section>
           ) : null}
         </article>

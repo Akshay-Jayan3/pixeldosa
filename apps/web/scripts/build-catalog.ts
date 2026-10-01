@@ -20,7 +20,7 @@
  * to decide" is design knowledge that a model can act on at generation time, and it is
  * otherwise stranded in a docs page no runtime will ever read.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -56,22 +56,39 @@ const registry = JSON.parse(readFileSync(resolve(webRoot, "registry.json"), "utf
   items: RegistryItem[];
 };
 
-const components = registry.items
+/**
+ * Pro items are listed too, so a runtime or agent can see they exist and what they take.
+ * Only the contract is here, never source: installing one goes through the key-checked
+ * `@pixeldosa-pro` registry.
+ */
+const proPath = resolve(webRoot, "registry-pro.json");
+const proItems = existsSync(proPath)
+  ? (JSON.parse(readFileSync(proPath, "utf8")) as { items: RegistryItem[] }).items
+  : [];
+
+const components = [
+  ...registry.items.map((item) => ({ item, access: "free" as const })),
+  ...proItems.map((item) => ({ item, access: "pro" as const })),
+]
   // Blocks (the composed experiences) are as renderable as the single components, so
   // anything carrying a schema is listed; `kind` tells a consumer which it is holding.
-  .filter((item) => item.meta?.schema)
-  .map((item) => {
+  .filter(({ item }) => item.meta?.schema)
+  .map(({ item, access }) => {
     const schema = item.meta!.schema!;
     return {
       name: item.name,
       component: schema.component,
       kind: item.type === "registry:block" ? "block" : "component",
+      access,
       title: item.title,
       description: item.description,
       categories: item.categories ?? [],
       /** Where the component lives once installed, and what to import from it. */
       import: { from: `@/components/ui/${item.name}`, named: schema.component },
-      install: `npx shadcn@latest add ${HOMEPAGE}/r/${item.name}.json`,
+      install:
+        access === "pro"
+          ? `npx shadcn@latest add @pixeldosa-pro/${item.name}`
+          : `npx shadcn@latest add ${HOMEPAGE}/r/${item.name}.json`,
       docs: `${HOMEPAGE}/docs/components/${item.name}`,
       /** The DOM element the component renders and spreads its remaining props onto. */
       element: schema.element,

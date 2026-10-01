@@ -7,6 +7,12 @@
       "runtimeArgs": ["--filter", "web", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "pixeldosa-web-prod",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "web", "start", "--port", "3100"],
+      "port": 3100
     }
   ]
 }

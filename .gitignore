@@ -8,3 +8,5 @@ out
 .env.local
 .DS_Store
 apps/web/schemas.generated.json
+apps/web/registry-pro.json
+apps/web/.registry-pro/

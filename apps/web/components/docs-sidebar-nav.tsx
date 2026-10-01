@@ -7,14 +7,23 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type SidebarExample = { slug: string; title: string };
-type SidebarItem = { name: string; title: string; isNew?: boolean; examples: SidebarExample[] };
+type SidebarItem = { name: string; title: string; isNew?: boolean; isPro?: boolean; examples: SidebarExample[] };
 
 /** Quiet by design: a sidebar with ten loud badges stops meaning anything. */
-function NewBadge() {
+function Badge({ children }: { children: ReactNode }) {
   return (
     <span className="shrink-0 rounded-sm border border-border px-1 text-[0.625rem] font-medium uppercase leading-4 tracking-wide text-muted-foreground">
-      New
+      {children}
     </span>
+  );
+}
+
+function ItemBadges({ item }: { item: SidebarItem }) {
+  return (
+    <>
+      {item.isPro ? <Badge>Pro</Badge> : null}
+      {item.isNew ? <Badge>New</Badge> : null}
+    </>
   );
 }
 export type SidebarGroup = { id: string; label: string; items: SidebarItem[] };
@@ -110,7 +119,11 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                       )}
                     >
                       <span>{item.title}</span>
-                      {item.isNew ? <NewBadge /> : null}
+                      {item.isNew || item.isPro ? (
+                        <span className="flex items-center gap-1.5">
+                          <ItemBadges item={item} />
+                        </span>
+                      ) : null}
                     </Link>
                   </li>
                 );
@@ -129,7 +142,7 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                     >
                       <span>{item.title}</span>
                       <span className="flex items-center gap-1.5">
-                        {item.isNew ? <NewBadge /> : null}
+                        <ItemBadges item={item} />
                         <ChevronIcon />
                       </span>
                     </summary>

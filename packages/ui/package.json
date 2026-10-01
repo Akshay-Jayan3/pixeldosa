@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
-    "./registry/*": "./src/registry/*.tsx"
+    "./registry/*": "./src/registry/*.tsx",
+    "./registry-pro/*": "./src/registry-pro/*.tsx"
   },
   "scripts": {
     "lint": "eslint .",
