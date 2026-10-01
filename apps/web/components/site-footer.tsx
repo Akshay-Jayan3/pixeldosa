@@ -5,8 +5,6 @@ import { AgentFigure } from "@pixeldosa/ui";
 import { CHANGELOG } from "@/lib/changelog";
 import { PORTFOLIO_URL, WORK_EMAIL_URL } from "@/lib/links";
 
-const REPO_URL = "https://github.com/Akshay-Jayan3/pixeldosa";
-
 /** "18 September 2026" — the changelog's own newest date, so it can't drift. */
 function formatUpdated(iso: string): string {
   const date = new Date(`${iso}T00:00:00Z`);
@@ -102,7 +100,6 @@ export function SiteFooter() {
 
             <Column title="Project">
               <FooterLink href="/work-with-me">Work with me</FooterLink>
-              <FooterLink href={REPO_URL}>GitHub</FooterLink>
               <FooterLink href={PORTFOLIO_URL}>Akshay Jayan</FooterLink>
               <FooterLink href={WORK_EMAIL_URL}>Email</FooterLink>
             </Column>

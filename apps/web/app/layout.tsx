@@ -110,7 +110,6 @@ const structuredData = {
   description:
     "Open-source React components and interaction patterns for building AI agent interfaces.",
   url: siteUrl,
-  codeRepository: "https://github.com/Akshay-Jayan3/pixeldosa",
   programmingLanguage: "TypeScript",
   license: "https://opensource.org/licenses/MIT",
   author: {
