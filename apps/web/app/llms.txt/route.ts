@@ -15,7 +15,7 @@ function line(item: RegistryItem): string {
 }
 
 /**
- * The llms.txt index (llmstxt.org): what PixelDosa is, how to install it, the rules for
+ * The llms.txt index (llmstxt.org): what PixelDosa UI is, how to install it, the rules for
  * using it well, and a link to agent-readable markdown for every component. Generated
  * from the registry and the agent guide, so it cannot fall out of date.
  */
@@ -26,7 +26,7 @@ export function GET() {
   const foundation = items.filter((item) => isFoundation(item) || groupFor(item) === "product");
 
   const body = [
-    "# PixelDosa",
+    "# PixelDosa UI",
     "",
     "> The trust layer for AI products: React components for the moments people decide whether to trust an agent (before it runs, while it works, and when they review what it did), plus a complete chat stack. Plain components with no AI SDK or protocol dependency, distributed through the shadcn registry.",
     "",
@@ -43,13 +43,13 @@ export function GET() {
     installCommand("pixeldosa-agent-guide"),
     "```",
     "",
-    "Install `pixeldosa-theme` explicitly: as a dependency of a component it adds motion tokens but keeps colours the project already defines. Installed directly, it applies PixelDosa's WCAG AA palette.",
+    "Install `pixeldosa-theme` explicitly: as a dependency of a component it adds motion tokens but keeps colours the project already defines. Installed directly, it applies PixelDosa UI's WCAG AA palette.",
     // Said only once something is Pro: an agent told about a registry with nothing in it
     // would go looking for components that don't exist.
     ...(items.some(isPro)
       ? [
           "",
-          "Components marked (Pro) install from a second registry that needs a PixelDosa Pro licence key. Add both registries, and set `PIXELDOSA_PRO_KEY` in `.env.local`. Only install a Pro component when that key is set; otherwise tell the user it's Pro, or use a free component.",
+          "Components marked (Pro) install from a second registry that needs a PixelDosa UI Pro licence key. Add both registries, and set `PIXELDOSA_PRO_KEY` in `.env.local`. Only install a Pro component when that key is set; otherwise tell the user it's Pro, or use a free component.",
           "",
           "```json",
           PRO_REGISTRY_CONFIG,

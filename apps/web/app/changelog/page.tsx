@@ -9,7 +9,7 @@ import { SketchRule } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Changelog",
-  description: "Every PixelDosa release during the beta: new components, improvements, fixes and anything that changed an API.",
+  description: "Every PixelDosa UI release during the beta: new components, improvements, fixes and anything that changed an API.",
 };
 
 const KIND_ORDER: ChangeKind[] = ["breaking", "new", "improved", "fixed"];
@@ -77,7 +77,7 @@ export default function ChangelogPage() {
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Changelog</h1>
         <SketchRule color="done" className="mt-2" />
         <p className="mt-3 text-muted-foreground text-pretty">
-          PixelDosa ships in small drops. During the beta, APIs can still change, and when one does it's listed here
+          PixelDosa UI ships in small drops. During the beta, APIs can still change, and when one does it's listed here
           first, marked <span className="font-medium text-foreground">Breaking</span>.
         </p>
       </header>

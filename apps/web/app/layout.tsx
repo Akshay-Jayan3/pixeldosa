@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
 
   title: {
-    default: "PixelDosa — Agent interfaces people can trust",
-    template: "%s — PixelDosa",
+    default: "PixelDosa UI — Agent interfaces people can trust",
+    template: "%s — PixelDosa UI",
   },
 
   description:
     "React components and interaction patterns for building clear, controllable AI agent interfaces.",
 
-  applicationName: "PixelDosa",
+  applicationName: "PixelDosa UI",
 
   keywords: [
     "AI interfaces",
@@ -52,8 +52,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: siteUrl,
-    siteName: "PixelDosa",
-    title: "PixelDosa — Agent interfaces people can trust",
+    siteName: "PixelDosa UI",
+    title: "PixelDosa UI — Agent interfaces people can trust",
     description:
       "React components and interaction patterns for building clear, controllable AI agent interfaces.",
     locale: "en_US",
@@ -62,14 +62,14 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "PixelDosa — Agent interfaces people can trust",
+        alt: "PixelDosa UI — Agent interfaces people can trust",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "PixelDosa — Agent interfaces people can trust",
+    title: "PixelDosa UI — Agent interfaces people can trust",
     description:
       "React components and interaction patterns for building clear, controllable AI agent interfaces.",
     creator: "@akshayjayan",
@@ -105,7 +105,7 @@ try {
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareSourceCode",
-  name: "PixelDosa",
+  name: "PixelDosa UI",
   description:
     "React components and interaction patterns for building AI agent interfaces.",
   url: siteUrl,

@@ -1,9 +1,5 @@
 /** Outbound links used in more than one place, so a changed URL is changed once. */
 
-/** Free early access to templates: a public GitHub issue form, no backend needed. */
-export const EARLY_ACCESS_URL =
-  "https://github.com/Akshay-Jayan3/pixeldosa/issues/new?template=early-access.yml";
-
 /** Akshay's portfolio. */
 export const PORTFOLIO_URL = "https://akshayjayan.com";
 

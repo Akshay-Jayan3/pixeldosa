@@ -157,7 +157,7 @@ export default async function ComponentDocPage({ params }: Params) {
             {isPro(item) ? (
               <div className="mt-4 flex flex-col gap-2">
                 <p className="text-sm text-muted-foreground text-pretty">
-                  A PixelDosa Pro component, so it installs with a licence key. Add both registries
+                  A PixelDosa UI Pro component, so it installs with a licence key. Add both registries
                   to <code className="font-mono">components.json</code>, and put your key in{" "}
                   <code className="font-mono">.env.local</code> as{" "}
                   <code className="font-mono">PIXELDOSA_PRO_KEY</code>.

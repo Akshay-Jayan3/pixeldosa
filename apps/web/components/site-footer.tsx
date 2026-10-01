@@ -73,7 +73,7 @@ export function SiteFooter() {
           <div className="flex min-w-0 flex-col gap-4">
             <div className="flex items-center gap-2 font-semibold tracking-tight">
               <AgentFigure variant="mark" size="md" pose="idle" hideLabel aria-hidden="true" still />
-              PixelDosa
+              PixelDosa UI
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground text-pretty">
               Interface components for AI products — the moments people decide whether to
@@ -108,7 +108,7 @@ export function SiteFooter() {
 
         <div className="flex flex-col gap-2 border-t pt-6 text-sm text-muted-foreground sm:flex-row sm:items-baseline sm:justify-between">
           <p className="text-pretty">
-            PixelDosa (beta). Designed and built by{" "}
+            PixelDosa UI (beta). Designed and built by{" "}
             <a
               href={PORTFOLIO_URL}
               className="rounded-sm text-foreground underline underline-offset-4 outline-none hover:no-underline focus-visible:ring-[3px] focus-visible:ring-ring/40"

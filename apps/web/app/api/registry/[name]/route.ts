@@ -32,10 +32,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
 
   const key = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
   if (!key) {
-    return error(401, "Licence key missing", "This is a PixelDosa Pro component, so it needs a licence key.");
+    return error(401, "Licence key missing", "This is a PixelDosa UI Pro component, so it needs a licence key.");
   }
   if (!(await isValidProKey(key))) {
-    return error(403, "Invalid licence key", "That PixelDosa Pro licence key isn't valid.");
+    return error(403, "Invalid licence key", "That PixelDosa UI Pro licence key isn't valid.");
   }
 
   try {

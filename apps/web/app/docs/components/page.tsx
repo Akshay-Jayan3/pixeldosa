@@ -11,7 +11,7 @@ import { SketchRule } from "@/components/sketch";
 
 export const metadata: Metadata = {
   title: "Components",
-  description: "Every PixelDosa component, browsable with a live preview.",
+  description: "Every PixelDosa UI component, browsable with a live preview.",
 };
 
 /**

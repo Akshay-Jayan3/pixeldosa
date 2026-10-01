@@ -70,7 +70,7 @@ const MARKERS = [
 
 /** In page order — the cast now sits after the rules, not before the chat block. */
 const GUIDE: GuideStop[] = [
-  { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through PixelDosa. Scroll whenever you like." },
+  { id: "hero", pose: "idle", text: "Hi, I'm Dosa. I'll walk you through PixelDosa UI. Scroll whenever you like." },
   { id: "showcase", pose: "working", text: "Every moment has a component. Browse the moving set, then open any piece." },
   { id: "chat", pose: "working", text: "Here I'm inside a full assistant screen. Pick a question and watch." },
   { id: "stages", pose: "planning", text: "Trust gets decided before, during and after a run. Each moment has its own pieces." },

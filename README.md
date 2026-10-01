@@ -1,4 +1,4 @@
-# PixelDosa
+# PixelDosa UI
 
 Interface components for AI products — the moments where people decide whether to trust
 an agent. Plain React: props in, callbacks out, no AI SDK or protocol required.
@@ -27,7 +27,7 @@ packages/tokens                   design + motion tokens and generated CSS
 packages/eslint-config            shared flat ESLint config
 packages/typescript-config        shared TypeScript config
 .agents/skills/pixeldosa-components/SKILL.md
-                                  how humans and agents build with PixelDosa
+                                  how humans and agents build with PixelDosa UI
 ```
 
 ## Commands
@@ -74,7 +74,7 @@ It is the operating spec for both humans and agents, and the build enforces the 
 it that can be enforced — missing engineering or motion notes, a description too thin for
 a cold model, a file that doesn't exist, or an import that would break on install.
 
-## Consuming PixelDosa
+## Consuming PixelDosa UI
 
 ```bash
 npx shadcn@latest init
@@ -95,7 +95,7 @@ npx shadcn@latest add @pixeldosa/agent-console
 
 Install `pixeldosa-theme` directly rather than letting it arrive as a dependency: pulled
 in as a dependency it adds motion tokens but keeps the colours your project already
-defines, while a direct install applies PixelDosa's palette.
+defines, while a direct install applies PixelDosa UI's palette.
 
 ## For coding agents and generative UI
 
