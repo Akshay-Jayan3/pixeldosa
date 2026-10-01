@@ -96,7 +96,6 @@ const catalog = {
     "Interface components for AI products: agent state, approval and handoff, generation workspaces, and run management. Each entry carries a JSON Schema for its props, its callbacks with their arguments, and the design reasoning behind it. Protocol-neutral — map it onto A2UI, AG-UI, an MCP server or your own renderer.",
   homepage: HOMEPAGE,
   registry: `${HOMEPAGE}/r/registry.json`,
-  license: "MIT",
   components,
 };
 

@@ -105,9 +105,3 @@ defines, while a direct install applies PixelDosa's palette.
 | [`/llms/<name>.md`](https://pixeldosa.akshayjayan.com/llms/agent-console.md) | One component, as markdown |
 | [`/r/catalog.json`](https://pixeldosa.akshayjayan.com/r/catalog.json) | Props as JSON Schema, callbacks with their arguments, and design guidance — for rendering components from a model's output. Plain JSON Schema, tied to no protocol |
 | `@pixeldosa/pixeldosa-agent-guide` | The UX rules, installed into your repo as a skill |
-
-## Licence
-
-MIT — see [LICENSE](LICENSE). Use, copy, modify and distribute it, including in
-commercial work. The components are meant to be copied into your codebase and changed;
-that is the point of distributing source rather than a package.

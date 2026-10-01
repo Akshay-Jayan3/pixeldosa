@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "Open-source React components and interaction patterns for building clear, controllable AI agent interfaces.",
+    "React components and interaction patterns for building clear, controllable AI agent interfaces.",
 
   applicationName: "PixelDosa",
 
@@ -33,7 +33,6 @@ export const metadata: Metadata = {
     "agent UX",
     "React AI components",
     "shadcn",
-    "open source",
     "design systems",
   ],
 
@@ -72,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PixelDosa — Agent interfaces people can trust",
     description:
-      "Open-source React components and interaction patterns for building clear, controllable AI agent interfaces.",
+      "React components and interaction patterns for building clear, controllable AI agent interfaces.",
     creator: "@akshayjayan",
     images: ["/og-image.png"],
   },
@@ -108,10 +107,9 @@ const structuredData = {
   "@type": "SoftwareSourceCode",
   name: "PixelDosa",
   description:
-    "Open-source React components and interaction patterns for building AI agent interfaces.",
+    "React components and interaction patterns for building AI agent interfaces.",
   url: siteUrl,
   programmingLanguage: "TypeScript",
-  license: "https://opensource.org/licenses/MIT",
   author: {
     "@type": "Person",
     name: "Akshay Jayan",

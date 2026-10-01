@@ -115,7 +115,7 @@ export function SiteFooter() {
             >
               Akshay Jayan
             </a>
-            , design engineer. MIT licensed.
+            , design engineer.
           </p>
           {/* A date, not a count. "48 components" needs a paragraph to defend — items or
               exported components, with or without the foundation primitives — and a number
