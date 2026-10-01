@@ -1,0 +1,114 @@
+---
+title: Select
+description: A choice from a short, known list, with the open list drawn in the system's own surface. A form field, or a compact pill for toolbars.
+---
+
+## Usage
+
+```tsx
+import { Select } from "@/components/ui/select";
+
+export function ModelPicker({ model, onModelChange }: Props) {
+  return (
+    <Select
+      aria-label="Model"
+      value={model}
+      onValueChange={onModelChange}
+      options={[
+        { value: "fast", label: "Fast: drafts in seconds" },
+        { value: "balanced", label: "Balanced" },
+        { value: "careful", label: "Careful: checks its sources" },
+      ]}
+    />
+  );
+}
+```
+
+`options` takes plain strings when what's shown is what's stored, or `{ value, label }`
+when they differ. Pass `value` with `onValueChange` when you own the state, or
+`defaultValue` when you don't.
+
+## Features
+
+- **The list is drawn by the system.** It opens in the same popover surface as every
+  other overlay, in both themes, instead of an OS menu in the OS's colours and fonts.
+- **Native behaviour kept.** Space, Enter and the arrow keys open it, arrows move,
+  typing jumps to a match, and Escape or Tab close it with focus back on the trigger.
+- **Sized to the choice.** The trigger is as wide as its current value, not its longest
+  option, so a row of pills stays compact.
+- **Works in forms.** Inside `FieldControl` it receives `id`, `aria-invalid` and
+  `aria-describedby` like any input. With `name`, a hidden native select submits the
+  value with the form.
+- **Touch-sized options.** Rows are 32px for a mouse and 44px on touch screens.
+
+## Variants
+
+### Field
+
+The default. It sits in a form beside inputs, at Field height, or 32px with `size="sm"`.
+
+<PreviewStack>
+  <Select
+    aria-label="Dataset"
+    className="w-64"
+    defaultValue="Q3 Revenue Final.xlsx"
+    options={["Q3 Revenue Final.xlsx", "Q2 Revenue.xlsx", "Billing contacts.csv"]}
+  />
+</PreviewStack>
+
+### Pill
+
+A compact chip for toolbars and composers. `prefix` shows a label before the value; it's
+visual only, so name the control with `aria-label`.
+
+<PreviewStack>
+  <Select
+    variant="pill"
+    prefix="Tone:"
+    aria-label="Tone"
+    defaultValue="Friendly"
+    options={["Friendly", "Formal", "Direct"]}
+  />
+</PreviewStack>
+
+### Placeholder and disabled options
+
+<PreviewStack>
+  <Select
+    size="sm"
+    aria-label="Region"
+    placeholder="Pick a region"
+    options={["Europe", "India", { value: "us", label: "United States (coming soon)", disabled: true }]}
+  />
+</PreviewStack>
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `options` | `(string \| { value, label?, disabled? })[]` | — | Required. Values must be non-empty strings. |
+| `value` / `onValueChange` | `string` / `(value: string) => void` | — | The selected value when you own the state, and the callback with each pick. |
+| `defaultValue` | `string` | — | The starting value when the component owns the state. |
+| `placeholder` | `string` | — | Shown, muted, while nothing is selected. |
+| `variant` | `"field" \| "pill"` | `"field"` | A form control, or a compact chip for toolbars. |
+| `size` | `"sm" \| "default"` | `"default"` | Height of the field variant: Field height, or 32px. |
+| `prefix` | `string` | — | Visual label before the value, such as `Tone:`. Hidden from screen readers. |
+| `name` / `required` | `string` / `boolean` | — | Submit the value with a form, and require a choice first. |
+| `disabled` | `boolean` | `false` | The whole control can't be opened. |
+
+Other props, such as `id`, `aria-label` and `className`, go to the trigger button.
+
+## Accessibility
+
+- The trigger is a combobox over a listbox, so a screen reader announces its name, its
+  role and the current value, and each option's selected state.
+- Name it with `aria-label`, a `<label htmlFor>` pointing at its `id`, or `FieldLabel`
+  inside a `Field`. A `prefix` is hidden from screen readers so it isn't read twice.
+- Focus returns to the trigger when the list closes, by a pick, Escape or Tab.
+- The pill's hit area reaches 44px tall without making the chip bigger.
+
+## When not to use
+
+Searching a long or remote list is `Command Menu`. Two or three choices that should
+stay visible side by side are better as buttons. A yes or no setting is a toggle, not a
+select.

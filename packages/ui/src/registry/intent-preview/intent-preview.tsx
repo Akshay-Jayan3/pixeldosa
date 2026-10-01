@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { AIActionToolbar, type AIAction } from "@/registry/ai-action-toolbar/ai-action-toolbar";
+import { Select } from "@/registry/select/select";
 import { cn } from "@/lib/utils";
 
 export type IntentAssumption = {
@@ -94,24 +95,13 @@ function IntentPreview({
                   <dt className="text-xs text-muted-foreground">{assumption.label}</dt>
                   <dd className="flex min-w-0 items-center gap-2">
                     {assumption.options && assumption.options.length > 0 ? (
-                      <select
+                      <Select
+                        size="sm"
                         aria-label={assumption.label}
                         value={values[assumption.id]}
-                        onChange={(event) =>
-                          setValues((previous) => ({ ...previous, [assumption.id]: event.target.value }))
-                        }
-                        // A native select: correct on every input method, and on phones it
-                        // opens the platform picker rather than a tiny custom dropdown.
-                        className="h-8 min-w-0 max-w-full truncate rounded-md border border-input bg-transparent px-2 text-base text-foreground outline-none transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none focus-visible:ring-[3px] focus-visible:ring-ring/40 sm:text-sm"
-                      >
-                        {[assumption.value, ...assumption.options.filter((option) => option !== assumption.value)].map(
-                          (option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          )
-                        )}
-                      </select>
+                        onValueChange={(value) => setValues((previous) => ({ ...previous, [assumption.id]: value }))}
+                        options={[assumption.value, ...assumption.options.filter((option) => option !== assumption.value)]}
+                      />
                     ) : (
                       <span className="truncate text-foreground">{assumption.value}</span>
                     )}

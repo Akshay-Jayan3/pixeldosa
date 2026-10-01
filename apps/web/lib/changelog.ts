@@ -27,6 +27,26 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-01-select",
+    date: "2026-10-01",
+    title: "A select that matches the system",
+    summary:
+      "Select is a new foundation component: a choice from a short list whose open list is drawn in the system's own surface, in both themes, instead of the platform's menu. It keeps what the native select gave (keyboard, typeahead, screen reader support and form submission) and replaces the native selects in Intent Preview and Prompt Composer.",
+    changes: [
+      { kind: "new", component: "select" },
+      {
+        kind: "improved",
+        component: "intent-preview",
+        note: "Corrections open a Select list in the system's own surface instead of the platform's menu.",
+      },
+      {
+        kind: "improved",
+        component: "prompt-composer",
+        note: "Control pills are Select pills: the list matches the system, and each pill still sizes to its current choice.",
+      },
+    ],
+  },
+  {
     id: "2026-09-18-agent-console",
     date: "2026-09-18",
     title: "The screen you come back to",

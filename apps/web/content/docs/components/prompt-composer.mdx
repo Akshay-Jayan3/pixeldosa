@@ -33,9 +33,10 @@ composer turns it into controls you can see before you send.
 
 ## Features
 
-- **Specification as pills.** "Tone: Friendly" is a native select, so it works with a
-  keyboard, a screen reader or a phone picker. Pills changed from their default are
-  outlined, so the non-default parts of the request stand out.
+- **Specification as pills.** "Tone: Friendly" is a `Select` pill, so it works with a
+  keyboard, typeahead and a screen reader, and its list is drawn in the system's own
+  surface. Pills changed from their default are outlined, so the non-default parts of
+  the request stand out.
 - **Enter to send, Shift+Enter for a new line.** Enter doesn't send while an input
   method (IME) is composing. Japanese or Chinese typists don't send half a sentence.
 - **Attach any way.** Use the button, drag and drop, or paste. Upload status is shown on each
@@ -90,7 +91,9 @@ onAttachFiles={(files) => {
 ## Accessibility
 
 - The text area has a label and is described by the keyboard hint.
-- Each control is a native `<select>` whose name includes its label ("Tone").
+- Each control is a `Select` combobox named after its label ("Tone") that announces its
+  current value; the visible "Tone:" prefix is hidden from screen readers so it isn't
+  read twice.
 - Send uses `aria-disabled`, so it stays focusable, and the reason it's blocked is shown and announced.
 - Attachment remove buttons are named after the file.
 

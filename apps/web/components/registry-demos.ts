@@ -47,6 +47,7 @@ import ListingCardExample from "@pixeldosa/ui/registry/card/examples/listing-car
 import LiveStatusLineDemo from "@pixeldosa/ui/registry/live-status-line/live-status-line.demo";
 import PricingPairExample from "@pixeldosa/ui/registry/card/examples/pricing-pair";
 import FieldDemo from "@pixeldosa/ui/registry/field/field.demo";
+import SelectDemo from "@pixeldosa/ui/registry/select/select.demo";
 import GenerationPlaceholderDemo from "@pixeldosa/ui/registry/generation-placeholder/generation-placeholder.demo";
 import GhostInputDemo from "@pixeldosa/ui/registry/ghost-input/ghost-input.demo";
 import OverlayDemo from "@pixeldosa/ui/registry/overlay/overlay.demo";
@@ -115,6 +116,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "Label, control, description and error wired to one generated id set.",
       render: FieldDemo,
+    },
+  ],
+  select: [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A field in a form, compact pills for a toolbar, and a placeholder with a disabled option.",
+      render: SelectDemo,
     },
   ],
   overlay: [

@@ -7028,7 +7028,7 @@
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "intent-preview",
       "title": "Intent Preview",
-      "description": "An agent restates what it understood — and the guesses it made — before any work starts. Takes an `interpretation` (the request restated as one plain sentence), optional `assumptions` (each a labelled best guess, optionally with alternative readings the user can switch to in place), optional `boundaries` listing what the agent will deliberately not do, and `onStart`, which receives the confirmed values, plus optional `onRephrase` and `onCancel`. The guesses arrive pre-filled, so when they are right confirming costs one click; when one is wrong it is corrected with a native select rather than by rewriting the prompt, and the start button changes to 'Start with changes' so the difference is visible. The reason it exists: a model that misreads a request early builds every later step on that mistake, so the cheapest correction in an agentic run is the first one. Distinct from Agent Ask, which blocks until the user supplies something the agent cannot guess — this is for when the agent could proceed on its best guess, but being wrong would be expensive. Holds perfectly still, since it is the user's turn. Composes AI Action Toolbar. Use it before long runs, runs with side effects, or requests with ambiguous scope. Not for every request — adding a confirmation to a cheap, reversible action is friction that trains people to click through without reading.",
+      "description": "An agent restates what it understood — and the guesses it made — before any work starts. Takes an `interpretation` (the request restated as one plain sentence), optional `assumptions` (each a labelled best guess, optionally with alternative readings the user can switch to in place), optional `boundaries` listing what the agent will deliberately not do, and `onStart`, which receives the confirmed values, plus optional `onRephrase` and `onCancel`. The guesses arrive pre-filled, so when they are right confirming costs one click; when one is wrong it is corrected in place from a list of the other readings rather than by rewriting the prompt, and the start button changes to 'Start with changes' so the difference is visible. The reason it exists: a model that misreads a request early builds every later step on that mistake, so the cheapest correction in an agentic run is the first one. Distinct from Agent Ask, which blocks until the user supplies something the agent cannot guess — this is for when the agent could proceed on its best guess, but being wrong would be expensive. Holds perfectly still, since it is the user's turn. Composes AI Action Toolbar. Use it before long runs, runs with side effects, or requests with ambiguous scope. Not for every request — adding a confirmation to a cheap, reversible action is friction that trains people to click through without reading.",
       "type": "registry:ui",
       "categories": [
         "ai-assisted",
@@ -7038,7 +7038,8 @@
       "dependencies": [],
       "registryDependencies": [
         "@pixeldosa/pixeldosa-theme",
-        "@pixeldosa/ai-action-toolbar"
+        "@pixeldosa/ai-action-toolbar",
+        "@pixeldosa/select"
       ],
       "files": [
         {
@@ -7049,8 +7050,8 @@
       ],
       "docs": "Requires `cn` at `@/lib/utils`. Use it only where misreading the request would be costly — long runs, side effects, ambiguous scope. On cheap, reversible actions it is friction.",
       "meta": {
-        "engineeringNotes": "Built from the model-side view of how agentic runs fail: interpretation happens before planning, and an early misreading compounds through every step that follows. Surfacing the interpretation in one sentence, together with the specific guesses that filled gaps in the request, moves correction to the single point where it is nearly free. Two decisions keep that from becoming friction. First, assumptions arrive pre-filled with the agent's best guess, so the common case — the guess is right — costs one click, and the start label changes to 'Start with changes' only when something was corrected, so the confirmation carries information rather than ceremony. Second, correction happens in place through a native select of alternative readings rather than by rephrasing the whole request, which is both faster and more precise. Boundaries ('I won't…') are included because what an agent will not do is part of its intent and is the thing users most want to know before a run with side effects. It is deliberately distinct from Agent Ask: Ask blocks on missing information the agent cannot guess, whereas Intent Preview is for requests the agent could act on immediately, where acting on a wrong guess would be expensive.",
-        "motionNotes": "Still, by design. This is a user-turn surface under the system's turn-taking grammar, so nothing moves or shimmers while it waits — the absence of motion is the signal that nothing proceeds until the user confirms. The only motion is the shared colour transition on hover and focus at `--pd-duration-instant`, inherited from the composed AI Action Toolbar and the select's own focus ring, and it drops to instant under prefers-reduced-motion. Entrance motion belongs to whatever surface reveals the preview, not to the component.",
+        "engineeringNotes": "Built from the model-side view of how agentic runs fail: interpretation happens before planning, and an early misreading compounds through every step that follows. Surfacing the interpretation in one sentence, together with the specific guesses that filled gaps in the request, moves correction to the single point where it is nearly free. Two decisions keep that from becoming friction. First, assumptions arrive pre-filled with the agent's best guess, so the common case — the guess is right — costs one click, and the start label changes to 'Start with changes' only when something was corrected, so the confirmation carries information rather than ceremony. Second, correction happens in place through a Select of alternative readings rather than by rephrasing the whole request, which is both faster and more precise. Boundaries ('I won't…') are included because what an agent will not do is part of its intent and is the thing users most want to know before a run with side effects. It is deliberately distinct from Agent Ask: Ask blocks on missing information the agent cannot guess, whereas Intent Preview is for requests the agent could act on immediately, where acting on a wrong guess would be expensive.",
+        "motionNotes": "Still, by design. This is a user-turn surface under the system's turn-taking grammar, so nothing moves or shimmers while it waits — the absence of motion is the signal that nothing proceeds until the user confirms. Motion is limited to the shared colour transition on hover and focus at `--pd-duration-instant`, inherited from the composed AI Action Toolbar and Select, and the brief fade of a correction list as it opens; both drop away under prefers-reduced-motion. Entrance motion belongs to whatever surface reveals the preview, not to the component.",
         "schema": {
           "component": "IntentPreview",
           "element": "section",
@@ -8250,7 +8251,7 @@
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "prompt-composer",
       "title": "Prompt Composer",
-      "description": "A request composer that isn't a blank chat box. Free text for what only words can say, structured `controls` for what shouldn't need prompt engineering (tone, length, audience, format), and attachments for context. Each control is a labelled pill ('Tone: Friendly') backed by a native select, and a pill changed from its default is outlined, so the specification can be read at a glance. `onSubmit` receives `{ text, values, attachments }`. The text area grows with its content up to a cap. Enter sends and Shift+Enter adds a line, except during IME composition. Attachments come in through the attach button, drag and drop, or paste. You upload them via `onAttachFiles` and pass `attachments` back with status uploading, ready or failed. Sending is blocked while an upload runs, and the composer says why. `suggestions` fill the text but never send, the character count appears only near `maxLength`, and while `busy`, Send becomes Stop. Use it for generation features: drafts, images, reports. Not a chat input: no thread, no history.",
+      "description": "A request composer that isn't a blank chat box. Free text for what only words can say, structured `controls` for what shouldn't need prompt engineering (tone, length, audience, format), and attachments for context. Each control is a labelled pill ('Tone: Friendly') that opens a list of choices, and a pill changed from its default is outlined, so the specification can be read at a glance. `onSubmit` receives `{ text, values, attachments }`. The text area grows with its content up to a cap. Enter sends and Shift+Enter adds a line, except during IME composition. Attachments come in through the attach button, drag and drop, or paste. You upload them via `onAttachFiles` and pass `attachments` back with status uploading, ready or failed. Sending is blocked while an upload runs, and the composer says why. `suggestions` fill the text but never send, the character count appears only near `maxLength`, and while `busy`, Send becomes Stop. Use it for generation features: drafts, images, reports. Not a chat input: no thread, no history.",
       "type": "registry:ui",
       "categories": [
         "ai-assisted",
@@ -8259,7 +8260,8 @@
       ],
       "dependencies": [],
       "registryDependencies": [
-        "@pixeldosa/pixeldosa-theme"
+        "@pixeldosa/pixeldosa-theme",
+        "@pixeldosa/select"
       ],
       "files": [
         {
@@ -8270,7 +8272,7 @@
       ],
       "docs": "Requires `cn` at `@/lib/utils`. Put anything users would otherwise type as boilerplate (\"make it friendlier, keep it short\") into `controls`, and turn `values` into the prompt on your side. Upload in `onAttachFiles` and keep `attachments` in your state.",
       "meta": {
-        "engineeringNotes": "Exists because the system argues against making every AI feature a blank chat box and needed an alternative. The composer splits a request into what only words can say (the text) and what is really a specification (controls), because specifications typed as prose are inconsistent and invisible until the result comes back wrong. Controls are native selects inside labelled pills, so they are keyboard, screen reader and phone friendly with no custom listbox. A changed value gets a stronger outline, so the non-default parts of the request stand out. Details are handled where composers usually slip. Enter is ignored while `isComposing`, so IME users confirming a candidate don't send half a sentence. The text area autosizes from scrollHeight up to 240px, because `field-sizing: content` isn't universal yet. Send is `aria-disabled`, not `disabled`, so it stays focusable and the blocked reason ('Waiting for attachments to finish uploading') is shown and announced. The count appears only in the last 10% before `maxLength`. The file input is reset after each pick, so the same file can be picked again. Uploads are the caller's, and the composer only reflects their status. It stays headless about what happens next: the caller assembles the prompt from `values`.",
+        "engineeringNotes": "Exists because the system argues against making every AI feature a blank chat box and needed an alternative. The composer splits a request into what only words can say (the text) and what is really a specification (controls), because specifications typed as prose are inconsistent and invisible until the result comes back wrong. Controls are Select pills: keyboard, typeahead and screen reader behaviour come from Select, each pill sizes to its current choice rather than its longest option, and the open list is drawn in the system's own surface instead of the platform's menu. A changed value gets a stronger outline, so the non-default parts of the request stand out. Details are handled where composers usually slip. Enter is ignored while `isComposing`, so IME users confirming a candidate don't send half a sentence. The text area autosizes from scrollHeight up to 240px, because `field-sizing: content` isn't universal yet. Send is `aria-disabled`, not `disabled`, so it stays focusable and the blocked reason ('Waiting for attachments to finish uploading') is shown and announced. The count appears only in the last 10% before `maxLength`. The file input is reset after each pick, so the same file can be picked again. Uploads are the caller's, and the composer only reflects their status. It stays headless about what happens next: the caller assembles the prompt from `values`.",
         "motionNotes": "Quiet, because composing is the user's turn. The only moving element is the shared `pd-shimmer` on an uploading attachment's 'Uploading' label, which is real machine work. Borders and backgrounds change colour at `--pd-duration-instant` on focus, hover, drag-over and control changes. The text area grows instantly as lines are added, with no height transition, so the caret never lags the text. Send swaps to Stop without animation, so the control is usable the moment generation starts. Everything is instant or static under prefers-reduced-motion.",
         "schema": {
           "component": "PromptComposer",
@@ -8892,6 +8894,136 @@
                 }
               ],
               "description": "Shown on a run that is still going."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "select",
+      "title": "Select",
+      "description": "A choice from a short, known list, with the open list drawn in the system's own popover surface instead of the platform's menu. Takes `options` (plain strings, or `{ value, label, disabled }` when what's shown differs from what's stored), `value` with `onValueChange` when the caller owns the state or `defaultValue` when it doesn't, and an optional `placeholder` shown muted while nothing is picked. Two looks: `variant=\"field\"` (the default) sits in a form beside inputs at Field height, or 32px with `size=\"sm\"`; `variant=\"pill\"` is a compact chip for toolbars and composers, with an optional visual `prefix` such as `Tone:` before the value. Keyboard opening, arrow navigation, typeahead, focus returned to the trigger and listbox semantics all come from Radix Select, and `name` adds a hidden native select so a form still submits the value. Works inside FieldControl, which passes it `id`, `aria-invalid` and `aria-describedby`. Use it for settings, corrections and filters with up to a few dozen options. Not for searching long or remote lists (use Command Menu) or for two or three options that should all stay visible.",
+      "type": "registry:ui",
+      "categories": [
+        "forms",
+        "application"
+      ],
+      "dependencies": [
+        "@radix-ui/react-select"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/select/select.tsx",
+          "target": "components/ui/select.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Option values must be non-empty strings. A `prefix` is hidden from screen readers, so name the control with `aria-label` or a label.",
+      "meta": {
+        "engineeringNotes": "Replaces the native selects the system used to use. A native select was the right default for input methods and phones, but its open list is an OS menu in the OS's colours and fonts, and it was the one surface the system couldn't style, which showed most in the dark theme. Radix Select keeps what native gave and draws the list itself: Space, Enter and arrows open it, arrows move, typeahead jumps, Escape and Tab close it with focus back on the trigger, and the trigger is a combobox over a listbox, so screen readers announce the label, the role and the current value. The API is data rather than composition (`options`, `value`, `onValueChange`), so a model rendering from the catalogue can drive it with plain JSON, and so both of the system's call sites, Intent Preview's corrections and Prompt Composer's pills, are one element each. The trigger sizes to its current value rather than the longest option, which is what Prompt Composer's pills had to fake with a transparent native select laid over a label. The pill's hit area stretches to 44px vertically because pills sit in a row; the field variant doesn't, because stacked fields would overlap. Options are 32px rows for a mouse and 44px on coarse pointers. With `name` set, Radix renders a hidden native select, so plain form submission keeps working.",
+        "motionNotes": "Opening is the only motion, and it's brief: the list fades in and settles from 98% scale over `--pd-duration-fast` with `--pd-ease-decelerate`, growing out of the trigger because its transform origin comes from the side Radix opened it on. It opens because the person asked, so it holds still from then on: no staggered rows, no sliding highlight, and the highlight moves instantly with the keys. Closing is instant. The trigger shares the system's colour transition at `--pd-duration-instant`. Under prefers-reduced-motion the list appears with no fade or scale, and the trigger's transition is dropped.",
+        "schema": {
+          "component": "Select",
+          "element": "button",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "Select",
+            "type": "object",
+            "properties": {
+              "options": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/SelectOption"
+                    }
+                  ]
+                },
+                "description": "The choices: plain strings, or `{ value, label }` when what's shown differs from what's stored."
+              },
+              "value": {
+                "type": "string",
+                "description": "The selected value, when the caller owns the state."
+              },
+              "defaultValue": {
+                "type": "string",
+                "description": "The starting value, when the component owns the state."
+              },
+              "placeholder": {
+                "type": "string",
+                "description": "Shown, muted, while nothing is selected."
+              },
+              "variant": {
+                "enum": [
+                  "field",
+                  "pill"
+                ],
+                "description": "`field` sits in a form beside inputs; `pill` is a compact chip for toolbars and composers."
+              },
+              "size": {
+                "enum": [
+                  "sm",
+                  "default"
+                ],
+                "description": "Height of the `field` variant: `default` matches Field inputs, `sm` matches 32px controls."
+              },
+              "prefix": {
+                "type": "string",
+                "description": "Text before the value inside the trigger, such as `Tone:`. Visual only and hidden from\nscreen readers, so name the control with `aria-label` or a label."
+              },
+              "name": {
+                "type": "string",
+                "description": "Submits the value with a form under this name."
+              },
+              "required": {
+                "type": "boolean",
+                "description": "The form won't submit until something is picked."
+              }
+            },
+            "required": [
+              "options"
+            ],
+            "$defs": {
+              "SelectOption": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "description": "What `onValueChange` receives and `value` is matched against. Must not be empty."
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "What the list and the trigger show. Defaults to `value`."
+                  },
+                  "disabled": {
+                    "type": "boolean",
+                    "description": "Listed, but can't be picked."
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              }
+            }
+          },
+          "events": [
+            {
+              "name": "onValueChange",
+              "required": false,
+              "params": [
+                {
+                  "name": "value",
+                  "type": "string"
+                }
+              ],
+              "description": "Called with the value a person picks."
             }
           ]
         }

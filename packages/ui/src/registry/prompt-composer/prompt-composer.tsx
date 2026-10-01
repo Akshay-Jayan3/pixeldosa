@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { Select } from "@/registry/select/select";
 import { cn } from "@/lib/utils";
 
 export type ComposerOption = string | { value: string; label: string };
@@ -54,8 +55,6 @@ export interface PromptComposerProps extends Omit<React.ComponentPropsWithoutRef
   onValueChange?: (value: string) => void;
 }
 
-const optionValue = (option: ComposerOption) => (typeof option === "string" ? option : option.value);
-const optionLabel = (option: ComposerOption) => (typeof option === "string" ? option : option.label);
 const MAX_HEIGHT_PX = 240;
 
 /**
@@ -312,38 +311,18 @@ function PromptComposer({
             const current = values[control.id] ?? control.defaultValue;
             const changed = current !== control.defaultValue;
             return (
-              <label
+              <Select
                 key={control.id}
-                className={cn(
-                  "relative flex h-8 items-center rounded-full border text-xs transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)] motion-reduce:transition-none has-[select:focus-visible]:ring-[3px] has-[select:focus-visible]:ring-ring/40",
-                  changed ? "border-foreground/50 text-foreground" : "border-input text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span aria-hidden="true" className="pointer-events-none pl-2.5">
-                  {control.label}:
-                </span>
-                {/* The visible value sizes the pill to the current choice. A native select is
-                    as wide as its longest option, which bloats the row. The real select sits
-                    over the pill, transparent, so picking still opens the platform picker. */}
-                <span aria-hidden="true" className={cn("pointer-events-none pl-1 pr-6 text-foreground", changed && "font-medium")}>
-                  {optionLabel(control.options.find((option) => optionValue(option) === current) ?? current)}
-                </span>
-                <select
-                  aria-label={control.label}
-                  value={current}
-                  onChange={(event) => setValues((all) => ({ ...all, [control.id]: event.target.value }))}
-                  className="absolute inset-0 size-full cursor-pointer appearance-none rounded-full opacity-0 outline-none"
-                >
-                  {control.options.map((option) => (
-                    <option key={optionValue(option)} value={optionValue(option)}>
-                      {optionLabel(option)}
-                    </option>
-                  ))}
-                </select>
-                <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute right-2 size-3 text-muted-foreground">
-                  <path d="m4.5 6.5 3.5 3.5 3.5-3.5" />
-                </svg>
-              </label>
+                variant="pill"
+                prefix={`${control.label}:`}
+                aria-label={control.label}
+                value={current}
+                onValueChange={(value) => setValues((all) => ({ ...all, [control.id]: value }))}
+                options={control.options}
+                // Changed from its default: outlined, with the value in medium weight, so the
+                // specification reads at a glance.
+                className={cn(changed && "border-foreground/50 text-foreground [&_[data-select-value]]:font-medium")}
+              />
             );
           })}
         </div>

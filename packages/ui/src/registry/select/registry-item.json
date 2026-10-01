@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "select",
+  "title": "Select",
+  "description": "A choice from a short, known list, with the open list drawn in the system's own popover surface instead of the platform's menu. Takes `options` (plain strings, or `{ value, label, disabled }` when what's shown differs from what's stored), `value` with `onValueChange` when the caller owns the state or `defaultValue` when it doesn't, and an optional `placeholder` shown muted while nothing is picked. Two looks: `variant=\"field\"` (the default) sits in a form beside inputs at Field height, or 32px with `size=\"sm\"`; `variant=\"pill\"` is a compact chip for toolbars and composers, with an optional visual `prefix` such as `Tone:` before the value. Keyboard opening, arrow navigation, typeahead, focus returned to the trigger and listbox semantics all come from Radix Select, and `name` adds a hidden native select so a form still submits the value. Works inside FieldControl, which passes it `id`, `aria-invalid` and `aria-describedby`. Use it for settings, corrections and filters with up to a few dozen options. Not for searching long or remote lists (use Command Menu) or for two or three options that should all stay visible.",
+  "type": "registry:ui",
+  "categories": ["forms", "application"],
+  "dependencies": ["@radix-ui/react-select"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/select/select.tsx",
+      "target": "components/ui/select.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Option values must be non-empty strings. A `prefix` is hidden from screen readers, so name the control with `aria-label` or a label.",
+  "meta": {
+    "engineeringNotes": "Replaces the native selects the system used to use. A native select was the right default for input methods and phones, but its open list is an OS menu in the OS's colours and fonts, and it was the one surface the system couldn't style, which showed most in the dark theme. Radix Select keeps what native gave and draws the list itself: Space, Enter and arrows open it, arrows move, typeahead jumps, Escape and Tab close it with focus back on the trigger, and the trigger is a combobox over a listbox, so screen readers announce the label, the role and the current value. The API is data rather than composition (`options`, `value`, `onValueChange`), so a model rendering from the catalogue can drive it with plain JSON, and so both of the system's call sites, Intent Preview's corrections and Prompt Composer's pills, are one element each. The trigger sizes to its current value rather than the longest option, which is what Prompt Composer's pills had to fake with a transparent native select laid over a label. The pill's hit area stretches to 44px vertically because pills sit in a row; the field variant doesn't, because stacked fields would overlap. Options are 32px rows for a mouse and 44px on coarse pointers. With `name` set, Radix renders a hidden native select, so plain form submission keeps working.",
+    "motionNotes": "Opening is the only motion, and it's brief: the list fades in and settles from 98% scale over `--pd-duration-fast` with `--pd-ease-decelerate`, growing out of the trigger because its transform origin comes from the side Radix opened it on. It opens because the person asked, so it holds still from then on: no staggered rows, no sliding highlight, and the highlight moves instantly with the keys. Closing is instant. The trigger shares the system's colour transition at `--pd-duration-instant`. Under prefers-reduced-motion the list appears with no fade or scale, and the trigger's transition is dropped."
+  }
+}

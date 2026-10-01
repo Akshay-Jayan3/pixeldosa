@@ -20,6 +20,7 @@ export {
   FieldError,
   type FieldProps,
 } from "./registry/field/field";
+export { Select, type SelectProps, type SelectOption } from "./registry/select/select";
 export {
   AnimatePresence,
   OverlayScrim,
