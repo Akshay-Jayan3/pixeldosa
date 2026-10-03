@@ -25,8 +25,11 @@ export function SiteHeader() {
           <Link href="/docs/components" className="hover:text-foreground">
             Components
           </Link>
-          <Link href="/docs/ai" className="hidden hover:text-foreground sm:inline">
-            Build with AI
+          <Link href="/docs/components#group-blocks" className="hidden hover:text-foreground sm:inline">
+            Blocks
+          </Link>
+          <Link href="/docs/ai" className="hidden hover:text-foreground lg:inline">
+            AI patterns
           </Link>
         </nav>
 

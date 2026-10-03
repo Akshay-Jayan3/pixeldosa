@@ -76,9 +76,8 @@ export function SiteFooter() {
               PixelDosa UI
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground text-pretty">
-              Interface components for AI products — the moments people decide whether to
-              trust an agent. Plain React, no SDK or protocol required. Copy the source and
-              keep the craft.
+              Thoughtful components and ready-to-use blocks for interactive product experiences.
+              Built in React, designed to make the details feel right.
             </p>
           </div>
 
@@ -87,9 +86,9 @@ export function SiteFooter() {
             className="grid min-w-0 grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:justify-items-end"
           >
             <Column title="Browse">
-              <FooterLink href="/docs/components">All components</FooterLink>
+              <FooterLink href="/docs/components">Components & blocks</FooterLink>
               <FooterLink href="/changelog">Changelog</FooterLink>
-              <FooterLink href="/docs/ai">Build with AI</FooterLink>
+              <FooterLink href="/docs/ai">AI patterns</FooterLink>
             </Column>
 
             <Column title="For agents">

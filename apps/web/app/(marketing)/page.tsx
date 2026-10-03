@@ -1,5 +1,3 @@
-import { Fragment } from "react";
-import type * as React from "react";
 import Link from "next/link";
 
 import { Button } from "@pixeldosa/ui";
@@ -82,6 +80,23 @@ const GUIDE: GuideStop[] = [
 const AGENT_SETUP = `npx shadcn@latest add @pixeldosa/ai-chat-experience
 npx shadcn@latest add @pixeldosa/pixeldosa-agent-guide`;
 
+const LIBRARY_LAYERS = [
+  {
+    number: "01",
+    title: "Components",
+    description: "The focused building pieces: controls, feedback, and interactions you can make your own.",
+    href: "/docs/components",
+    link: "Browse components",
+  },
+  {
+    number: "02",
+    title: "Blocks",
+    description: "Composed experiences with the structure and important interaction states already in place.",
+    href: "/docs/components#group-blocks",
+    link: "Explore blocks",
+  },
+] as const;
+
 function titleFor(name: string) {
   return getRegistryItem(name)?.title ?? name;
 }
@@ -108,34 +123,67 @@ export default function HomePage() {
                 judged on seriousness before a single component is read, and a handwritten
                 one at this size reads as a personal project. The character stays as a mark;
                 it is not the argument. */}
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Components · Blocks · Thoughtful interactions
+            </p>
             <h1 className="max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl">
-              {/* The space sits outside each word: inline-blocks drop trailing whitespace. */}
-              {["Agent", "interfaces", "people", "can"].map((word, index) => (
-                <Fragment key={word}>
-                  <span className="pd-word" style={{ "--i": index } as React.CSSProperties}>
-                    {word}
-                  </span>{" "}
-                </Fragment>
-              ))}
-              <span className="pd-word" style={{ "--i": 4 } as React.CSSProperties}>
-                trust.
-              </span>
+              Build interfaces that feel considered.
             </h1>
             <p className="max-w-2xl text-lg text-muted-foreground text-pretty">
-              A React component system for building clear, controllable AI agent interfaces.
+              PixelDosa is a growing library of interactive React components and ready-to-use blocks,
+              crafted for the details people notice—from everyday product flows to thoughtful AI experiences.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 mt-6">
               <Button asChild size="default">
-                <Link href="/docs/components">Browse components</Link>
+                <Link href="/docs/components">Explore the library</Link>
               </Button>
               <Button asChild size="default" variant="outline">
-                <Link href="/docs/ai">Build with AI</Link>
+                <Link href="/docs/components#group-blocks">Explore blocks</Link>
               </Button>
             </div>
           </div>
 
           <HeroWorkbench />
+        </div>
+      </section>
+
+      <section aria-labelledby="library-layers" className="border-b">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end">
+            <div className="max-w-xl">
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                A library that grows with the work
+              </p>
+              <h2 id="library-layers" className="mt-3 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+                Start with a detail. Build toward the whole experience.
+              </h2>
+              <p className="mt-3 text-muted-foreground text-pretty">
+                Use a single interaction or start with a composed flow. Over time, PixelDosa will grow into
+                complete page templates, too.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {LIBRARY_LAYERS.map((layer) => (
+                <Link
+                  key={layer.title}
+                  href={layer.href}
+                  className="group flex min-h-44 flex-col rounded-xl border bg-card p-5 outline-none transition-colors hover:border-foreground/30 focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                >
+                  <span className="font-mono text-xs tabular-nums text-muted-foreground">{layer.number}</span>
+                  <h3 className="mt-5 font-medium tracking-tight">{layer.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground text-pretty">{layer.description}</p>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm text-foreground">
+                    {layer.link}
+                    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5 transition-transform group-hover:translate-x-0.5">
+                      <path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -174,6 +222,7 @@ export default function HomePage() {
       {/* Before / while / after */}
       <section data-guide="stages" aria-labelledby="stages" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="pd-reveal max-w-2xl">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">AI workflows</p>
           <h2 id="stages" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
             Trust is decided in three moments.
           </h2>
@@ -221,8 +270,9 @@ export default function HomePage() {
       <section data-guide="rules" aria-labelledby="grammar" className="border-y bg-card">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="max-w-2xl">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">The AI design language</p>
             <h2 id="grammar" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              One set of rules, in every component.
+              Clear signals. Consistent behavior.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
               Components agree with each other because they share rules. That's what makes a screen built from

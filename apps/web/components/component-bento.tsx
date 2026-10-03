@@ -34,14 +34,14 @@ export function ComponentBento() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">The component system</p>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">A featured playground · AI</p>
             <h2 id="showcase-title" className="mt-3 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              Every moment has a component.
+              AI, designed as a real interaction.
             </h2>
           </div>
-          <Link href="/docs/components" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+          <Link href="/docs/ai" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
             <span className="inline-flex items-center gap-1.5">
-              Browse all components
+              Explore AI patterns
               <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5">
                 <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -49,7 +49,7 @@ export function ComponentBento() {
           </Link>
         </div>
         <p className="mt-3 max-w-2xl text-muted-foreground text-pretty">
-          Before it runs, while it works, and when you review. A focused set of pieces for interfaces people can read and steer.
+          From making a plan to reviewing the result, these pieces make complex AI interactions clear, steerable, and grounded in user control.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3" aria-label="Featured components">

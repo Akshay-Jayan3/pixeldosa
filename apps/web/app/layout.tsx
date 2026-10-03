@@ -13,25 +13,25 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
 
   title: {
-    default: "PixelDosa UI — Agent interfaces people can trust",
+    default: "PixelDosa UI — Thoughtful interactive components and blocks",
     template: "%s — PixelDosa UI",
   },
 
   description:
-    "React components and interaction patterns for building clear, controllable AI agent interfaces.",
+    "A growing library of interactive React components and ready-to-use blocks for thoughtful product experiences, including human-centered AI.",
 
   applicationName: "PixelDosa UI",
 
   keywords: [
+    "interactive UI",
+    "React UI blocks",
+    "React component library",
+    "product interfaces",
+    "UI patterns",
     "AI interfaces",
     "AI agent UI",
     "AI UX",
-    "AI design system",
-    "AI components",
-    "React components",
     "agent interfaces",
-    "agent UX",
-    "React AI components",
     "shadcn",
     "design systems",
   ],
@@ -53,25 +53,25 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: "PixelDosa UI",
-    title: "PixelDosa UI — Agent interfaces people can trust",
+    title: "PixelDosa UI — Thoughtful interactive components and blocks",
     description:
-      "React components and interaction patterns for building clear, controllable AI agent interfaces.",
+      "A growing library of interactive React components and ready-to-use blocks for thoughtful product experiences, including human-centered AI.",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "PixelDosa UI — Agent interfaces people can trust",
+        alt: "PixelDosa UI — Thoughtful interactive components and blocks",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "PixelDosa UI — Agent interfaces people can trust",
+    title: "PixelDosa UI — Thoughtful interactive components and blocks",
     description:
-      "React components and interaction patterns for building clear, controllable AI agent interfaces.",
+      "A growing library of interactive React components and ready-to-use blocks for thoughtful product experiences, including human-centered AI.",
     creator: "@akshayjayan",
     images: ["/og-image.png"],
   },
@@ -107,7 +107,7 @@ const structuredData = {
   "@type": "SoftwareSourceCode",
   name: "PixelDosa UI",
   description:
-    "React components and interaction patterns for building AI agent interfaces.",
+    "Interactive React components and ready-to-use blocks for thoughtful product experiences, including human-centered AI.",
   url: siteUrl,
   programmingLanguage: "TypeScript",
   author: {
