@@ -23,6 +23,9 @@ export type ColorToken =
   | "card-foreground"
   | "popover"
   | "popover-foreground"
+  | "illustration-lilac"
+  | "illustration-peach"
+  | "illustration-butter"
   | "primary"
   | "primary-foreground"
   | "secondary"
@@ -39,8 +42,8 @@ export type ColorToken =
   | AgentToken;
 
 /**
- * The four agent markers. Everything else in the system is ink; these are the only
- * colours, and each has one job:
+ * Illustration colors are decorative fills only and never carry interaction or agent
+ * status. The four agent markers have status-only meaning. Each marker has one job:
  *  - working: the agent is busy — progress, the step it's on, what it's reading;
  *  - waiting: it needs the person — a question or an approval (the only colour that asks);
  *  - blocked: something failed or is in the way, always shown with a way forward;
@@ -63,9 +66,9 @@ export type ColorScale = Record<ColorToken, string>;
 
 /**
  * Ink on paper. Light is the default: a warm off-white page, near-black ink, and a
- * pencil grey for secondary text. The look is a sketchbook, not a glowing screen, so
- * there are no tinted surfaces beyond the agent markers. Chosen 2026-09-16 from the
- * hand-drawn character study, where these values were set as sRGB and converted:
+ * pencil grey for secondary text. The look is a sketchbook, not a glowing screen.
+ * Neutral values were chosen 2026-09-16 from the hand-drawn character study, where
+ * they were set as sRGB and converted:
  * light — paper #f7f7f3, card #fdfdfb, ink #1c1d1f, pencil #5f6166, wash #efeee8,
  * rule #e2e1db; dark — ground #151614, card #1d1e1c, ink #ecebe6, pencil #a3a29b,
  * wash #282926, rule #30312e.
@@ -82,6 +85,9 @@ export const colorsLight: ColorScale = {
   "card-foreground": "oklch(0.231 0.004 264)",
   popover: "oklch(0.993 0.003 106)",
   "popover-foreground": "oklch(0.231 0.004 264)",
+  "illustration-lilac": "oklch(0.88 0.055 305)",
+  "illustration-peach": "oklch(0.89 0.055 42)",
+  "illustration-butter": "oklch(0.92 0.065 92)",
   primary: "oklch(0.231 0.004 264)",
   "primary-foreground": "oklch(0.993 0.003 106)",
   secondary: "oklch(0.948 0.008 99)",
@@ -110,28 +116,31 @@ export const colorsLight: ColorScale = {
 };
 
 export const colorsDark: ColorScale = {
-  background: "oklch(0.198 0.004 129)",
+  background: "oklch(0.166 0.004 129)",
   foreground: "oklch(0.939 0.007 97)",
-  card: "oklch(0.233 0.004 129)",
+  card: "oklch(0.203 0.004 129)",
   "card-foreground": "oklch(0.939 0.007 97)",
-  popover: "oklch(0.233 0.004 129)",
+  popover: "oklch(0.203 0.004 129)",
   "popover-foreground": "oklch(0.939 0.007 97)",
+  "illustration-lilac": "oklch(0.32 0.033 305)",
+  "illustration-peach": "oklch(0.33 0.033 42)",
+  "illustration-butter": "oklch(0.35 0.038 92)",
   primary: "oklch(0.939 0.007 97)",
-  "primary-foreground": "oklch(0.198 0.004 129)",
-  secondary: "oklch(0.279 0.006 122)",
+  "primary-foreground": "oklch(0.166 0.004 129)",
+  secondary: "oklch(0.245 0.006 122)",
   "secondary-foreground": "oklch(0.939 0.007 97)",
-  muted: "oklch(0.279 0.006 122)",
+  muted: "oklch(0.245 0.006 122)",
   "muted-foreground": "oklch(0.711 0.010 100)",
-  accent: "oklch(0.285 0.006 122)",
+  accent: "oklch(0.251 0.006 122)",
   "accent-foreground": "oklch(0.939 0.007 97)",
   // Bright enough to read as text on the dark ground…
   destructive: "oklch(0.653 0.184 24)",
   // …which makes light text on it fail (3.3:1), so destructive fills carry dark text in
   // dark mode. One red can't serve both roles with light text on this ground.
   "destructive-foreground": "oklch(0.16 0.02 24)",
-  border: "oklch(0.311 0.005 122)",
-  input: "oklch(0.381 0.007 118)",
-  ring: "oklch(0.711 0.010 100)",
+  border: "oklch(0.278 0.005 122)",
+  input: "oklch(0.336 0.007 118)",
+  ring: "oklch(0.68 0.010 100)",
   "agent-working": "oklch(0.731 0.122 267)",
   "agent-working-soft": "oklch(0.289 0.052 266)",
   "agent-waiting": "oklch(0.779 0.127 63)",

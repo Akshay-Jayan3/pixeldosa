@@ -16,13 +16,23 @@ rationale, so any agent (not only Claude Code) can pick this up and stay consist
 
 Ink on paper. Light is the default: a warm off-white page, near-black ink, pencil-grey
 secondary text, and `1px` rules for depth instead of shadows. `primary` is the ink
-itself, so **contrast carries hierarchy, not colour.** The only chroma is the four
-agent markers (`agent-working` blue, `agent-waiting` orange, `agent-blocked` red,
-`agent-done` green) plus `destructive`, and each has exactly one job. The agent has
-a body: `Agent Figure`, a hand-drawn character whose pose says what a run is doing,
-how sure it is, and when it needs the person. The whole identity reads as **a
-sketchbook, not a glowing screen**: handcrafted and a little playful, never gradients,
-glass, orbs or glow. Dark mode is the same drawing in reverse, not a separate brand.
+itself, so contrast carries hierarchy. The visual palette stays ink, paper, and neutral
+surfaces, with soft lilac, peach, and butter used only as illustration fills. Agent
+marker colours are reserved for agent states. The agent has a body:
+`Agent Figure`, a hand-drawn character whose pose says what a run is doing, how sure it
+is, and when it needs the person. The whole identity reads as **a sketchbook, not a
+glowing screen**: handcrafted and a little playful, never gradients, glass, orbs or
+glow. Dark mode is the same drawing in reverse, not a separate brand.
+
+The signature is **precise UI with a human hand at the edges**. Product typography,
+controls, and interaction patterns stay clear and familiar; selective pen marks,
+handwritten notes, and a hard ink-offset lift give the docs and featured surfaces their
+character. Treat those marks like annotations, not texture on every component. Use the
+existing agent colours only when they communicate agent state; the rest stays in ink.
+Grids and ruled separators belong on selected marketing and documentation surfaces as
+layout cues; keep them faint, purposeful, and behind content.
+Use Space Grotesk for prominent marketing and section headings, with the existing
+system sans retained for body copy and controls and Kalam reserved for short annotations.
 
 If a screen would look identical as a static Figma frame — no real state, no
 manipulation, no motion earning its place — it is not on-brand for this system. See
@@ -41,6 +51,9 @@ color:
     card-foreground: "oklch(0.231 0.004 264)"
     popover: "oklch(0.993 0.003 106)"
     popover-foreground: "oklch(0.231 0.004 264)"
+    illustration-lilac: "oklch(0.88 0.055 305)"
+    illustration-peach: "oklch(0.89 0.055 42)"
+    illustration-butter: "oklch(0.92 0.065 92)"
     primary: "oklch(0.231 0.004 264)"
     primary-foreground: "oklch(0.993 0.003 106)"
     secondary: "oklch(0.948 0.008 99)"
@@ -69,6 +82,9 @@ color:
     card-foreground: "oklch(0.939 0.007 97)"
     popover: "oklch(0.233 0.004 129)"
     popover-foreground: "oklch(0.939 0.007 97)"
+    illustration-lilac: "oklch(0.36 0.035 305)"
+    illustration-peach: "oklch(0.37 0.035 42)"
+    illustration-butter: "oklch(0.39 0.04 92)"
     primary: "oklch(0.939 0.007 97)"
     primary-foreground: "oklch(0.198 0.004 129)"
     secondary: "oklch(0.279 0.006 122)"

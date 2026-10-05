@@ -142,3 +142,58 @@ export function SketchRule({ color = "working", className }: { color?: keyof typ
     </svg>
   );
 }
+
+/** A small drafting-board illustration for the marketing hero's margin. */
+export function SketchStudy({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 160 160"
+      className={cn("pd-draw size-40 overflow-visible", className)}
+    >
+      <path
+        d="M24 25 137 21 140 135 20 139Z"
+        fill="none"
+        stroke="var(--foreground)"
+        strokeOpacity=".38"
+        strokeWidth="1"
+      />
+      <path
+        d="M48 23 45 138M75 22 74 137M103 22 104 136M132 22 134 135M22 52 139 49M21 80 139 79M21 109 140 108M20 132 140 130"
+        fill="none"
+        stroke="var(--foreground)"
+        strokeOpacity=".22"
+        strokeWidth="1"
+      />
+      <path
+        d="M52 64C57 48 74 41 91 44c18 3 31 19 29 37-2 20-17 34-36 35-20 1-36-13-37-31-.5-7 1-14 5-21Z"
+        fill="var(--illustration-lilac)"
+        fillOpacity=".88"
+      />
+      <path
+        d="M113 44c6-5 14-3 17 3 3 7-1 14-8 15-6 1-11-4-11-10 0-3 1-6 2-8Z"
+        fill="var(--illustration-peach)"
+      />
+      <path
+        d="M38 112c5-4 12-2 14 3 3 6-1 12-7 13-6 1-10-3-10-8 0-3 1-6 3-8Z"
+        fill="var(--illustration-butter)"
+      />
+      <path
+        d="M51 65C58 48 75 42 92 45c17 3 29 18 27 36-2 18-17 32-35 34-19 1-34-12-36-29"
+        fill="none"
+        stroke="var(--foreground)"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M15 34h12m-6-6v12M137 145h12m-6-6v12M12 128h10m-5-5v10M143 18h8m-4-4v8"
+        fill="none"
+        stroke="var(--foreground)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <circle cx="25" cy="139" r="2.5" fill="var(--foreground)" />
+      <circle cx="139" cy="22" r="2.5" fill="var(--foreground)" />
+    </svg>
+  );
+}

@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 import { SiteHeader } from "@/components/site-header";
 
+import "@fontsource-variable/space-grotesk";
 import "@fontsource/kalam/400.css";
 import "@fontsource/kalam/700.css";
 import "./globals.css";

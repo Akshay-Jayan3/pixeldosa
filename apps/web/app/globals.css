@@ -154,6 +154,7 @@
    interface text: labels, buttons and body copy stay in the sans. */
 @theme {
   --font-hand: "Kalam", "Segoe Print", "Bradley Hand", cursive;
+  --font-display: "Space Grotesk Variable", "Space Grotesk", sans-serif;
 }
 
 /* ─── The site's craft layer ─────────────────────────────────────────────────────────
@@ -168,6 +169,24 @@ body {
 }
 .dark body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* A faint drafting grid anchors the hero like a page from a working notebook.
+   The fade keeps it behind the demo instead of turning the whole page into graph paper. */
+.pd-draft-grid::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 4%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px, 128px 128px, 128px 128px;
+  background-position: 0 0, 0 0, 128px 128px, 128px 128px;
+  content: "";
+  mask-image: linear-gradient(to bottom, black 0%, black 48%, transparent 100%);
+  pointer-events: none;
 }
 
 /* A card cut from paper: on hover it lifts off the page and casts a hard ink offset,

@@ -19,16 +19,16 @@ export function SiteHeader() {
         </Link>
 
         <nav aria-label="Main" className="flex items-center gap-4 text-sm text-muted-foreground">
-          <Link href="/docs" className="hover:text-foreground">
+          <Link href="/docs" className="transition-colors hover:text-foreground">
             Docs
           </Link>
-          <Link href="/docs/components" className="hover:text-foreground">
+          <Link href="/docs/components" className="transition-colors hover:text-foreground">
             Components
           </Link>
-          <Link href="/docs/components#group-blocks" className="hidden hover:text-foreground sm:inline">
+          <Link href="/docs/components#group-blocks" className="hidden transition-colors hover:text-foreground sm:inline">
             Blocks
           </Link>
-          <Link href="/docs/ai" className="hidden hover:text-foreground lg:inline">
+          <Link href="/docs/ai" className="hidden transition-colors hover:text-foreground lg:inline">
             AI patterns
           </Link>
         </nav>

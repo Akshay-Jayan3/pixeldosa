@@ -20,7 +20,7 @@ function BentoCard({ name, className }: { name: string; className: string }) {
       <ComponentThumbnail name={name} eager className="min-h-0 flex-1 aspect-auto" />
       <div className="flex items-center justify-between gap-3 border-t px-4 py-3">
         <p className="truncate text-sm font-medium text-foreground">{title}</p>
-        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground">
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground group-focus-visible:text-foreground">
           <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>

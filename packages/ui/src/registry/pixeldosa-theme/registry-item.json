@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "pixeldosa-theme",
   "title": "PixelDosa UI Theme",
-  "description": "The PixelDosa UI design and motion token layer, installed as CSS custom properties. Provides the full semantic colour scale for light and dark mode (background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring), the base corner radius, and the duration/easing/stagger variables that every PixelDosa UI component animates against. Install this once per project before or alongside any other PixelDosa UI component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
+  "description": "The PixelDosa UI design and motion token layer, installed as CSS custom properties. Provides semantic colors for light and dark mode, including surfaces, text, controls, agent-status roles, and soft illustration-only fills, plus the base corner radius and duration/easing/stagger variables. Illustration fills are decorative and do not communicate state. Install this once per project before or alongside any other PixelDosa UI component; installing a component without it leaves the component styled against the host project's existing theme values instead.",
   "type": "registry:theme",
   "categories": ["core", "theme"],
   "files": [],

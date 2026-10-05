@@ -13,6 +13,7 @@
     "registry:build": "tsx scripts/build-schemas.ts && tsx scripts/build-registry.ts && shadcn build --output public/r && tsx scripts/postprocess-registry.ts && tsx scripts/build-registry.ts --pro && shadcn build registry-pro.json --output .registry-pro && tsx scripts/postprocess-registry.ts --pro && tsx scripts/build-catalog.ts"
   },
   "dependencies": {
+    "@fontsource-variable/space-grotesk": "^5.3.0",
     "@fontsource/kalam": "^5.3.0",
     "@pixeldosa/tokens": "workspace:*",
     "@pixeldosa/ui": "workspace:*",

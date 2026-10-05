@@ -9,7 +9,7 @@ import { ComponentThumbnail } from "@/components/component-thumbnail";
 import { HeroWorkbench } from "@/components/hero-workbench";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteGuide, type GuideStop } from "@/components/site-guide";
-import { MarkerSwatch } from "@/components/sketch";
+import { MarginNote, MarkerSwatch, Scribble, SketchRule, SketchStudy } from "@/components/sketch";
 import { demos } from "@/components/registry-demos";
 import { getRegistryItem } from "@/lib/registry";
 
@@ -87,6 +87,7 @@ const LIBRARY_LAYERS = [
     description: "The focused building pieces: controls, feedback, and interactions you can make your own.",
     href: "/docs/components",
     link: "Browse components",
+    mark: "component",
   },
   {
     number: "02",
@@ -94,8 +95,30 @@ const LIBRARY_LAYERS = [
     description: "Composed experiences with the structure and important interaction states already in place.",
     href: "/docs/components#group-blocks",
     link: "Explore blocks",
+    mark: "block",
   },
 ] as const;
+
+function LayerSketch({ kind }: { kind: "component" | "block" }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 48 32" className="size-12 shrink-0">
+      {kind === "component" ? (
+        <>
+          <rect x="3" y="5" width="27" height="22" rx="3" fill="var(--illustration-lilac)" />
+          <rect x="18" y="2" width="27" height="22" rx="3" fill="var(--card)" stroke="var(--foreground)" strokeWidth="1.2" />
+          <path d="M24 10h14M24 15h9" stroke="var(--foreground)" strokeWidth="1.2" strokeLinecap="round" />
+        </>
+      ) : (
+        <>
+          <rect x="3" y="8" width="28" height="21" rx="3" fill="var(--illustration-peach)" />
+          <rect x="9" y="4" width="28" height="21" rx="3" fill="var(--illustration-butter)" />
+          <rect x="15" y="1" width="28" height="21" rx="3" fill="var(--card)" stroke="var(--foreground)" strokeWidth="1.2" />
+          <path d="M20 8h17M20 13h11" stroke="var(--foreground)" strokeWidth="1.2" strokeLinecap="round" />
+        </>
+      )}
+    </svg>
+  );
+}
 
 function titleFor(name: string) {
   return getRegistryItem(name)?.title ?? name;
@@ -108,8 +131,8 @@ export default function HomePage() {
     <>
       <main>
       {/* Hero */}
-      <section data-guide="hero" className="border-b">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24">
+      <section data-guide="hero" className="pd-draft-grid relative isolate border-b">
+        <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-10 px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24">
           <div className="flex max-w-3xl flex-col items-center gap-8">
             <Link
               href="/changelog"
@@ -119,15 +142,17 @@ export default function HomePage() {
               <span className="tabular-nums">Version 0.1.0</span>
             </Link>
 
-            {/* Plain type, not the hand font. The headline is where a component library is
-                judged on seriousness before a single component is read, and a handwritten
-                one at this size reads as a personal project. The character stays as a mark;
-                it is not the argument. */}
+            {/* A geometric display face gives the library a sharper voice while body copy
+                and controls keep the familiar sans-serif. */}
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
               Components · Blocks · Thoughtful interactions
             </p>
-            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl">
-              Build interfaces that feel considered.
+            <SketchRule color="ink" className="w-20" />
+            <h1 className="max-w-3xl font-display text-5xl font-normal leading-[1.05] tracking-tight text-balance sm:text-6xl">
+              Build interfaces that feel{" "}
+              <Scribble color="ink" className="font-semibold">
+                considered.
+              </Scribble>
             </h1>
             <p className="max-w-2xl text-lg text-muted-foreground text-pretty">
               PixelDosa is a growing library of interactive React components and ready-to-use blocks,
@@ -144,18 +169,41 @@ export default function HomePage() {
             </div>
           </div>
 
-          <HeroWorkbench />
+          <div className="relative w-full max-w-xl">
+            <HeroWorkbench />
+            <MarginNote
+              arrow="down-left"
+              className="absolute -right-28 top-8 hidden rotate-3 lg:inline-flex"
+            >
+              Try each state
+            </MarginNote>
+          </div>
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto hidden h-full max-w-7xl xl:block">
+          <div className="absolute left-5 top-52 -rotate-2">
+            <p className="font-hand text-sm text-muted-foreground">Ideas, made usable</p>
+            <SketchStudy className="mt-1 size-36" />
+            <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-muted-foreground">
+              sketch → system
+            </p>
+          </div>
+          <MarginNote
+            arrow="down-left"
+            className="absolute right-5 top-40 max-w-36 rotate-3"
+          >
+            Good interfaces help people think
+          </MarginNote>
         </div>
       </section>
 
-      <section aria-labelledby="library-layers" className="border-b">
+      <section aria-labelledby="library-layers" className="border-b border-dashed">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end">
             <div className="max-w-xl">
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 A library that grows with the work
               </p>
-              <h2 id="library-layers" className="mt-3 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+              <h2 id="library-layers" className="mt-3 font-display text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
                 Start with a detail. Build toward the whole experience.
               </h2>
               <p className="mt-3 text-muted-foreground text-pretty">
@@ -169,9 +217,12 @@ export default function HomePage() {
                 <Link
                   key={layer.title}
                   href={layer.href}
-                  className="group flex min-h-44 flex-col rounded-xl border bg-card p-5 outline-none transition-colors hover:border-foreground/30 focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                  className="pd-lift group flex min-h-44 flex-col rounded-xl border bg-card p-5 outline-none transition-colors hover:border-foreground/30 focus-visible:ring-[3px] focus-visible:ring-ring/40"
                 >
-                  <span className="font-mono text-xs tabular-nums text-muted-foreground">{layer.number}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs tabular-nums text-muted-foreground">{layer.number}</span>
+                    <LayerSketch kind={layer.mark} />
+                  </div>
                   <h3 className="mt-5 font-medium tracking-tight">{layer.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground text-pretty">{layer.description}</p>
                   <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm text-foreground">
@@ -195,7 +246,7 @@ export default function HomePage() {
       <section data-guide="chat" aria-labelledby="chat" className="mx-auto max-w-6xl px-4 pt-20 sm:px-6">
         <div className="mx-auto max-w-2xl">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="chat" className="text-sm">
+            <h2 id="chat" className="font-display text-sm">
               <span className="font-medium text-foreground">AI Chat Experience.</span>{" "}
               <span className="text-muted-foreground">
                 Live. Pick a question and watch it think, search, read and answer.
@@ -223,7 +274,7 @@ export default function HomePage() {
       <section data-guide="stages" aria-labelledby="stages" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="pd-reveal max-w-2xl">
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">AI workflows</p>
-          <h2 id="stages" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+          <h2 id="stages" className="font-display text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
             Trust is decided in three moments.
           </h2>
           <p className="mt-3 text-muted-foreground text-pretty">
@@ -271,7 +322,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">The AI design language</p>
-            <h2 id="grammar" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            <h2 id="grammar" className="font-display text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
               Clear signals. Consistent behavior.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
@@ -313,7 +364,7 @@ export default function HomePage() {
       {/* The cast */}
       <section data-guide="cast" aria-labelledby="cast" className="pd-reveal mx-auto max-w-6xl px-4 pt-20 sm:px-6">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <h2 id="cast" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+          <h2 id="cast" className="font-display text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
             You can tell whose turn it is.
           </h2>
           <Link
@@ -339,7 +390,7 @@ export default function HomePage() {
       <section data-guide="agents" aria-labelledby="agents" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="pd-reveal grid items-center gap-10 lg:grid-cols-2">
           <div>
-            <h2 id="agents" className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            <h2 id="agents" className="font-display text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
               Your coding agent knows how to use it.
             </h2>
             <p className="mt-3 text-muted-foreground text-pretty">
