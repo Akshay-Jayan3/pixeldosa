@@ -30,6 +30,10 @@ packages/typescript-config        shared TypeScript config
                                   how humans and agents build with PixelDosa UI
 ```
 
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
 ## Commands
 
 ```bash

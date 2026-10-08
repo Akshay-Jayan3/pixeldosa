@@ -2,7 +2,7 @@
   "name": "@pixeldosa/tokens",
   "version": "0.1.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
