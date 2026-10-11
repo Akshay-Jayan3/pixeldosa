@@ -3206,7 +3206,6 @@
       "description": "A global, keyboard-first overlay (⌘K/Ctrl+K) for finding resources and running actions across an app. Renders as a centered floating panel on desktop and a full-width sheet under the sm breakpoint. Exports CommandMenu (the controlled root), CommandMenuInput, CommandMenuList (which auto-renders a live result-count announcer), CommandMenuEmpty, CommandMenuGroup, CommandMenuSeparator, and CommandMenuItem (accepts onSelect, an optional leading icon, and an optional keybind hint rendered as a kbd badge). Composes cmdk for the ARIA combobox/filter engine under a Radix Dialog for focus trapping, portalling and dismiss-on-escape/outside-click, with a token-driven CSS fade+scale for entrance/exit. Controlled-only: there is no internal open state, because the global shortcut listener has to live in the host app regardless. Use for apps with enough destinations or repeat actions that menu-hunting has real cost — dashboards, admin panels, developer tools; do not use it for a menu triggered from one visible button or row, use a Menu or ContextMenu instead.",
       "type": "registry:ui",
       "categories": [
-        "actions",
         "overlays"
       ],
       "dependencies": [
