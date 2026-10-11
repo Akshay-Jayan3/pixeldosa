@@ -1,13 +1,14 @@
 import { buildAgentMarkdown, getAgentGuide, getComponentDoc } from "@/lib/docs";
 import { getComponents, installCommand } from "@/lib/registry";
-import { groupFor } from "@/lib/component-groups";
+import { GROUP_ORDER, groupFor } from "@/lib/component-groups";
 
 export const dynamic = "force-static";
 
-/** Every component's agent markdown in one file, Blocks first, after the usage rules. */
+/** Every component's agent markdown in one file, following the public catalogue order. */
 export function GET() {
-  const items = [...getComponents()].sort((a, b) =>
-    groupFor(a) === "blocks" && groupFor(b) !== "blocks" ? -1 : 0
+  const items = [...getComponents()].sort(
+    (a, b) =>
+      GROUP_ORDER.indexOf(groupFor(a)) - GROUP_ORDER.indexOf(groupFor(b))
   );
 
   const body = [

@@ -1,0 +1,44 @@
+---
+title: Workflow Stepper
+description: A compact sequential progress indicator for approval, onboarding, and agent-run workflows.
+---
+
+## Usage
+
+```tsx
+import { WorkflowStepper } from "@/components/ui/workflow-stepper";
+
+const steps = [
+  { id: "review", title: "Review intent", description: "Checked the request and goals.", status: "complete" },
+  { id: "draft", title: "Draft changes", description: "Preparing the first pass.", status: "current" },
+  { id: "approve", title: "Approve and ship", description: "Human signoff before launch.", status: "upcoming" },
+];
+
+<WorkflowStepper title="Run progress" steps={steps} />
+```
+
+## Why it exists
+
+A person should know where they are without reading an entire document. The stepper answers the three questions that matter in a flow: what has happened, what is happening now, and what remains. It is especially useful for permission gates, onboarding, setup tasks, and agent processes where the work is sequential but still needs to feel lightweight.
+
+## Props
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `steps` | `{ id, title, description?, status?, badge? }[]` | Ordered from first to last. |
+| `currentStep` | `number` | Optional 0-based index. If omitted, the component uses the first step marked `current`. |
+| `title` | `string` | Optional heading above the list. |
+| `showStatus` | `boolean` | Displays a small label for complete/current/next. Default `true`. |
+| `size` | `"default" \| "compact"` | Defaults to `"default"`. |
+
+## Accessibility
+
+- Uses a semantic ordered list.
+- The current step is visually differentiated with colour and ring contrast.
+- Completed steps show a checkmark and text remains legible in both light and dark themes.
+
+## When not to use
+
+- For a timeline of events that happened over time; use an activity trail instead.
+- For long-form instructions or nested tasks; a wizard or panel is clearer.
+- For a single action or a non-sequential check; a button or status chip is simpler.

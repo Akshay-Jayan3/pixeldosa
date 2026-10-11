@@ -1,7 +1,6 @@
 {
   "extends": "@pixeldosa/typescript-config/nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/registry/*": ["../../packages/ui/src/registry/*"],
       "@/registry-pro/*": ["../../packages/ui/src/registry-pro/*"],

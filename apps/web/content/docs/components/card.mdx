@@ -105,7 +105,8 @@ plain `className` override (`border-2 border-primary`) rather than a prop, since
   `CardAction` is present, keeping the trailing control top-aligned however much the
   title and description wrap.
 - **Two orientations**: `vertical` renders `CardImage` as a top banner, `horizontal`
-  as a fixed-width, left-rounded side panel.
+  as a fixed-width, left-rounded side panel. The `showcase` variant removes the
+  default vertical padding and gap for preview-led compositions.
 - **No invented interaction semantics** — every part is a plain `div`, so making a
   card actionable stays an explicit decision (see Accessibility).
 
@@ -128,6 +129,25 @@ The default vertical composition — header, content, and a separated footer:
     </CardFooter>
   </Card>
 </Preview>
+
+### Showcase composition
+
+Use `variant="showcase"` when a preview or image is the card's primary content. It
+removes the default vertical padding and gap so the media can sit flush with the
+card edge; compose the remaining content explicitly:
+
+```tsx
+<Card variant="showcase">
+  <img src="/preview.png" alt="Dashboard preview" className="aspect-video w-full object-cover" />
+  <CardFooter className="justify-between gap-3 pt-4">
+    <div>
+      <CardTitle>Analytics workspace</CardTitle>
+      <CardDescription>Explore product metrics and trends.</CardDescription>
+    </div>
+    <Button variant="outline" size="sm">Open preview</Button>
+  </CardFooter>
+</Card>
+```
 
 ### With a header action
 
@@ -178,7 +198,7 @@ Every part forwards `className` and all native props of the element it renders.
 
 | Part | Renders | Notes |
 | --- | --- | --- |
-| `Card` | `div` | The bordered container. `bg-card` / `text-card-foreground`, 1px `border-border`, `rounded-xl`. Takes `orientation="vertical" \| "horizontal"` (default `vertical`). |
+| `Card` | `div` | The bordered container. `bg-card` / `text-card-foreground`, 1px `border-border`, `rounded-xl`. Takes `orientation="vertical" \| "horizontal"` (default `vertical`) and `variant="default" \| "showcase"` (default `default`). `showcase` removes vertical padding and gaps for preview-led layouts. |
 | `CardHeader` | `div` | Grid layout; adds a second column automatically when a `CardAction` is present. |
 | `CardTitle` | `div` | Not a heading element — nest a real heading tag as its child if the card is part of the page outline. |
 | `CardDescription` | `div` | Muted, small text. |

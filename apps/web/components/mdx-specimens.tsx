@@ -91,11 +91,19 @@ export function ActionToolbarSpecimen({
 }
 
 /** Cost Estimate with its buttons wired to nothing, for the docs previews. */
-export function CostEstimateSpecimen(props: Omit<CostEstimateProps, "onRun" | "onCancel" | "onAdjust"> & { withActions?: boolean; adjustLabel?: string }) {
-  const { withActions = true, adjustLabel, ...rest } = props;
+export function CostEstimateSpecimen(
+  props: Omit<CostEstimateProps, "onRun" | "onCancel" | "onAdjust" | "cost"> & {
+    cost?: CostEstimateProps["cost"];
+    withActions?: boolean;
+    adjustLabel?: string;
+  }
+) {
+  const { withActions = true, adjustLabel, cost = { low: "$1.10", high: "$1.80" }, title = "Before this runs", ...rest } = props;
   return (
     <CostEstimate
       {...rest}
+      cost={cost}
+      title={title}
       adjustLabel={adjustLabel}
       onRun={withActions ? () => undefined : undefined}
       onAdjust={adjustLabel ? () => undefined : undefined}
@@ -139,8 +147,11 @@ export function ResponseFeedbackSpecimen(props: Omit<ResponseFeedbackProps, "onS
 }
 
 /** AI Disclosure with its consent buttons wired to local state, for the docs previews. */
-export function AIDisclosureSpecimen(props: Omit<AIDisclosureProps, "onAllow" | "onDecline" | "onDismiss">) {
+export function AIDisclosureSpecimen(
+  props: Omit<AIDisclosureProps, "onAllow" | "onDecline" | "onDismiss" | "title"> & { title?: string }
+) {
   const [answered, setAnswered] = React.useState<string | null>(null);
+  const title = props.title ?? "Written by AI";
   if (props.variant === "consent" && answered) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -158,6 +169,7 @@ export function AIDisclosureSpecimen(props: Omit<AIDisclosureProps, "onAllow" | 
   return (
     <AIDisclosure
       {...props}
+      title={title}
       className="w-full max-w-md"
       onAllow={props.variant === "consent" ? () => setAnswered(props.allowLabel ?? "Allow") : undefined}
       onDecline={props.variant === "consent" ? () => setAnswered(props.declineLabel ?? "Not now") : undefined}

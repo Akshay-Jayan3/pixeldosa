@@ -1,0 +1,93 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "workflow-stepper",
+  "title": "Workflow Stepper",
+  "description": "A compact sequential progress indicator for multi-step work. Renders ordered `steps` with a title, optional description, optional badge, and a computed state of `complete`, `current`, or `upcoming`; the caller can provide an explicit `currentStep` or let the component infer it from the first step marked current. Use it to orient a person inside an approval flow, onboarding flow, setup sequence, or an agent run without turning the whole page into a tutorial. Not a timeline, not a chat transcript, and not a wizard with nested forms; it is the lightweight state layer that tells people where they are and what is next.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/workflow-stepper/workflow-stepper.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nexport type WorkflowStepStatus = \"complete\" | \"current\" | \"upcoming\";\r\n\r\nexport type WorkflowStep = {\r\n  id: string;\r\n  title: string;\r\n  description?: string;\r\n  status?: WorkflowStepStatus;\r\n  badge?: string;\r\n};\r\n\r\nconst workflowStepperVariants = cva(\"flex w-full flex-col\", {\r\n  variants: {\r\n    size: {\r\n      default: \"gap-3\",\r\n      compact: \"gap-2.5\",\r\n    },\r\n  },\r\n  defaultVariants: {\r\n    size: \"default\",\r\n  },\r\n});\r\n\r\nexport interface WorkflowStepperProps\r\n  extends React.ComponentPropsWithoutRef<\"div\">,\r\n    VariantProps<typeof workflowStepperVariants> {\r\n  /** Ordered steps, from first to last. */\r\n  steps: WorkflowStep[];\r\n  /** The 0-based index of the current step. Defaults to the first step marked `current`. */\r\n  currentStep?: number;\r\n  /** Displayed above the step list. */\r\n  title?: string;\r\n  /** Show each step's computed state as a badge. */\r\n  showStatus?: boolean;\r\n}\r\n\r\nconst STEP_STATUS_LABEL: Record<WorkflowStepStatus, string> = {\r\n  complete: \"Done\",\r\n  current: \"Current\",\r\n  upcoming: \"Next\",\r\n};\r\n\r\nfunction WorkflowStepper({\r\n  steps,\r\n  currentStep,\r\n  title,\r\n  className,\r\n  size,\r\n  showStatus = true,\r\n  ...props\r\n}: WorkflowStepperProps) {\r\n  const resolvedCurrentStep = React.useMemo(() => {\r\n    if (typeof currentStep === \"number\") {\r\n      return currentStep;\r\n    }\r\n\r\n    const index = steps.findIndex((step) => step.status === \"current\");\r\n    return index >= 0 ? index : 0;\r\n  }, [currentStep, steps]);\r\n\r\n  return (\r\n    <div className={cn(workflowStepperVariants({ size }), className)} {...props}>\r\n      {title ? (\r\n        <p className=\"text-sm font-medium text-foreground\">{title}</p>\r\n      ) : null}\r\n\r\n      <ol className=\"flex flex-col\">\r\n        {steps.map((step, index) => {\r\n          const isComplete = step.status === \"complete\" || index < resolvedCurrentStep;\r\n          const isCurrent = step.status === \"current\" || index === resolvedCurrentStep;\r\n          const isUpcoming = step.status === \"upcoming\" || (!isComplete && !isCurrent && index > resolvedCurrentStep);\r\n          const status: WorkflowStepStatus = isComplete ? \"complete\" : isCurrent ? \"current\" : \"upcoming\";\r\n\r\n          return (\r\n            <li key={step.id} className=\"relative flex gap-3 pb-3 last:pb-0\">\r\n              {index < steps.length - 1 ? (\r\n                <span\r\n                  aria-hidden=\"true\"\r\n                  className={cn(\r\n                    \"absolute left-[0.9rem] top-8 h-[calc(100%-0.5rem)] w-px bg-border\",\r\n                    isComplete ? \"bg-primary/60\" : \"bg-border\"\r\n                  )}\r\n                />\r\n              ) : null}\r\n\r\n              <div className=\"relative z-10 flex flex-col items-center\">\r\n                <div\r\n                  className={cn(\r\n                    \"flex size-8 items-center justify-center rounded-full border text-xs font-medium transition-colors duration-(--pd-duration-instant) ease-(--pd-ease-standard) motion-reduce:transition-none\",\r\n                    isComplete && \"border-primary bg-primary text-primary-foreground\",\r\n                    isCurrent && \"border-primary bg-primary/10 text-primary ring-[3px] ring-primary/15\",\r\n                    isUpcoming && \"border-border bg-background text-muted-foreground\"\r\n                  )}\r\n                  aria-hidden=\"true\"\r\n                >\r\n                  {isComplete ? (\r\n                    <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" className=\"size-4 fill-none stroke-current\">\r\n                      <path d=\"M5.5 12.5 9.5 16.5 18.5 7.5\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" />\r\n                    </svg>\r\n                  ) : (\r\n                    index + 1\r\n                  )}\r\n                </div>\r\n              </div>\r\n\r\n              <div className=\"min-w-0 flex-1 pt-0.5\">\r\n                <div className=\"flex flex-wrap items-center gap-2\">\r\n                  <p className={cn(\"text-sm font-medium\", isCurrent ? \"text-foreground\" : \"text-foreground/90\")}>{step.title}</p>\r\n                  {showStatus ? (\r\n                    <span\r\n                      className={cn(\r\n                        \"rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em]\",\r\n                        isComplete && \"border-primary/20 bg-primary/10 text-primary\",\r\n                        isCurrent && \"border-primary/20 bg-primary/10 text-primary\",\r\n                        isUpcoming && \"border-border bg-muted text-muted-foreground\"\r\n                      )}\r\n                    >\r\n                      {STEP_STATUS_LABEL[status]}\r\n                    </span>\r\n                  ) : null}\r\n                  {step.badge ? (\r\n                    <span className=\"rounded-full border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground\">\r\n                      {step.badge}\r\n                    </span>\r\n                  ) : null}\r\n                </div>\r\n\r\n                {step.description ? (\r\n                  <p className=\"mt-1 text-sm text-muted-foreground text-pretty\">{step.description}</p>\r\n                ) : null}\r\n              </div>\r\n            </li>\r\n          );\r\n        })}\r\n      </ol>\r\n    </div>\r\n  );\r\n}\r\n\r\nexport { WorkflowStepper, workflowStepperVariants };\r\n",
+      "type": "registry:ui",
+      "target": "components/ui/workflow-stepper.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "The component resolves state from the caller's `currentStep` or from the first step marked `current`, then derives the visible badge and connector colours rather than storing duplicated state. That keeps the API small and lets the page remain the source of truth for a live flow while the stepper stays presentational and easy to compose in an approval, onboarding, or agent-run layout. The alternative was a full state machine in the component itself, which would create stale logic when a step was already derived elsewhere in the app.",
+    "motionNotes": "The stepper uses a token-driven instant colour transition and the standard ring treatment for the current step; there is no large animation because the job is orientation, not spectacle. Reduced motion keeps the transition off while preserving the state change through colour and ring contrast, so the user still understands which step is active without any movement.",
+    "schema": {
+      "component": "WorkflowStepper",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "WorkflowStepper",
+        "type": "object",
+        "properties": {
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WorkflowStep"
+            },
+            "description": "Ordered steps, from first to last."
+          },
+          "currentStep": {
+            "type": "number",
+            "description": "The 0-based index of the current step. Defaults to the first step marked `current`."
+          },
+          "title": {
+            "type": "string",
+            "description": "Displayed above the step list."
+          },
+          "showStatus": {
+            "type": "boolean",
+            "description": "Show each step's computed state as a badge."
+          }
+        },
+        "required": [
+          "steps"
+        ],
+        "$defs": {
+          "WorkflowStep": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "complete",
+                  "current",
+                  "upcoming"
+                ]
+              },
+              "badge": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Keep each step concise: a short title, optional explanation, and a state that the user can understand in one glance.",
+  "categories": [
+    "ai-assisted",
+    "content",
+    "application"
+  ],
+  "type": "registry:ui"
+}

@@ -9,7 +9,15 @@ import { cn } from "@/lib/utils";
  * otherwise navigates to the example's detail page) — preventDefault plus
  * stopPropagation keep a copy click from also triggering navigation.
  */
-export function CopyIconButton({ text, className }: { text: string; className?: string }) {
+export function CopyIconButton({
+  text,
+  label = "Copy code",
+  className,
+}: {
+  text: string;
+  label?: string;
+  className?: string;
+}) {
   const [copied, setCopied] = React.useState(false);
 
   const copy = async (event: React.MouseEvent) => {
@@ -24,7 +32,7 @@ export function CopyIconButton({ text, className }: { text: string; className?: 
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? "Copied" : "Copy code"}
+      aria-label={copied ? `${label} copied` : label}
       className={cn(
         "inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-input text-muted-foreground",
         "transition-colors duration-[var(--pd-duration-instant)] hover:bg-accent hover:text-accent-foreground",

@@ -19,8 +19,13 @@ const cardVariants = cva(
         vertical: "flex-col gap-6 py-6",
         horizontal: "flex-row items-stretch gap-0",
       },
+      variant: {
+        default: "",
+        showcase: "gap-0 py-0",
+      },
     },
     defaultVariants: {
+      variant: "default",
       orientation: "vertical",
     },
   }
@@ -37,7 +42,7 @@ export interface CardProps
  * in both themes.
  */
 const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
-  { className, orientation, ...props },
+  { className, orientation, variant, ...props },
   ref
 ) {
   return (
@@ -45,7 +50,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
       ref={ref}
       data-slot="card"
       data-orientation={orientation ?? "vertical"}
-      className={cn(cardVariants({ orientation }), className)}
+      className={cn(cardVariants({ orientation, variant }), className)}
       {...props}
     />
   );

@@ -45,6 +45,7 @@ import ContentCardExample from "@pixeldosa/ui/registry/card/examples/content-car
 import DiffAcceptDemo from "@pixeldosa/ui/registry/diff-accept/diff-accept.demo";
 import ListingCardExample from "@pixeldosa/ui/registry/card/examples/listing-card";
 import LiveStatusLineDemo from "@pixeldosa/ui/registry/live-status-line/live-status-line.demo";
+import WorkflowStepperDemo from "@pixeldosa/ui/registry/workflow-stepper/workflow-stepper.demo";
 import PricingPairExample from "@pixeldosa/ui/registry/card/examples/pricing-pair";
 import FieldDemo from "@pixeldosa/ui/registry/field/field.demo";
 import SelectDemo from "@pixeldosa/ui/registry/select/select.demo";
@@ -372,6 +373,14 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "A morning's work, each line with what allowed it, the result, and Undo where it still applies.",
       render: ActivityTrailDemo,
+    },
+  ],
+  "workflow-stepper": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A compact, sequential view of what is complete, active and still ahead.",
+      render: WorkflowStepperDemo,
     },
   ],
   "human-handoff": [

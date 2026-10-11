@@ -3,7 +3,7 @@ import "server-only";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { GROUP_ORDER, groupFor, isFoundation } from "./component-groups";
+import { GROUP_ORDER, groupFor } from "./component-groups";
 
 export type RegistryFile = {
   path: string;
@@ -106,25 +106,23 @@ export function getComponentsByCategory(category: string): RegistryItem[] {
 }
 
 /**
- * Neighbours in the exact order the sidebar renders — grouped, with foundation
- * primitives excluded. Deriving this from the same grouping the nav uses is the point:
+ * Neighbours in the exact order the sidebar renders. Deriving this from the same
+ * grouping the nav uses is the point:
  * a "next" arrow that jumps to a component the sidebar doesn't show, or that skips
  * around the visible order, is the kind of small wrongness a user feels without being
  * able to name it.
  *
- * A foundation page reached directly by URL still gets arrows, falling back to the
- * full title-sorted list so it is never a dead end.
+ * Every documented component participates in the order so the navigation never skips
+ * a component visible in the catalogue.
  */
 export function getAdjacentComponents(name: string): {
   prev: RegistryItem | null;
   next: RegistryItem | null;
 } {
   const all = getComponents();
-  const navOrder = GROUP_ORDER.flatMap((group) =>
-    all.filter((item) => !isFoundation(item) && groupFor(item) === group)
+  const items = GROUP_ORDER.flatMap((group) =>
+    all.filter((item) => groupFor(item) === group)
   );
-
-  const items = navOrder.some((item) => item.name === name) ? navOrder : all;
   const index = items.findIndex((item) => item.name === name);
   if (index === -1) return { prev: null, next: null };
 

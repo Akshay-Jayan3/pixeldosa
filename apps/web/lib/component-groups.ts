@@ -1,60 +1,86 @@
 /**
- * Docs-site navigation grouping.
- *
- * The AI/foundation split is derived from each item's real `categories[0]`
- * (`ai-assisted`), not from a hand-kept list — so a new AI component can never be
- * accidentally omitted from the nav. The sub-grouping below is a docs-site concern
- * and deliberately lives here rather than in `registry-item.json`, which is published
- * to consumers and shouldn't carry our navigation opinions.
+ * Docs navigation follows the library's public-facing shape: reusable components,
+ * composed sections/blocks, then templates. This taxonomy is docs-only and does not
+ * affect registry metadata or install names.
  */
+export type ComponentGroupId = "components" | "sections" | "templates";
 
-export type ComponentGroupId = "blocks" | "ai" | "product";
-
-/**
- * Blocks lead, deliberately. They are the composed experiences the component tier
- * exists to produce — the thing someone should meet first, not a footnote under
- * twelve primitives.
- */
-export const GROUP_ORDER: ComponentGroupId[] = ["blocks", "ai", "product"];
+export const GROUP_ORDER: ComponentGroupId[] = ["components", "sections", "templates"];
 
 export const GROUP_LABELS: Record<ComponentGroupId, string> = {
-  blocks: "Blocks",
-  ai: "AI",
-  product: "Product",
+  components: "Components",
+  sections: "Sections & Blocks",
+  templates: "Templates",
 };
 
-/**
- * Only components that are *not* `ai-assisted` need an entry here. Everything else
- * groups under "AI" automatically, so a new AI component can never be missed.
- *
- * A finer split (assisted input / review / trust / output) was tried and removed:
- * at nine components it fragmented a short list into four two-item groups, which made
- * the nav look longer and busier than the thing it was describing. Revisit only if the
- * AI list grows past roughly fifteen.
- */
-const GROUP_BY_NAME: Record<string, ComponentGroupId> = {
-  "command-menu": "product",
+export const SUBGROUP_ORDER: Record<ComponentGroupId, string[]> = {
+  components: [
+    "ai-components",
+    "cards",
+    "data-display",
+    "navigation",
+    "buttons",
+    "inputs",
+    "feedback",
+  ],
+  sections: ["sections", "blocks"],
+  templates: [],
 };
 
-/**
- * Foundation primitives — Button, Card, Field, Overlay. Still shipped, still
- * installable, still composed internally by the AI tier; just not part of the docs
- * site's navigation, which is focused on the AI story. Their pages remain reachable
- * by URL and through "Browse all".
- */
-export function isFoundation(item: { name: string; type?: string; categories?: string[] }): boolean {
-  if (item.type === "registry:block") return false;
-  if (GROUP_BY_NAME[item.name]) return false;
-  return item.categories?.[0] !== "ai-assisted";
-}
+const SUBGROUP_LABELS: Record<ComponentGroupId, Record<string, string>> = {
+  components: {
+    "ai-components": "AI components",
+    cards: "Cards",
+    "data-display": "Data display",
+    navigation: "Navigation",
+    buttons: "Buttons",
+    inputs: "Inputs",
+    feedback: "Feedback",
+  },
+  sections: {
+    sections: "Sections",
+    blocks: "Blocks",
+  },
+  templates: {},
+};
+
+const FOUNDATION_SUBGROUP_BY_CATEGORY: Record<string, string> = {
+  actions: "buttons",
+  content: "cards",
+  forms: "inputs",
+  overlays: "navigation",
+};
 
 export function groupFor(item: {
   name: string;
   type?: string;
   categories?: string[];
 }): ComponentGroupId {
-  // Tier comes from the registry type, not a name list — a new Block can never be
-  // filed as a component by omission.
-  if (item.type === "registry:block") return "blocks";
-  return GROUP_BY_NAME[item.name] ?? "ai";
+  if (item.type === "registry:block") return "sections";
+  return "components";
+}
+
+export function subgroupFor(item: {
+  name: string;
+  type?: string;
+  categories?: string[];
+}): string {
+  const group = groupFor(item);
+
+  if (group === "components" && item.categories?.[0] === "ai-assisted") {
+    return "ai-components";
+  }
+  if (group === "components") {
+    return FOUNDATION_SUBGROUP_BY_CATEGORY[item.categories?.[0] ?? ""] ?? "cards";
+  }
+  if (group === "sections") {
+    return item.categories?.includes("marketing") || item.categories?.includes("section")
+      ? "sections"
+      : "blocks";
+  }
+  return "sections";
+}
+
+export function subgroupLabel(group: ComponentGroupId, subgroup: string): string {
+  return SUBGROUP_LABELS[group][subgroup] ?? "Other";
 }

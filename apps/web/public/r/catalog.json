@@ -859,7 +859,7 @@
           },
           "label": {
             "type": "string",
-            "description": "What the pose means, in words. Defaults to the pose's own label. Read by assistive\ntechnology, and shown beside the figure unless `hideLabel` is set."
+            "description": "What the pose means, in words. Defaults to the pose's own label. Read by assistive\r\ntechnology, and shown beside the figure unless `hideLabel` is set."
           },
           "hideLabel": {
             "type": "boolean"
@@ -873,7 +873,7 @@
           },
           "announce": {
             "type": "boolean",
-            "description": "Announce label changes through a polite live region. Off by default: most products\nalready announce status elsewhere (Live Status Line, Agent Presence), and two\nchannels saying the same thing is worse than one."
+            "description": "Announce label changes through a polite live region. Off by default: most products\r\nalready announce status elsewhere (Live Status Line, Agent Presence), and two\r\nchannels saying the same thing is worse than one."
           },
           "still": {
             "type": "boolean",
@@ -2895,7 +2895,7 @@
       "kind": "component",
       "access": "free",
       "title": "Card",
-      "description": "A bordered content container exposed as composable sub-components — Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, CardImage — rather than a single prop-driven component. Supports a vertical (default) and horizontal orientation via the orientation prop; CardImage reads the parent's orientation to switch between a top-rounded banner and a left-rounded side panel. Depth comes from a 1px border token rather than a shadow. Use to group related content on a page, including image-led listing cards and pricing cards built by composing these parts with your own content; use Dialog instead when the content needs to interrupt the user or block interaction.",
+      "description": "A bordered content container exposed as composable sub-components — Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, CardImage — rather than a single prop-driven component. Supports vertical (default) and horizontal orientations plus a compact showcase variant for preview-led catalogue tiles. CardImage reads the parent's orientation to switch between a top-rounded banner and a left-rounded side panel. Depth comes from a 1px border token rather than a shadow. Use to group related content on a page, including image-led listing cards and pricing cards built by composing these parts with your own content; use Dialog instead when the content needs to interrupt the user or block interaction.",
       "categories": [
         "content",
         "application"
@@ -2915,7 +2915,7 @@
       },
       "events": [],
       "guidance": {
-        "engineering": "Exposed as eight composable parts rather than a single component with header/footer/title/image props, so a Block composing Card can rearrange or omit regions without fighting a monolithic API. A pricing card, for example, needs zero new Card capability — it composes entirely from the existing header/content/footer parts plus its own feature-list content, which is the intended test of whether something belongs in Card at all versus being a Block built on top of it. CVA now carries exactly one real variant axis, orientation, added because CardImage's rounding genuinely differs between a top banner (vertical) and a side panel (horizontal) — not spending it on density or interactive treatments yet, since no Block currently needs those. Depth uses border-border rather than a shadow, matching the system's dark-mode-first 'borders over shadows' decision documented in the design tokens.",
+        "engineering": "Exposed as eight composable parts rather than a single component with header/footer/title/image props, so a Block composing Card can rearrange or omit regions without fighting a monolithic API. CVA expresses two purposeful axes: orientation controls CardImage's banner-versus-side-panel geometry, while the showcase variant removes default vertical padding and gaps for preview-led catalogue cards. A pricing card still needs no special Card capability — it composes the existing parts and its own content. Depth uses border-border rather than a shadow, matching the system's dark-mode-first 'borders over shadows' decision documented in the design tokens.",
         "motion": "None. Card is compositional infrastructure with no interaction state of its own — motion belongs on components built on top of it (a future SpotlightCard or an interactive card treatment), not baked into the base primitive, per the pillar rule that motion must earn its place."
       }
     },
@@ -9612,6 +9612,90 @@
       "guidance": {
         "engineering": "The kept set is caller-owned and passed in, because it has to survive the regeneration that replaces the other cells — holding it internally would lose the user's choices exactly when the component re-renders with new results. `onRegenerateRest` hands back the ids it is replacing rather than a bare signal, so the caller can keep positions stable and never has to diff two arrays to work out what the user meant. A cell that is still running is excluded from the replaceable set, which stops a second click from cancelling work already in flight. Per-cell status rather than a batch status comes from how these pipelines actually fail: partial success is the common case, and a grid that collapses to a single error state throws away results the user already paid for. The regeneration cost is a caller-formatted string on the button because unpriced iteration is the single most common complaint in this category.",
         "motion": "Only unfinished cells move: a running cell pulses its dot while the rest hold still, so a grid mid-regeneration reads as 'these two are working, the others are yours'. Kept cells change by border weight rather than by animation, since keeping is the user's turn and a celebratory motion there would be noise. Under `prefers-reduced-motion` the pulse stops and the running state is carried by its label."
+      }
+    },
+    {
+      "name": "workflow-stepper",
+      "component": "WorkflowStepper",
+      "kind": "component",
+      "access": "free",
+      "title": "Workflow Stepper",
+      "description": "A compact sequential progress indicator for multi-step work. Renders ordered `steps` with a title, optional description, optional badge, and a computed state of `complete`, `current`, or `upcoming`; the caller can provide an explicit `currentStep` or let the component infer it from the first step marked current. Use it to orient a person inside an approval flow, onboarding flow, setup sequence, or an agent run without turning the whole page into a tutorial. Not a timeline, not a chat transcript, and not a wizard with nested forms; it is the lightweight state layer that tells people where they are and what is next.",
+      "categories": [
+        "ai-assisted",
+        "content",
+        "application"
+      ],
+      "import": {
+        "from": "@/components/ui/workflow-stepper",
+        "named": "WorkflowStepper"
+      },
+      "install": "npx shadcn@latest add https://pixeldosa.akshayjayan.com/r/workflow-stepper.json",
+      "docs": "https://pixeldosa.akshayjayan.com/docs/components/workflow-stepper",
+      "element": "div",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "WorkflowStepper",
+        "type": "object",
+        "properties": {
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WorkflowStep"
+            },
+            "description": "Ordered steps, from first to last."
+          },
+          "currentStep": {
+            "type": "number",
+            "description": "The 0-based index of the current step. Defaults to the first step marked `current`."
+          },
+          "title": {
+            "type": "string",
+            "description": "Displayed above the step list."
+          },
+          "showStatus": {
+            "type": "boolean",
+            "description": "Show each step's computed state as a badge."
+          }
+        },
+        "required": [
+          "steps"
+        ],
+        "$defs": {
+          "WorkflowStep": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "complete",
+                  "current",
+                  "upcoming"
+                ]
+              },
+              "badge": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        }
+      },
+      "events": [],
+      "guidance": {
+        "engineering": "The component resolves state from the caller's `currentStep` or from the first step marked `current`, then derives the visible badge and connector colours rather than storing duplicated state. That keeps the API small and lets the page remain the source of truth for a live flow while the stepper stays presentational and easy to compose in an approval, onboarding, or agent-run layout. The alternative was a full state machine in the component itself, which would create stale logic when a step was already derived elsewhere in the app.",
+        "motion": "The stepper uses a token-driven instant colour transition and the standard ring treatment for the current step; there is no large animation because the job is orientation, not spectacle. Reduced motion keeps the transition off while preserving the state change through colour and ring contrast, so the user still understands which step is active without any movement."
       }
     }
   ]

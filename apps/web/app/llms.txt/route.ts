@@ -1,4 +1,4 @@
-import { isFoundation, groupFor } from "@/lib/component-groups";
+import { groupFor } from "@/lib/component-groups";
 import { SITE_URL, getAgentGuide, getComponentDoc } from "@/lib/docs";
 import { getComponents, installCommand, isPro, PRO_REGISTRY_CONFIG, type RegistryItem } from "@/lib/registry";
 
@@ -21,9 +21,8 @@ function line(item: RegistryItem): string {
  */
 export function GET() {
   const items = getComponents();
-  const blocks = items.filter((item) => groupFor(item) === "blocks");
-  const ai = items.filter((item) => groupFor(item) === "ai" && !isFoundation(item));
-  const foundation = items.filter((item) => isFoundation(item) || groupFor(item) === "product");
+  const components = items.filter((item) => groupFor(item) === "components");
+  const sections = items.filter((item) => groupFor(item) === "sections");
 
   const body = [
     "# PixelDosa UI",
@@ -57,17 +56,17 @@ export function GET() {
         ]
       : []),
     "",
-    "## Blocks",
+    "## Components",
     "",
-    ...blocks.map(line),
+    ...components.map(line),
     "",
-    "## AI components",
+    "## Sections & blocks",
     "",
-    ...ai.map(line),
+    ...(sections.length > 0 ? sections.map(line) : ["Reusable sections and blocks are in progress."]),
     "",
-    "## Foundation",
+    "## Templates",
     "",
-    ...foundation.map(line),
+    "Templates will be added as the library grows.",
     "",
     "## Optional",
     "",

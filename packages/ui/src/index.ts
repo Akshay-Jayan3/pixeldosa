@@ -284,6 +284,13 @@ export {
   type TrailActor,
 } from "./registry/activity-trail/activity-trail";
 export {
+  WorkflowStepper,
+  workflowStepperVariants,
+  type WorkflowStepperProps,
+  type WorkflowStep,
+  type WorkflowStepStatus,
+} from "./registry/workflow-stepper/workflow-stepper";
+export {
   HumanHandoff,
   type HumanHandoffProps,
   type HandoffStage,

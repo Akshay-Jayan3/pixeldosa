@@ -1,15 +1,19 @@
 import { DocsSidebarNav, type SidebarGroup } from "@/components/docs-sidebar-nav";
 import { demoExamples } from "@/components/registry-demos";
-import { GROUP_LABELS, GROUP_ORDER, groupFor, isFoundation } from "@/lib/component-groups";
+import {
+  GROUP_LABELS,
+  GROUP_ORDER,
+  groupFor,
+  subgroupFor,
+  subgroupLabel,
+  SUBGROUP_ORDER,
+} from "@/lib/component-groups";
 import { getNewComponents } from "@/lib/changelog";
 import { getComponents, isPro } from "@/lib/registry";
 
 /**
- * Navigation reads directly from the registry, so a new component appears without a
- * separate nav config. Foundation primitives (Button, Card, Field, Overlay) are
- * filtered out here rather than deleted — they still ship and are still composed
- * internally by the AI tier, they just aren't the story this site tells. They stay
- * reachable by URL and through "Browse all".
+ * Navigation reads directly from the registry. Small editorial subgroups make the
+ * growing collection browseable while empty catalog groups signal what's next.
  *
  * Data is resolved here (a server component, so it can read the filesystem via
  * lib/registry) and handed to DocsSidebarNav as plain props, since that component
@@ -18,24 +22,39 @@ import { getComponents, isPro } from "@/lib/registry";
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const recent = getNewComponents();
   const items = getComponents()
-    .filter((item) => !isFoundation(item))
     .map((item) => ({
       name: item.name,
       title: item.title,
       isNew: recent.has(item.name),
       isPro: isPro(item),
       group: groupFor(item),
+      subgroup: subgroupFor(item),
       examples: (demoExamples[item.name] ?? []).map((example) => ({
         slug: example.slug,
         title: example.title,
       })),
     }));
 
-  const groups: SidebarGroup[] = GROUP_ORDER.map((id) => ({
-    id,
-    label: GROUP_LABELS[id],
-    items: items.filter((item) => item.group === id),
-  })).filter((group) => group.items.length > 0);
+  const groups: SidebarGroup[] = GROUP_ORDER.map((id) => {
+    const groupItems = items.filter((item) => item.group === id);
+    return {
+      id,
+      label: GROUP_LABELS[id],
+      categories: SUBGROUP_ORDER[id]
+        .map((subgroup) => ({
+          id: subgroup,
+          label: subgroupLabel(id, subgroup),
+          items: groupItems.filter((item) => item.subgroup === subgroup),
+        }))
+        .filter((category) => category.items.length > 0),
+      emptyMessage:
+        id === "sections" && !groupItems.some((item) => item.subgroup === "sections")
+          ? "More sections are coming soon."
+          : id === "templates" && groupItems.length === 0
+            ? "Templates are coming soon."
+            : undefined,
+    };
+  }).filter((group) => group.categories.length > 0 || group.emptyMessage);
 
   return (
     <div className="flex">
