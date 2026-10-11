@@ -90,8 +90,6 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
  */
 export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
   const pathname = usePathname();
-  const isExampleActive = (name: string, slug: string) =>
-    pathname === `/docs/components/${name}/${slug}`;
 
   return (
     <>
@@ -102,7 +100,10 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
         <NavLink href="/docs/ai" active={pathname === "/docs/ai"}>
           Build with AI
         </NavLink>
-        <NavLink href="/docs/components" active={pathname === "/docs/components"}>
+        <NavLink
+          href="/docs/components"
+          active={pathname === "/docs/components"}
+        >
           Library
         </NavLink>
         <NavLink href="/changelog" active={pathname === "/changelog"}>
@@ -132,135 +133,77 @@ export function DocsSidebarNav({ groups }: { groups: SidebarGroup[] }) {
                     </svg>
                   )}
                 </span>
-                <h2 id={`sidebar-${group.id}`} className="truncate">{group.label}</h2>
+                <h2 id={`sidebar-${group.id}`} className="truncate">
+                  {group.label}
+                </h2>
               </span>
-              <span className="flex shrink-0 items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
-                {group.categories.reduce((count, category) => count + category.items.length, 0)}
-                <ChevronIcon direction="group" />
-              </span>
+              <ChevronIcon direction="group" />
             </summary>
-            <ul className="mt-0.5 space-y-0.5">
-            {group.categories.map((category) => {
-              const categoryActive = category.items.some((item) => {
-                const href = `/docs/components/${item.name}`;
-                return (
-                  pathname === href ||
-                  item.examples.some((example) => isExampleActive(item.name, example.slug))
-                );
-              });
 
-              return (
-                <li key={category.id}>
-                  <details open className="group/category">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted/60 [&::-webkit-details-marker]:hidden">
-                      <span className="flex min-w-0 items-center gap-2">
+            <ul className="mt-0.5 space-y-0.5">
+              {group.categories.map((category) => {
+                const categoryActive = category.items.some((item) => {
+                  const href = `/docs/components/${item.name}`;
+
+                  return (
+                    pathname === href ||
+                    pathname.startsWith(`${href}/`)
+                  );
+                });
+
+                return (
+                  <li key={category.id}>
+                    <details
+                      open={categoryActive}
+                      className="group/category"
+                    >
+                      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted/60 [&::-webkit-details-marker]:hidden">
                         <ChevronIcon direction="right" />
                         <span className="truncate">{category.label}</span>
-                      </span>
-                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                        {category.items.length}
-                      </span>
-                    </summary>
-                    <ul className="ml-3 mt-0.5 space-y-0.5 border-l border-border/70 pl-2">
-                      {category.items.map((item) => {
-                        const href = `/docs/components/${item.name}`;
-                        const hasMultipleExamples = item.examples.length > 1;
-                        const isComponentActive =
-                          pathname === href ||
-                          item.examples.some((example) =>
-                            isExampleActive(item.name, example.slug)
-                          );
+                      </summary>
 
-                        if (!hasMultipleExamples) {
+                      <ul className="ml-3 mt-0.5 space-y-0.5 border-l border-border/70 pl-2">
+                        {category.items.map((item) => {
+                          const href = `/docs/components/${item.name}`;
+                          const active =
+                            pathname === href ||
+                            pathname.startsWith(`${href}/`);
+
                           return (
                             <li key={item.name}>
                               <Link
                                 href={href}
-                                aria-current={isComponentActive ? "page" : undefined}
+                                aria-current={active ? "page" : undefined}
                                 className={cn(
                                   "flex items-center justify-between gap-2 rounded-md py-1.5 pl-2 pr-1 text-sm transition-colors duration-(--pd-duration-instant)",
-                                  isComponentActive
+                                  active
                                     ? "bg-accent text-accent-foreground"
                                     : "text-muted-foreground hover:text-accent-foreground"
                                 )}
                               >
                                 <span>{item.title}</span>
+
                                 {item.isNew || item.isPro ? (
-                                  <span className="flex items-center gap-1.5">
+                                  <span className="flex shrink-0 items-center gap-1.5">
                                     <ItemBadges item={item} />
                                   </span>
                                 ) : null}
                               </Link>
                             </li>
                           );
-                        }
+                        })}
+                      </ul>
+                    </details>
+                  </li>
+                );
+              })}
+            </ul>
 
-                        return (
-                          <li key={item.name}>
-                            <details open className="group/example">
-                              <summary
-                                className={cn(
-                                  "flex cursor-pointer list-none items-center justify-between gap-2 rounded-md py-1.5 pl-2 pr-1 text-sm transition-colors duration-(--pd-duration-instant) [&::-webkit-details-marker]:hidden",
-                                  isComponentActive
-                                    ? "text-accent-foreground"
-                                    : "text-muted-foreground hover:text-accent-foreground"
-                                )}
-                              >
-                                <span>{item.title}</span>
-                                <span className="flex items-center gap-1.5">
-                                  <ItemBadges item={item} />
-                                  <ChevronIcon />
-                                </span>
-                              </summary>
-                              <ul className="ml-2 mt-0.5 space-y-0.5 border-l border-border/70 pl-2">
-                                <li>
-                                  <Link
-                                    href={href}
-                                    aria-current={pathname === href ? "page" : undefined}
-                                    className={cn(
-                                      "block rounded-md px-2 py-1.5 text-xs transition-colors duration-(--pd-duration-instant)",
-                                      pathname === href
-                                        ? "bg-accent text-accent-foreground"
-                                        : "text-muted-foreground hover:text-accent-foreground"
-                                    )}
-                                  >
-                                    Overview
-                                  </Link>
-                                </li>
-                                {item.examples.map((example) => {
-                                  const exampleHref = `${href}/${example.slug}`;
-                                  const isActive = isExampleActive(item.name, example.slug);
-                                  return (
-                                    <li key={example.slug}>
-                                      <Link
-                                        href={exampleHref}
-                                        aria-current={isActive ? "page" : undefined}
-                                        className={cn(
-                                          "block rounded-md px-2 py-1.5 text-xs transition-colors duration-(--pd-duration-instant)",
-                                          isActive
-                                            ? "bg-accent text-accent-foreground"
-                                            : "text-muted-foreground hover:text-accent-foreground"
-                                        )}
-                                      >
-                                        {example.title}
-                                      </Link>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </details>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </details>
-                </li>
-              );
-            })}
-          </ul>
-          {group.emptyMessage ? (
-            <p className="px-2 py-1 text-xs text-muted-foreground">{group.emptyMessage}</p>
-          ) : null}
+            {group.emptyMessage ? (
+              <p className="px-2 py-1 text-xs text-muted-foreground">
+                {group.emptyMessage}
+              </p>
+            ) : null}
           </details>
         </section>
       ))}
