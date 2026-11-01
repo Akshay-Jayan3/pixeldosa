@@ -1,0 +1,26 @@
+---
+title: Product Spotlight
+description: Let visitors select a capability and see its explanation beside it.
+---
+
+## Usage
+
+```tsx
+<ProductSpotlight
+  title="From first thought to finished work."
+  items={[
+    { id: "plan", label: "Plan", title: "Make the next step clear.", description: "Turn priorities into a plan." },
+    { id: "build", label: "Build", title: "Keep work moving.", description: "Track owners and decisions." },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Section heading. |
+| `eyebrow` | `string` | — | Optional context above the heading. |
+| `items` | `ProductSpotlightItem[]` | — | Selectable features with `id`, `label`, `title`, `description`, and optional `visual`. |
+| `density` | `"comfortable" \| "compact"` | `"comfortable"` | Vertical spacing preset. |
+| `className` | `string` | — | Extra section classes. |

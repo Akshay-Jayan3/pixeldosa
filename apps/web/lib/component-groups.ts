@@ -1,15 +1,51 @@
 /**
- * Docs navigation follows the library's public-facing shape: reusable components,
- * composed sections/blocks, then templates. This taxonomy is docs-only and does not
- * affect registry metadata or install names.
+ * Docs navigation is a flat set of public-facing groups. Registry blocks stay in
+ * the Blocks group until they are explicitly assigned to a dedicated top-level group.
  */
-export type ComponentGroupId = "components" | "sections" | "templates";
+export type ComponentGroupId =
+  | "components"
+  | "heroes"
+  | "media"
+  | "controls"
+  | "text"
+  | "backgrounds"
+  | "illustrations"
+  | "charts"
+  | "carousels"
+  | "card-stacks"
+  | "grids"
+  | "blocks"
+  | "templates";
 
-export const GROUP_ORDER: ComponentGroupId[] = ["components", "sections", "templates"];
+export const GROUP_ORDER: ComponentGroupId[] = [
+  "components",
+  "heroes",
+  "media",
+  "controls",
+  "text",
+  "backgrounds",
+  "illustrations",
+  "charts",
+  "carousels",
+  "card-stacks",
+  "grids",
+  "blocks",
+  "templates",
+];
 
 export const GROUP_LABELS: Record<ComponentGroupId, string> = {
   components: "Components",
-  sections: "Sections & Blocks",
+  heroes: "Heroes",
+  media: "Media",
+  controls: "Controls",
+  text: "Text",
+  backgrounds: "Backgrounds",
+  illustrations: "Illustrations",
+  charts: "Charts",
+  carousels: "Carousels",
+  "card-stacks": "Card stacks",
+  grids: "Grids",
+  blocks: "Blocks",
   templates: "Templates",
 };
 
@@ -20,34 +56,37 @@ export const SUBGROUP_ORDER: Record<ComponentGroupId, string[]> = {
     "data-display",
     "navigation",
     "buttons",
-    "inputs",
+    "form-controls",
     "feedback",
   ],
-  sections: ["sections", "blocks"],
+  heroes: [],
+  media: [],
+  controls: [],
+  text: [],
+  backgrounds: [],
+  illustrations: [],
+  charts: [],
+  carousels: [],
+  "card-stacks": [],
+  grids: [],
+  blocks: [],
   templates: [],
 };
 
-const SUBGROUP_LABELS: Record<ComponentGroupId, Record<string, string>> = {
-  components: {
-    "ai-components": "AI components",
-    cards: "Cards",
-    "data-display": "Data display",
-    navigation: "Navigation",
-    buttons: "Buttons",
-    inputs: "Inputs",
-    feedback: "Feedback",
-  },
-  sections: {
-    sections: "Sections",
-    blocks: "Blocks",
-  },
-  templates: {},
+const COMPONENT_SUBGROUP_LABELS: Record<string, string> = {
+  "ai-components": "AI",
+  cards: "Cards",
+  "data-display": "Data display",
+  navigation: "Navigation",
+  buttons: "Buttons",
+  "form-controls": "Form controls",
+  feedback: "Feedback",
 };
 
 const FOUNDATION_SUBGROUP_BY_CATEGORY: Record<string, string> = {
   actions: "buttons",
   content: "cards",
-  forms: "inputs",
+  forms: "form-controls",
   overlays: "navigation",
 };
 
@@ -56,8 +95,7 @@ export function groupFor(item: {
   type?: string;
   categories?: string[];
 }): ComponentGroupId {
-  if (item.type === "registry:block") return "sections";
-  return "components";
+  return item.type === "registry:block" ? "blocks" : "components";
 }
 
 export function subgroupFor(item: {
@@ -65,22 +103,12 @@ export function subgroupFor(item: {
   type?: string;
   categories?: string[];
 }): string {
-  const group = groupFor(item);
-
-  if (group === "components" && item.categories?.[0] === "ai-assisted") {
-    return "ai-components";
-  }
-  if (group === "components") {
-    return FOUNDATION_SUBGROUP_BY_CATEGORY[item.categories?.[0] ?? ""] ?? "cards";
-  }
-  if (group === "sections") {
-    return item.categories?.includes("marketing") || item.categories?.includes("section")
-      ? "sections"
-      : "blocks";
-  }
-  return "sections";
+  if (groupFor(item) !== "components") return "";
+  if (item.categories?.[0] === "ai-assisted") return "ai-components";
+  return FOUNDATION_SUBGROUP_BY_CATEGORY[item.categories?.[0] ?? ""] ?? "cards";
 }
 
 export function subgroupLabel(group: ComponentGroupId, subgroup: string): string {
-  return SUBGROUP_LABELS[group][subgroup] ?? "Other";
+  if (group !== "components") return GROUP_LABELS[group];
+  return COMPONENT_SUBGROUP_LABELS[subgroup] ?? "Other";
 }

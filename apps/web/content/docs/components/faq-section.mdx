@@ -1,0 +1,25 @@
+---
+title: FAQ Section
+description: Answer common product or purchase questions using native disclosure rows.
+---
+
+## Usage
+
+```tsx
+<FAQSection
+  title="Questions, answered"
+  items={[
+    { id: "trial", question: "Can I try it first?", answer: "Yes, start with the free plan." },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Section heading. |
+| `description` | `string` | — | Optional introduction. |
+| `items` | `FAQItem[]` | — | Questions and React-node answers with stable ids. |
+| `density` | `"comfortable" \| "compact"` | `"comfortable"` | Spacing preset. |
+| `className` | `string` | — | Extra section classes. |

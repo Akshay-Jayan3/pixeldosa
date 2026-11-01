@@ -1,0 +1,80 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "integrations-showcase",
+  "title": "Integrations Showcase",
+  "description": "A searchable directory section for showing product integrations with their category and optional explanatory copy. It accepts a title and integration items with stable ids, names, categories, and descriptions; visitors can filter by any of those text fields. Use it when integration fit is an important product question, rather than presenting a decorative wall of logos with no labels or context.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/integrations-showcase/integrations-showcase.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst integrationsShowcaseVariants = cva(\"mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8\", {\r\n  variants: { layout: { grid: \"space-y-6\", compact: \"space-y-4\" } },\r\n  defaultVariants: { layout: \"grid\" },\r\n});\r\n\r\nexport interface Integration {\r\n  id: string;\r\n  name: string;\r\n  category: string;\r\n  description?: string;\r\n}\r\n\r\nexport interface IntegrationsShowcaseProps extends VariantProps<typeof integrationsShowcaseVariants> {\r\n  title: string;\r\n  integrations: Integration[];\r\n  className?: string;\r\n}\r\n\r\n/** Helps visitors search a product's integrations by name or category. */\r\nexport function IntegrationsShowcase({ title, integrations, layout, className }: IntegrationsShowcaseProps) {\r\n  const [query, setQuery] = React.useState(\"\");\r\n  const filtered = integrations.filter((item) => `${item.name} ${item.category} ${item.description ?? \"\"}`.toLowerCase().includes(query.trim().toLowerCase()));\r\n\r\n  return (\r\n    <section className={cn(integrationsShowcaseVariants({ layout }), className)}>\r\n      <header className=\"flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between\">\r\n        <div><h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2><p className=\"mt-2 text-muted-foreground\">Find the tools that fit your workflow.</p></div>\r\n        <label className=\"w-full sm:max-w-xs\"><span className=\"sr-only\">Search integrations</span><input value={query} onChange={(event) => setQuery(event.target.value)} type=\"search\" placeholder=\"Search integrations\" className=\"h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40\" /></label>\r\n      </header>\r\n      <p className=\"sr-only\" aria-live=\"polite\">{filtered.length} integrations found</p>\r\n      {filtered.length ? (\r\n        <ul className=\"grid gap-3 sm:grid-cols-2 lg:grid-cols-3\">\r\n          {filtered.map((item) => <li key={item.id} className=\"rounded-lg border border-border p-4\"><div className=\"flex items-center justify-between gap-3\"><h3 className=\"font-medium\">{item.name}</h3><span className=\"rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground\">{item.category}</span></div>{item.description ? <p className=\"mt-2 text-sm text-muted-foreground\">{item.description}</p> : null}</li>)}\r\n        </ul>\r\n      ) : <p className=\"rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground\">No integrations match “{query}”. Try another name or category.</p>}\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { integrationsShowcaseVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/integrations-showcase.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Uses a native search input and client-side filtering over caller-provided data, avoiding a remote search dependency for a small marketing catalog. The result count is announced through one polite live region, while a visible empty state explains how to recover from no matches. Each result names both the integration and its category so meaning does not depend on a logo.",
+    "motionNotes": "Filtering updates the list immediately without stagger or layout animation; visitors need a quick and stable response to each query. Result count and empty-state copy provide feedback without movement. Reduced-motion preferences require no special fallback because no animation is introduced.",
+    "schema": {
+      "component": "IntegrationsShowcase",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "IntegrationsShowcase",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "integrations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Integration"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "integrations"
+        ],
+        "$defs": {
+          "Integration": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "category"
+            ]
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Integration content is provided locally; if consumers link items to setup flows, provide explicit links as a future extension rather than implying the cards are interactive.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

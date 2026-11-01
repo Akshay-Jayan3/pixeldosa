@@ -1,0 +1,32 @@
+---
+title: Customer Proof
+description: Present attributed customer quotes and optional results with visitor-controlled navigation.
+---
+
+## Usage
+
+```tsx
+<CustomerProof
+  title="Trusted by teams doing meaningful work"
+  stories={[
+    {
+      id: "northstar",
+      quote: "We can see what matters and what needs attention.",
+      author: "Jordan Lee",
+      role: "Head of Product",
+      company: "Northstar",
+      metric: "2×",
+      metricLabel: "faster planning cycles",
+    },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Optional section heading. |
+| `stories` | `CustomerStory[]` | — | Attributed stories with optional role, company, metric, and metric label. |
+| `emphasis` | `"quote" \| "metric"` | `"quote"` | Content emphasis preset. |
+| `className` | `string` | — | Extra section classes. |

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "integrations-showcase",
+  "title": "Integrations Showcase",
+  "description": "A searchable directory section for showing product integrations with their category and optional explanatory copy. It accepts a title and integration items with stable ids, names, categories, and descriptions; visitors can filter by any of those text fields. Use it when integration fit is an important product question, rather than presenting a decorative wall of logos with no labels or context.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/integrations-showcase/integrations-showcase.tsx",
+      "target": "components/blocks/integrations-showcase.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Integration content is provided locally; if consumers link items to setup flows, provide explicit links as a future extension rather than implying the cards are interactive.",
+  "meta": {
+    "engineeringNotes": "Uses a native search input and client-side filtering over caller-provided data, avoiding a remote search dependency for a small marketing catalog. The result count is announced through one polite live region, while a visible empty state explains how to recover from no matches. Each result names both the integration and its category so meaning does not depend on a logo.",
+    "motionNotes": "Filtering updates the list immediately without stagger or layout animation; visitors need a quick and stable response to each query. Result count and empty-state copy provide feedback without movement. Reduced-motion preferences require no special fallback because no animation is introduced."
+  }
+}

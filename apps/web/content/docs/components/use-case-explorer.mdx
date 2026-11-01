@@ -1,0 +1,30 @@
+---
+title: Use Case Explorer
+description: Help visitors explore how a product fits different roles or workflows.
+---
+
+## Usage
+
+```tsx
+<UseCaseExplorer
+  title="Built around the work you do"
+  cases={[
+    {
+      id: "product",
+      label: "Product teams",
+      title: "Ship with shared context.",
+      description: "Connect customer needs to delivered work.",
+      outcomes: ["Prioritize requests", "Review outcomes"],
+    },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Section heading. |
+| `cases` | `UseCase[]` | — | Cases with `id`, `label`, `title`, `description`, and outcome strings. |
+| `layout` | `"cards" \| "compact"` | `"cards"` | Spacing preset. |
+| `className` | `string` | — | Extra section classes. |

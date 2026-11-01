@@ -1,0 +1,121 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "workflow-section",
+  "title": "Workflow Section",
+  "description": "An interactive process section that lets visitors select a step and read its explanation in a paired detail panel. It accepts a title, optional introduction, ordered steps with stable ids, titles, descriptions, optional detail content, and a horizontal or vertical layout. Use it to explain how a service or product works when sequence matters; use a static feature list when steps are independent.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/workflow-section/workflow-section.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst workflowSectionVariants = cva(\"mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8\", {\r\n  variants: {\r\n    orientation: { horizontal: \"space-y-8\", vertical: \"space-y-6\" },\r\n  },\r\n  defaultVariants: { orientation: \"horizontal\" },\r\n});\r\n\r\nexport interface WorkflowStep {\r\n  id: string;\r\n  title: string;\r\n  description: string;\r\n  detail?: React.ReactNode;\r\n}\r\n\r\nexport interface WorkflowSectionProps extends VariantProps<typeof workflowSectionVariants> {\r\n  title: string;\r\n  description?: string;\r\n  steps: WorkflowStep[];\r\n  className?: string;\r\n}\r\n\r\n/** Shows a process one step at a time so visitors can understand how it works. */\r\nexport function WorkflowSection({\r\n  title,\r\n  description,\r\n  steps,\r\n  orientation,\r\n  className,\r\n}: WorkflowSectionProps) {\r\n  const [activeId, setActiveId] = React.useState(steps[0]?.id);\r\n  const active = steps.find((step) => step.id === activeId) ?? steps[0];\r\n\r\n  return (\r\n    <section className={cn(workflowSectionVariants({ orientation }), className)}>\r\n      <header className=\"max-w-2xl\">\r\n        <h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2>\r\n        {description ? <p className=\"mt-3 text-muted-foreground\">{description}</p> : null}\r\n      </header>\r\n      {steps.length ? (\r\n        <div className={cn(\"grid gap-6\", orientation === \"horizontal\" ? \"md:grid-cols-[0.8fr_1.2fr]\" : \"md:grid-cols-2\")}>\r\n          <ol className=\"space-y-2\">\r\n            {steps.map((step, index) => (\r\n              <li key={step.id}>\r\n                <button\r\n                  type=\"button\"\r\n                  aria-pressed={active?.id === step.id}\r\n                  onClick={() => setActiveId(step.id)}\r\n                  className=\"flex w-full items-start gap-3 rounded-lg border border-border p-4 text-left outline-none hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-ring/40 aria-pressed:border-primary\"\r\n                >\r\n                  <span className=\"flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium\">{index + 1}</span>\r\n                  <span><span className=\"block font-medium\">{step.title}</span><span className=\"mt-1 block text-sm text-muted-foreground\">{step.description}</span></span>\r\n                </button>\r\n              </li>\r\n            ))}\r\n          </ol>\r\n          {active ? (\r\n            <article className=\"min-h-48 rounded-xl border border-border bg-card p-6 sm:p-8\">\r\n              <p className=\"text-sm font-medium text-primary\">Step {steps.findIndex((step) => step.id === active.id) + 1}</p>\r\n              <h3 className=\"mt-2 text-xl font-semibold\">{active.title}</h3>\r\n              <p className=\"mt-2 text-muted-foreground\">{active.description}</p>\r\n              {active.detail ? <div className=\"mt-5\">{active.detail}</div> : null}\r\n            </article>\r\n          ) : null}\r\n        </div>\r\n      ) : <p className=\"text-sm text-muted-foreground\">No steps to show yet.</p>}\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { workflowSectionVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/workflow-section.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Uses ordinary buttons to select one step and a separate detail region, rather than a custom carousel or a large timeline widget. This keeps every step discoverable, keyboard reachable, and usable without dragging or timed progression. Step content remains caller-authored, allowing product screenshots, simple text, or other local components without binding the block to a product domain.",
+    "motionNotes": "The active step changes without an animated slide; sequence and selection are conveyed by order, number, border, and text. This avoids implying that later steps are unavailable or that the visitor must wait for a timed transition. Reduced motion does not change the interaction or remove any content.",
+    "schema": {
+      "component": "WorkflowSection",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "WorkflowSection",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WorkflowStep"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "steps"
+        ],
+        "$defs": {
+          "WorkflowStep": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "detail": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "description"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Give each step a stable unique id and provide a detail node only when it adds useful context beyond the description.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

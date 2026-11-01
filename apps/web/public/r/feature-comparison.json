@@ -1,0 +1,146 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "feature-comparison",
+  "title": "Feature Comparison",
+  "description": "A responsive semantic table for comparing product tiers or a small number of alternatives across named capabilities. It accepts plans with ids and names plus feature rows whose values map to plan ids; cells can contain text or React nodes. Use it when visitors need a direct side-by-side comparison, and keep the number of columns small enough to scan on mobile; use Pricing Section when price and plan actions are the main decision.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/feature-comparison/feature-comparison.tsx",
+      "content": "import * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst featureComparisonVariants = cva(\"mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8\", {\r\n  variants: { density: { comfortable: \"space-y-6\", compact: \"space-y-4\" } },\r\n  defaultVariants: { density: \"comfortable\" },\r\n});\r\n\r\nexport interface ComparisonPlan {\r\n  id: string;\r\n  name: string;\r\n  description?: string;\r\n}\r\n\r\nexport interface ComparisonFeature {\r\n  id: string;\r\n  label: string;\r\n  values: Record<string, React.ReactNode>;\r\n}\r\n\r\nexport interface FeatureComparisonProps extends VariantProps<typeof featureComparisonVariants> {\r\n  title: string;\r\n  description?: string;\r\n  plans: ComparisonPlan[];\r\n  features: ComparisonFeature[];\r\n  className?: string;\r\n}\r\n\r\n/** Compares a small set of products or plans using named, scannable attributes. */\r\nexport function FeatureComparison({ title, description, plans, features, density, className }: FeatureComparisonProps) {\r\n  return (\r\n    <section className={cn(featureComparisonVariants({ density }), className)}>\r\n      <header className=\"max-w-2xl\">\r\n        <h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2>\r\n        {description ? <p className=\"mt-3 text-muted-foreground\">{description}</p> : null}\r\n      </header>\r\n      {plans.length ? (\r\n        <div className=\"overflow-x-auto rounded-xl border border-border\">\r\n          <table className=\"w-full min-w-[36rem] border-collapse text-left text-sm\">\r\n            <caption className=\"sr-only\">{title}</caption>\r\n            <thead className=\"bg-muted/50\">\r\n              <tr>\r\n                <th scope=\"col\" className=\"w-1/4 p-4 font-medium\">Capability</th>\r\n                {plans.map((plan) => <th scope=\"col\" key={plan.id} className=\"p-4 font-medium\">{plan.name}</th>)}\r\n              </tr>\r\n            </thead>\r\n            <tbody>\r\n              {features.map((feature) => (\r\n                <tr key={feature.id} className=\"border-t border-border\">\r\n                  <th scope=\"row\" className=\"p-4 font-medium\">{feature.label}</th>\r\n                  {plans.map((plan) => <td key={plan.id} className=\"p-4 text-muted-foreground\">{feature.values[plan.id] ?? \"—\"}</td>)}\r\n                </tr>\r\n              ))}\r\n            </tbody>\r\n          </table>\r\n        </div>\r\n      ) : <p className=\"text-sm text-muted-foreground\">Add plans and features to compare.</p>}\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { featureComparisonVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/feature-comparison.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Uses a native HTML table with scoped column and row headers instead of visually aligned divs, because comparison depends on preserving each value's relationship to its plan and feature for assistive technology. A min-width and horizontal overflow wrapper retain readable columns on narrow screens rather than compressing the labels into illegibility. Missing cells render a neutral dash.",
+    "motionNotes": "The table is static and introduces no motion; comparisons benefit from stable row and column alignment rather than animated rearrangement. The mobile overflow is directly scrollable and does not rely on motion or hover to reveal values, so reduced-motion settings do not alter its behavior.",
+    "schema": {
+      "component": "FeatureComparison",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "FeatureComparison",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ComparisonPlan"
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ComparisonFeature"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "plans",
+          "features"
+        ],
+        "$defs": {
+          "ComparisonPlan": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "ComparisonFeature": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "values": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "$ref": "#/$defs/UINode"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "x-react": "ReactNode"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "values"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Feature values are rendered as provided; format labels and accessible descriptions for icon-only or abbreviated values in the consuming app.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

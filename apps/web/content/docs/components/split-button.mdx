@@ -1,0 +1,47 @@
+---
+title: Split Button
+description: A primary action paired with a menu of related alternatives, with accessible keyboard navigation and loading and disabled states.
+---
+
+## Usage
+
+```tsx
+import { SplitButton } from "@/components/ui/split-button";
+
+export function PublishActions() {
+  return (
+    <SplitButton
+      label="Publish"
+      onClick={publishNow}
+      items={[
+        { label: "Schedule publish", onClick: schedulePublish },
+        { label: "Save as draft", onClick: saveDraft, separator: true },
+      ]}
+    />
+  );
+}
+```
+
+Keep the most common action on the primary segment. Use the menu for related
+alternatives that should not compete for the same visual priority. If all actions
+are peers, use an Action Menu or Button Group instead.
+
+Menu items can include an icon, be disabled, or introduce a separator before
+themselves. The menu closes after selection and returns focus to its trigger.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | — | Visible label for the primary action. |
+| `onClick` | `(event: React.MouseEvent<HTMLButtonElement>) => void` | — | Handler for the primary action. |
+| `items` | `SplitButtonItem[]` | — | Related menu actions; each item has a `label`, `onClick`, and optional `icon`, `disabled`, and `separator`. |
+| `variant` | `"primary" \| "secondary" \| "outline" \| "ghost"` | `"primary"` | Visual treatment shared by both segments. |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Height and type size for both segments. |
+| `disabled` | `boolean` | `false` | Disables both segments. |
+| `loading` | `boolean` | `false` | Disables both segments, marks the primary action busy, and shows a reduced-motion-aware indicator. |
+| `menuPlacement` | `"bottom" \| "top"` | `"bottom"` | Preferred side for the menu; Radix adjusts placement to avoid viewport collisions. |
+| `className` | `string` | — | Additional classes applied to the button group. |
+| `type` | `"button" \| "submit" \| "reset"` | `"button"` | Native button type for the primary action. |
+
+Other native button attributes are forwarded to the primary action.

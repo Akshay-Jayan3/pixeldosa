@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "workflow-section",
+  "title": "Workflow Section",
+  "description": "An interactive process section that lets visitors select a step and read its explanation in a paired detail panel. It accepts a title, optional introduction, ordered steps with stable ids, titles, descriptions, optional detail content, and a horizontal or vertical layout. Use it to explain how a service or product works when sequence matters; use a static feature list when steps are independent.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/workflow-section/workflow-section.tsx",
+      "target": "components/blocks/workflow-section.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Give each step a stable unique id and provide a detail node only when it adds useful context beyond the description.",
+  "meta": {
+    "engineeringNotes": "Uses ordinary buttons to select one step and a separate detail region, rather than a custom carousel or a large timeline widget. This keeps every step discoverable, keyboard reachable, and usable without dragging or timed progression. Step content remains caller-authored, allowing product screenshots, simple text, or other local components without binding the block to a product domain.",
+    "motionNotes": "The active step changes without an animated slide; sequence and selection are conveyed by order, number, border, and text. This avoids implying that later steps are unavailable or that the visitor must wait for a timed transition. Reduced motion does not change the interaction or remove any content."
+  }
+}

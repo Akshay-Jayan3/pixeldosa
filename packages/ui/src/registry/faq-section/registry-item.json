@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "faq-section",
+  "title": "FAQ Section",
+  "description": "A page section for answering common product or purchase questions in native disclosure rows. It accepts a title, optional introduction, and question items with stable ids and React-node answers. Use it to make secondary details available without overwhelming the page; keep high-stakes terms and essential pricing information visible elsewhere rather than hiding them only inside disclosures.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/faq-section/faq-section.tsx",
+      "target": "components/blocks/faq-section.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Use unique ids for each question. Native disclosures are independent and allow multiple answers to remain open simultaneously.",
+  "meta": {
+    "engineeringNotes": "Uses the native details/summary disclosure pattern rather than recreating accordion state and keyboard semantics. It supports browser-native keyboard operation and independent open states, with no runtime dependency or forced single-open behavior. Answers remain React nodes so consumers can include links or structured details.",
+    "motionNotes": "The plus indicator rotates using the instant motion token only to reflect open state; the answer itself appears through the browser's native disclosure behavior. Under prefers-reduced-motion the indicator transition is disabled while its orientation and the answer state still communicate the change."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "feature-comparison",
+  "title": "Feature Comparison",
+  "description": "A responsive semantic table for comparing product tiers or a small number of alternatives across named capabilities. It accepts plans with ids and names plus feature rows whose values map to plan ids; cells can contain text or React nodes. Use it when visitors need a direct side-by-side comparison, and keep the number of columns small enough to scan on mobile; use Pricing Section when price and plan actions are the main decision.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/feature-comparison/feature-comparison.tsx",
+      "target": "components/blocks/feature-comparison.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Feature values are rendered as provided; format labels and accessible descriptions for icon-only or abbreviated values in the consuming app.",
+  "meta": {
+    "engineeringNotes": "Uses a native HTML table with scoped column and row headers instead of visually aligned divs, because comparison depends on preserving each value's relationship to its plan and feature for assistive technology. A min-width and horizontal overflow wrapper retain readable columns on narrow screens rather than compressing the labels into illegibility. Missing cells render a neutral dash.",
+    "motionNotes": "The table is static and introduces no motion; comparisons benefit from stable row and column alignment rather than animated rearrangement. The mobile overflow is directly scrollable and does not rely on motion or hover to reveal values, so reduced-motion settings do not alter its behavior."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "split-button",
+  "title": "Split Button",
+  "description": "A compound action control with a primary button and a separate menu trigger for related alternatives. It renders a native primary button beside a Radix dropdown-menu trigger, with primary, secondary, outline, and ghost variants; small, medium, and large sizes; top or bottom menu placement; optional leading icons, separators, disabled menu items, and disabled or loading states. Use it when one action should remain immediately available and related alternatives belong in a menu; use an Action Menu when none of the actions is primary, or a Button Group for peer actions that should all stay visible.",
+  "type": "registry:ui",
+  "categories": ["actions"],
+  "dependencies": [
+    "@radix-ui/react-dropdown-menu",
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/split-button/split-button.tsx",
+      "target": "components/ui/split-button.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. Radix Dropdown Menu is installed as a direct dependency and provides menu focus management, keyboard navigation, dismissal, and portal behavior.",
+  "meta": {
+    "engineeringNotes": "Uses Radix Dropdown Menu rather than hand-rolled menu roles, pointer dismissal, and focus management: this preserves arrow-key navigation, typeahead, Escape handling, focus restoration, and collision-aware placement for the secondary actions. The primary action remains an independent native button, so its click behavior and form semantics do not depend on opening the menu. CVA owns the variant and size matrix and exports splitButtonVariants for consumer extension; semantic classes keep colors theme-driven, while the separate icon trigger has its own accessible name.",
+    "motionNotes": "Menu content appears without an entrance animation so focus movement and action availability remain the motion; adding a decorative menu transition would add little orientation value for this compact control. Button color feedback uses the generated instant duration and standard easing tokens. The loading indicator rotates only to communicate ongoing work and becomes static under prefers-reduced-motion; the button remains mounted, disabled, and marked busy so progress is still conveyed without animation."
+  }
+}

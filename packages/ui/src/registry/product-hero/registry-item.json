@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "product-hero",
+  "title": "Product Hero",
+  "description": "A responsive opening section for product and marketing pages, with centered, split, product-preview, and editorial compositions. It renders an optional eyebrow, required headline, optional supporting description, caller-supplied action slot, and optional product visual. Use it to explain a product's core value and offer a next step near the top of a page; choose a different section when the visitor already understands the product and needs detailed feature comparison, proof, or pricing.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/product-hero/product-hero.tsx",
+      "target": "components/blocks/product-hero.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. Supply working action elements through the `actions` slot and a meaningful product visual through `visual`; omit `visual` when the product has no useful preview.",
+  "meta": {
+    "engineeringNotes": "Uses a composed slot API for actions and visual rather than embedding a product screenshot, CTA behavior, or a specific brand's copy. Product sites need control over links, analytics, responsive media, and server-rendered imagery, while the block's responsibility is the responsive composition and heading hierarchy. CVA defines the four named layout variants so consumers can extend the matrix without branching through conditional class strings. It is a Level 2 block intended for product-page templates, not a standalone control.",
+    "motionNotes": "The block has no entrance, autoplay, or decorative motion; its job is to establish page hierarchy immediately, and moving content would delay that orientation. CTA controls may use their own interaction feedback, but the hero itself does not animate. Because no motion is introduced, reduced-motion settings do not hide content or change the layout."
+  }
+}

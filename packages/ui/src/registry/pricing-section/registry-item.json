@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pricing-section",
+  "title": "Pricing Section",
+  "description": "A plan comparison section with a monthly or annual billing selector and caller-supplied actions. It accepts plans with names, descriptions, monthly and annual display prices, feature lists, and action nodes. Use it when visitors need to compare plan cost and included benefits; clarify billing terms and currency in the supplied price copy, and use Feature Comparison when feature differences matter more than checkout.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/pricing-section/pricing-section.tsx",
+      "target": "components/blocks/pricing-section.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Supply already formatted display prices and accurate billing terms; the component does not calculate tax, currency conversions, or subscription totals.",
+  "meta": {
+    "engineeringNotes": "Treats displayed prices as caller-formatted strings rather than embedding locale, currency, tax, and billing arithmetic in a presentation block. A native button pair with aria-pressed makes the billing selection keyboard operable without requiring a switch widget for two labelled choices. Plan actions are slots so consumers can connect them to their own checkout or sales flows.",
+    "motionNotes": "The billing selection updates price text immediately with no number-counting effect, since animated price changes can obscure the actual amount. Selected styling and the explicit billing note communicate the current state. Reduced-motion preferences do not alter the text or action availability."
+  }
+}

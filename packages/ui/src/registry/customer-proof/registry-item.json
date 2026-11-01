@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "customer-proof",
+  "title": "Customer Proof",
+  "description": "An attributed customer-story block for testimonials, optional outcome metrics, and a small set of navigable quotes. It accepts stories with stable ids, quote text, author, optional role and company, and optional metric and label. Use it to add customer evidence near a product or conversion decision; use a logo strip for recognition alone and do not invent customer claims or statistics.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/customer-proof/customer-proof.tsx",
+      "target": "components/blocks/customer-proof.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Use permissioned quotes and verifiable metrics, and always provide attribution. The carousel wraps previous and next navigation across the supplied stories.",
+  "meta": {
+    "engineeringNotes": "Keeps attribution, quote, and metric in one semantic figure so evidence is not separated from its source. Previous and Next are explicit buttons rather than autoplay or a swipe-only carousel, which keeps browsing under visitor control and available to keyboard users. A one-story collection omits unnecessary controls, and an empty collection gets an explicit fallback.",
+    "motionNotes": "Story changes are immediate and do not auto-advance; testimonials are evidence that visitors may need time to read, so timed motion would reduce comprehension. The live position indicator reports which story is active. No motion is used, so reduced-motion preferences do not remove or delay content."
+  }
+}

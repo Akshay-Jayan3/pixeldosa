@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-case-explorer",
+  "title": "Use Case Explorer",
+  "description": "An interactive marketing section that lets visitors choose a role or scenario and see the relevant description and outcomes. It accepts a title and cases with stable ids, labels, headings, descriptions, and outcome lists. Use it to help different audiences recognize how the same product fits their workflow; use Product Spotlight when the distinction is between product capabilities instead of user groups.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/use-case-explorer/use-case-explorer.tsx",
+      "target": "components/blocks/use-case-explorer.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Provide short labels and outcome copy for each audience; all case content is local and available without a network request.",
+  "meta": {
+    "engineeringNotes": "Uses an explicit audience selector and a single associated content panel instead of rendering every persona as a separate long card. This makes the audience choice the organizing action and keeps each benefit list tied to its intended visitor. Native buttons and aria-pressed avoid a bespoke tab system while preserving standard keyboard activation.",
+    "motionNotes": "Changing audience replaces the panel content immediately with no slide or fade, preventing motion from obscuring the newly selected audience's message. A visible pressed state and clear labels communicate selection. Reduced-motion settings require no behavior change because the interaction has no animation."
+  }
+}

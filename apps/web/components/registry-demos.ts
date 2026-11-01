@@ -39,6 +39,20 @@ import AgentAskDemo from "@pixeldosa/ui/registry/agent-ask/agent-ask.demo";
 import AgentPresenceDemo from "@pixeldosa/ui/registry/agent-presence/agent-presence.demo";
 import AIContextSurfaceDemo from "@pixeldosa/ui/registry/ai-context-surface/ai-context-surface.demo";
 import ButtonDemo from "@pixeldosa/ui/registry/button/button.demo";
+import SplitButtonDemo from "@pixeldosa/ui/registry/split-button/split-button.demo";
+import ProductHeroDemo from "@pixeldosa/ui/registry/product-hero/product-hero.demo";
+import SplitProductHeroDemo from "@pixeldosa/ui/registry/product-hero/examples/split";
+import ShowcaseProductHeroDemo from "@pixeldosa/ui/registry/product-hero/examples/showcase";
+import EditorialProductHeroDemo from "@pixeldosa/ui/registry/product-hero/examples/editorial";
+import ProductSpotlightDemo from "@pixeldosa/ui/registry/product-spotlight/product-spotlight.demo";
+import WorkflowSectionDemo from "@pixeldosa/ui/registry/workflow-section/workflow-section.demo";
+import FeatureComparisonDemo from "@pixeldosa/ui/registry/feature-comparison/feature-comparison.demo";
+import UseCaseExplorerDemo from "@pixeldosa/ui/registry/use-case-explorer/use-case-explorer.demo";
+import CustomerProofDemo from "@pixeldosa/ui/registry/customer-proof/customer-proof.demo";
+import IntegrationsShowcaseDemo from "@pixeldosa/ui/registry/integrations-showcase/integrations-showcase.demo";
+import PricingSectionDemo from "@pixeldosa/ui/registry/pricing-section/pricing-section.demo";
+import FAQSectionDemo from "@pixeldosa/ui/registry/faq-section/faq-section.demo";
+import ConversionCTADemo from "@pixeldosa/ui/registry/conversion-cta/conversion-cta.demo";
 import CommandMenuDemo from "@pixeldosa/ui/registry/command-menu/command-menu.demo";
 import ConfidenceMeterDemo from "@pixeldosa/ui/registry/confidence-meter/confidence-meter.demo";
 import ContentCardExample from "@pixeldosa/ui/registry/card/examples/content-card";
@@ -81,6 +95,112 @@ export const demoExamples: Record<string, DemoExample[]> = {
       title: "Overview",
       description: "All six variants, four sizes, loading and disabled states.",
       render: ButtonDemo,
+    },
+  ],
+  "split-button": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A primary publish action with related menu choices, loading, and disabled states.",
+      render: SplitButtonDemo,
+    },
+  ],
+  "product-hero": [
+    {
+      slug: "centered",
+      title: "Centered",
+      description: "A focused, centered introduction with the product preview below.",
+      render: ProductHeroDemo,
+    },
+    {
+      slug: "split",
+      title: "Split",
+      description: "Copy and product preview share the first screen.",
+      render: SplitProductHeroDemo,
+    },
+    {
+      slug: "showcase",
+      title: "Product showcase",
+      description: "A centered message gives a wide product preview the spotlight.",
+      render: ShowcaseProductHeroDemo,
+    },
+    {
+      slug: "editorial",
+      title: "Editorial",
+      description: "A text-led composition for a more considered product story.",
+      render: EditorialProductHeroDemo,
+    },
+  ],
+  "product-spotlight": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Select a capability to see its matching explanation.",
+      render: ProductSpotlightDemo,
+    },
+  ],
+  "workflow-section": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Select a process step to explore its details.",
+      render: WorkflowSectionDemo,
+    },
+  ],
+  "feature-comparison": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Compare three plan tiers in a responsive feature table.",
+      render: FeatureComparisonDemo,
+    },
+  ],
+  "use-case-explorer": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Choose an audience to see relevant outcomes.",
+      render: UseCaseExplorerDemo,
+    },
+  ],
+  "customer-proof": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Browse attributed customer stories and outcome metrics.",
+      render: CustomerProofDemo,
+    },
+  ],
+  "integrations-showcase": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Search and filter a small integrations catalog.",
+      render: IntegrationsShowcaseDemo,
+    },
+  ],
+  "pricing-section": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Switch billing periods and compare plans.",
+      render: PricingSectionDemo,
+    },
+  ],
+  "faq-section": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "Open native disclosure rows to read common answers.",
+      render: FAQSectionDemo,
+    },
+  ],
+  "conversion-cta": [
+    {
+      slug: "overview",
+      title: "Overview",
+      description: "A focused page-ending CTA with two actions and a reassurance note.",
+      render: ConversionCTADemo,
     },
   ],
   "command-menu": [

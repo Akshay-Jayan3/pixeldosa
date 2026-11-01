@@ -20,11 +20,13 @@ export type SidebarCategory = {
   id: string;
   label: string;
   items: SidebarItem[];
+  emptyMessage?: string;
 };
 
 export type SidebarGroup = {
   id: string;
   label: string;
+  items: SidebarItem[];
   categories: SidebarCategory[];
   emptyMessage?: string;
 };
@@ -152,7 +154,7 @@ export function DocsSidebarNav({
                     >
                       <path d="M2 2h4.5v4.5H2zM9.5 2H14v4.5H9.5zM2 9.5h4.5V14H2zM9.5 9.5H14V14H9.5z" />
                     </svg>
-                  ) : group.id === "sections" ? (
+                  ) : group.id !== "templates" ? (
                     <svg
                       viewBox="0 0 16 16"
                       fill="none"
@@ -196,6 +198,34 @@ export function DocsSidebarNav({
 
             {/* Categories */}
             <ul className="mt-0.5 space-y-0.5">
+              {group.items.map((item) => {
+                const href = `/docs/components/${item.name}`;
+                const active =
+                  pathname === href ||
+                  pathname.startsWith(`${href}/`);
+
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "flex items-center justify-between gap-2 rounded-md py-1.5 pl-3 pr-1 text-sm transition-colors duration-(--pd-duration-instant)",
+                        active
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:text-accent-foreground",
+                      )}
+                    >
+                      <span className="truncate">{item.title}</span>
+                      {item.isNew || item.isPro ? (
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          <ItemBadges item={item} />
+                        </span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
               {group.categories.map((category) => (
                 <li key={category.id}>
                   <details open className="group/category">
@@ -235,6 +265,11 @@ export function DocsSidebarNav({
                           </li>
                         );
                       })}
+                      {category.emptyMessage ? (
+                        <li className="px-2 py-1.5 text-xs text-muted-foreground">
+                          {category.emptyMessage}
+                        </li>
+                      ) : null}
                     </ul>
                   </details>
                 </li>

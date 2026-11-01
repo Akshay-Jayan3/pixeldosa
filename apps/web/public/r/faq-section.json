@@ -1,0 +1,118 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "faq-section",
+  "title": "FAQ Section",
+  "description": "A page section for answering common product or purchase questions in native disclosure rows. It accepts a title, optional introduction, and question items with stable ids and React-node answers. Use it to make secondary details available without overwhelming the page; keep high-stakes terms and essential pricing information visible elsewhere rather than hiding them only inside disclosures.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/faq-section/faq-section.tsx",
+      "content": "import * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst faqSectionVariants = cva(\"mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[minmax(12rem,0.7fr)_minmax(0,1.3fr)] lg:px-8\", {\r\n  variants: { density: { comfortable: \"md:gap-16\", compact: \"md:gap-8\" } },\r\n  defaultVariants: { density: \"comfortable\" },\r\n});\r\n\r\nexport interface FAQItem {\r\n  id: string;\r\n  question: string;\r\n  answer: React.ReactNode;\r\n}\r\n\r\nexport interface FaqSectionProps extends VariantProps<typeof faqSectionVariants> {\r\n  title: string;\r\n  description?: string;\r\n  items: FAQItem[];\r\n  className?: string;\r\n}\r\n\r\n/** Answers common purchase questions with native, keyboard-operable disclosures. */\r\nexport function FAQSection({ title, description, items, density, className }: FaqSectionProps) {\r\n  return (\r\n    <section className={cn(faqSectionVariants({ density }), className)}>\r\n      <header><h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2>{description ? <p className=\"mt-3 text-muted-foreground\">{description}</p> : null}</header>\r\n      <div className=\"divide-y divide-border border-y border-border\">\r\n        {items.map((item) => (\r\n          <details key={item.id} className=\"group py-4\">\r\n            <summary className=\"flex cursor-pointer list-none items-center justify-between gap-4 font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 [&::-webkit-details-marker]:hidden\">\r\n              {item.question}\r\n              <span aria-hidden=\"true\" className=\"text-muted-foreground transition-transform group-open:rotate-45 motion-reduce:transition-none\">+</span>\r\n            </summary>\r\n            <div className=\"pt-3 pr-7 text-sm leading-6 text-muted-foreground\">{item.answer}</div>\r\n          </details>\r\n        ))}\r\n      </div>\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { faqSectionVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/faq-section.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Uses the native details/summary disclosure pattern rather than recreating accordion state and keyboard semantics. It supports browser-native keyboard operation and independent open states, with no runtime dependency or forced single-open behavior. Answers remain React nodes so consumers can include links or structured details.",
+    "motionNotes": "The plus indicator rotates using the instant motion token only to reflect open state; the answer itself appears through the browser's native disclosure behavior. Under prefers-reduced-motion the indicator transition is disabled while its orientation and the answer state still communicate the change.",
+    "schema": {
+      "component": "FaqSection",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "FaqSection",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/FAQItem"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "items"
+        ],
+        "$defs": {
+          "FAQItem": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "answer"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Use unique ids for each question. Native disclosures are independent and allow multiple answers to remain open simultaneously.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

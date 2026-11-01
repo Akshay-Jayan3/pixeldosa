@@ -1,4 +1,3 @@
-import { groupFor } from "@/lib/component-groups";
 import { SITE_URL, getAgentGuide, getComponentDoc } from "@/lib/docs";
 import { getComponents, installCommand, isPro, PRO_REGISTRY_CONFIG, type RegistryItem } from "@/lib/registry";
 
@@ -21,8 +20,8 @@ function line(item: RegistryItem): string {
  */
 export function GET() {
   const items = getComponents();
-  const components = items.filter((item) => groupFor(item) === "components");
-  const sections = items.filter((item) => groupFor(item) === "sections");
+  const components = items.filter((item) => item.type !== "registry:block");
+  const blocks = items.filter((item) => item.type === "registry:block");
 
   const body = [
     "# PixelDosa UI",
@@ -60,9 +59,9 @@ export function GET() {
     "",
     ...components.map(line),
     "",
-    "## Sections & blocks",
+    "## Blocks",
     "",
-    ...(sections.length > 0 ? sections.map(line) : ["Reusable sections and blocks are in progress."]),
+    ...(blocks.length > 0 ? blocks.map(line) : ["Reusable blocks are in progress."]),
     "",
     "## Templates",
     "",

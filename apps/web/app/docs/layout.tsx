@@ -40,21 +40,27 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     return {
       id,
       label: GROUP_LABELS[id],
-      categories: SUBGROUP_ORDER[id]
-        .map((subgroup) => ({
-          id: subgroup,
-          label: subgroupLabel(id, subgroup),
-          items: groupItems.filter((item) => item.subgroup === subgroup),
-        }))
-        .filter((category) => category.items.length > 0),
+      items: id === "components" ? [] : groupItems,
+      categories:
+        id === "components"
+          ? SUBGROUP_ORDER[id]
+              .map((subgroup) => ({
+                id: subgroup,
+                label: subgroupLabel(id, subgroup),
+                items: groupItems.filter((item) => item.subgroup === subgroup),
+              }))
+              .filter((category) => category.items.length > 0)
+          : [],
       emptyMessage:
-        id === "sections" && !groupItems.some((item) => item.subgroup === "sections")
-          ? "More sections are coming soon."
-          : id === "templates" && groupItems.length === 0
+        groupItems.length === 0
+          ? id === "templates"
             ? "Templates are coming soon."
-            : undefined,
+            : id === "components"
+              ? undefined
+              : "Nothing here yet."
+          : undefined,
     };
-  }).filter((group) => group.categories.length > 0 || group.emptyMessage);
+  }).filter((group) => group.categories.length > 0 || group.items.length > 0 || group.emptyMessage);
 
   return (
     <div className="flex">

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pricing-section",
+  "title": "Pricing Section",
+  "description": "A plan comparison section with a monthly or annual billing selector and caller-supplied actions. It accepts plans with names, descriptions, monthly and annual display prices, feature lists, and action nodes. Use it when visitors need to compare plan cost and included benefits; clarify billing terms and currency in the supplied price copy, and use Feature Comparison when feature differences matter more than checkout.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/pricing-section/pricing-section.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst pricingSectionVariants = cva(\"mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8\", {\r\n  variants: { columns: { two: \"space-y-7\", three: \"space-y-7\" } },\r\n  defaultVariants: { columns: \"three\" },\r\n});\r\n\r\nexport interface PricingPlan {\r\n  id: string;\r\n  name: string;\r\n  description: string;\r\n  monthlyPrice: string;\r\n  annualPrice: string;\r\n  features: string[];\r\n  action: React.ReactNode;\r\n}\r\n\r\nexport interface PricingSectionProps extends VariantProps<typeof pricingSectionVariants> {\r\n  title: string;\r\n  description?: string;\r\n  plans: PricingPlan[];\r\n  className?: string;\r\n}\r\n\r\n/** Compares plans and lets visitors switch between monthly and annual prices. */\r\nexport function PricingSection({ title, description, plans, columns, className }: PricingSectionProps) {\r\n  const [annual, setAnnual] = React.useState(false);\r\n\r\n  return (\r\n    <section className={cn(pricingSectionVariants({ columns }), className)}>\r\n      <header className=\"mx-auto max-w-2xl text-center\">\r\n        <h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2>\r\n        {description ? <p className=\"mt-3 text-muted-foreground\">{description}</p> : null}\r\n        <div className=\"mt-5 inline-flex rounded-full border border-border p-1\" role=\"group\" aria-label=\"Billing period\">\r\n          <button type=\"button\" aria-pressed={!annual} onClick={() => setAnnual(false)} className=\"rounded-full px-3 py-1.5 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 aria-pressed:bg-primary aria-pressed:text-primary-foreground\">Monthly</button>\r\n          <button type=\"button\" aria-pressed={annual} onClick={() => setAnnual(true)} className=\"rounded-full px-3 py-1.5 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 aria-pressed:bg-primary aria-pressed:text-primary-foreground\">Annual</button>\r\n        </div>\r\n      </header>\r\n      <div className={cn(\"grid gap-4\", columns === \"two\" ? \"md:grid-cols-2\" : \"md:grid-cols-2 lg:grid-cols-3\")}>\r\n        {plans.map((plan) => (\r\n          <article key={plan.id} className=\"flex flex-col rounded-xl border border-border bg-card p-6\">\r\n            <h3 className=\"text-lg font-semibold\">{plan.name}</h3>\r\n            <p className=\"mt-2 min-h-10 text-sm text-muted-foreground\">{plan.description}</p>\r\n            <p className=\"mt-5 text-3xl font-semibold\">{annual ? plan.annualPrice : plan.monthlyPrice}<span className=\"ml-1 text-sm font-normal text-muted-foreground\">/ month</span></p>\r\n            <p className=\"mt-1 text-xs text-muted-foreground\">{annual ? \"Billed annually\" : \"Billed monthly\"}</p>\r\n            <ul className=\"my-6 flex-1 space-y-2 text-sm\">{plan.features.map((feature) => <li key={feature} className=\"flex gap-2\"><span aria-hidden=\"true\" className=\"text-primary\">✓</span>{feature}</li>)}</ul>\r\n            <div>{plan.action}</div>\r\n          </article>\r\n        ))}\r\n      </div>\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { pricingSectionVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/pricing-section.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Treats displayed prices as caller-formatted strings rather than embedding locale, currency, tax, and billing arithmetic in a presentation block. A native button pair with aria-pressed makes the billing selection keyboard operable without requiring a switch widget for two labelled choices. Plan actions are slots so consumers can connect them to their own checkout or sales flows.",
+    "motionNotes": "The billing selection updates price text immediately with no number-counting effect, since animated price changes can obscure the actual amount. Selected styling and the explicit billing note communicate the current state. Reduced-motion preferences do not alter the text or action availability.",
+    "schema": {
+      "component": "PricingSection",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "PricingSection",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/PricingPlan"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "plans"
+        ],
+        "$defs": {
+          "PricingPlan": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "monthlyPrice": {
+                "type": "string"
+              },
+              "annualPrice": {
+                "type": "string"
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "action": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "description",
+              "monthlyPrice",
+              "annualPrice",
+              "features",
+              "action"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Supply already formatted display prices and accurate billing terms; the component does not calculate tax, currency conversions, or subscription totals.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

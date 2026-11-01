@@ -1,0 +1,27 @@
+---
+title: Feature Comparison
+description: Compare a few plans or products in a responsive, accessible table.
+---
+
+## Usage
+
+```tsx
+<FeatureComparison
+  title="Choose the right way to work"
+  plans={[{ id: "starter", name: "Starter" }, { id: "team", name: "Team" }]}
+  features={[
+    { id: "projects", label: "Projects", values: { starter: "3", team: "Unlimited" } },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Comparison heading and accessible table caption. |
+| `description` | `string` | — | Optional introduction. |
+| `plans` | `ComparisonPlan[]` | — | Columns with a stable `id` and `name`. |
+| `features` | `ComparisonFeature[]` | — | Rows with a stable `id`, `label`, and values keyed by plan id. |
+| `density` | `"comfortable" \| "compact"` | `"comfortable"` | Spacing preset. |
+| `className` | `string` | — | Extra section classes. |

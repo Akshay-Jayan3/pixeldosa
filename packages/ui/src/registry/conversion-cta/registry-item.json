@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "conversion-cta",
+  "title": "Conversion CTA",
+  "description": "A closing product or marketing section with a concise headline, supporting copy, caller-supplied actions, and optional reassurance note. It provides left-aligned and centered compositions while leaving destination, analytics, loading, and error behavior to the consumer. Use it to make the next step clear after a page has established value; avoid adding multiple competing primary actions.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/conversion-cta/conversion-cta.tsx",
+      "target": "components/blocks/conversion-cta.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Pass functional links or buttons through `actions`; the block does not select or infer a conversion destination.",
+  "meta": {
+    "engineeringNotes": "Keeps the CTA's content and actions as slots instead of owning navigation or checkout state, so the same section composes with native links, app-router links, or application actions. CVA provides a small alignment matrix, while a single content container preserves the hierarchy between headline, explanation, actions, and reassurance.",
+    "motionNotes": "The section has no entrance or decorative animation; it should be available immediately when a visitor reaches the end of a page. Action controls remain ordinary consumer-supplied interactive elements with their own focus and feedback. Reduced-motion settings do not change the layout or hide content."
+  }
+}

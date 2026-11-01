@@ -169,7 +169,6 @@
   },
   "docs": "Requires `cn` at `@/lib/utils`. The host app owns the global ⌘K/Ctrl+K keydown listener and the `open` boolean — this component has no built-in trigger or shortcut binding, matching its controlled-only API. `CommandMenuItem`'s `keybind` prop is a single visible string (e.g. \"⌘S\"), not per-key badges; split it yourself if you need individually boxed keys.",
   "categories": [
-    "actions",
     "overlays"
   ],
   "type": "registry:ui"

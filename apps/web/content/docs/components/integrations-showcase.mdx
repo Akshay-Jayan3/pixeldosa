@@ -1,0 +1,24 @@
+---
+title: Integrations Showcase
+description: A searchable integration directory with names, categories, and optional descriptions.
+---
+
+## Usage
+
+```tsx
+<IntegrationsShowcase
+  title="Connect the tools you already use"
+  integrations={[
+    { id: "github", name: "GitHub", category: "Development", description: "Connect issues and pull requests." },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Section heading. |
+| `integrations` | `Integration[]` | — | Items with `id`, `name`, `category`, and optional `description`. |
+| `layout` | `"grid" \| "compact"` | `"grid"` | Spacing preset. |
+| `className` | `string` | — | Extra section classes. |

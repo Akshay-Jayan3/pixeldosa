@@ -1,0 +1,47 @@
+---
+title: Product Hero
+description: A responsive product-page opening section in four compositions, with composable copy, actions, and product visuals.
+---
+
+## Usage
+
+```tsx
+import { ProductHero } from "@/components/blocks/product-hero";
+import { Button } from "@/components/ui/button";
+
+export function ProductPageHero() {
+  return (
+    <ProductHero
+      eyebrow="The workspace for focused teams"
+      title="Make your best work easier to find."
+      description="Bring projects, decisions, and next steps into one calm workspace."
+      variant="split"
+      actions={
+        <>
+          <Button>Get started</Button>
+          <Button variant="outline">Explore the product</Button>
+        </>
+      }
+      visual={<ProductScreenshot />}
+    />
+  );
+}
+```
+
+Choose a composition based on the content: **Centered** for one focused message,
+**Split** when copy and product imagery should share the row, **Showcase** when the
+product visual deserves the width, and **Editorial** for a more text-led opening.
+Each composition is previewed separately above.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `eyebrow` | `string` | — | Short context line above the headline. |
+| `title` | `string` | — | Required main value proposition. |
+| `description` | `string` | — | Supporting sentence or paragraph. |
+| `actions` | `React.ReactNode` | — | Caller-supplied primary and secondary actions. |
+| `visual` | `React.ReactNode` | — | Product screenshot, illustration, or composed preview. |
+| `variant` | `"centered" \| "split" \| "showcase" \| "editorial"` | `"split"` | Layout composition. |
+| `headingLevel` | `1 \| 2 \| 3` | `1` | Heading level for the consuming page's outline. |
+| `className` | `string` | — | Additional classes applied to the section. |

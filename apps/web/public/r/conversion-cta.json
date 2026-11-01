@@ -1,0 +1,98 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "conversion-cta",
+  "title": "Conversion CTA",
+  "description": "A closing product or marketing section with a concise headline, supporting copy, caller-supplied actions, and optional reassurance note. It provides left-aligned and centered compositions while leaving destination, analytics, loading, and error behavior to the consumer. Use it to make the next step clear after a page has established value; avoid adding multiple competing primary actions.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/conversion-cta/conversion-cta.tsx",
+      "content": "import * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst conversionCtaVariants = cva(\"mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8\", {\r\n  variants: { alignment: { left: \"text-left\", center: \"text-center\" } },\r\n  defaultVariants: { alignment: \"left\" },\r\n});\r\n\r\nexport interface ConversionCtaProps extends VariantProps<typeof conversionCtaVariants> {\r\n  title: string;\r\n  description?: string;\r\n  actions?: React.ReactNode;\r\n  note?: string;\r\n  className?: string;\r\n}\r\n\r\n/** Closes a page with one clear next step and optional reassurance. */\r\nexport function ConversionCTA({ title, description, actions, note, alignment, className }: ConversionCtaProps) {\r\n  return (\r\n    <section className={cn(conversionCtaVariants({ alignment }), className)}>\r\n      <div className=\"rounded-xl border border-border bg-muted/40 p-6 sm:p-10\">\r\n        <div className={cn(alignment === \"center\" ? \"mx-auto max-w-2xl\" : \"max-w-2xl\")}>\r\n          <h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2>\r\n          {description ? <p className=\"mt-3 text-pretty text-muted-foreground\">{description}</p> : null}\r\n          {actions ? <div className={cn(\"mt-6 flex flex-wrap gap-3\", alignment === \"center\" ? \"justify-center\" : \"justify-start\")}>{actions}</div> : null}\r\n          {note ? <p className=\"mt-4 text-sm text-muted-foreground\">{note}</p> : null}\r\n        </div>\r\n      </div>\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { conversionCtaVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/conversion-cta.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Keeps the CTA's content and actions as slots instead of owning navigation or checkout state, so the same section composes with native links, app-router links, or application actions. CVA provides a small alignment matrix, while a single content container preserves the hierarchy between headline, explanation, actions, and reassurance.",
+    "motionNotes": "The section has no entrance or decorative animation; it should be available immediately when a visitor reaches the end of a page. Action controls remain ordinary consumer-supplied interactive elements with their own focus and feedback. Reduced-motion settings do not change the layout or hide content.",
+    "schema": {
+      "component": "ConversionCta",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ConversionCta",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "actions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/UINode"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/UINode"
+                    }
+                  ]
+                }
+              }
+            ],
+            "x-react": "ReactNode"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "$defs": {
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Pass functional links or buttons through `actions`; the block does not select or infer a conversion destination.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

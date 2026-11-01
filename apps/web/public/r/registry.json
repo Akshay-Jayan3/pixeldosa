@@ -3611,6 +3611,103 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "conversion-cta",
+      "title": "Conversion CTA",
+      "description": "A closing product or marketing section with a concise headline, supporting copy, caller-supplied actions, and optional reassurance note. It provides left-aligned and centered compositions while leaving destination, analytics, loading, and error behavior to the consumer. Use it to make the next step clear after a page has established value; avoid adding multiple competing primary actions.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/conversion-cta/conversion-cta.tsx",
+          "target": "components/blocks/conversion-cta.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Pass functional links or buttons through `actions`; the block does not select or infer a conversion destination.",
+      "meta": {
+        "engineeringNotes": "Keeps the CTA's content and actions as slots instead of owning navigation or checkout state, so the same section composes with native links, app-router links, or application actions. CVA provides a small alignment matrix, while a single content container preserves the hierarchy between headline, explanation, actions, and reassurance.",
+        "motionNotes": "The section has no entrance or decorative animation; it should be available immediately when a visitor reaches the end of a page. Action controls remain ordinary consumer-supplied interactive elements with their own focus and feedback. Reduced-motion settings do not change the layout or hide content.",
+        "schema": {
+          "component": "ConversionCta",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "ConversionCta",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "actions": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "$defs": {
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "cost-estimate",
       "title": "Cost Estimate",
       "description": "What a run will cost and how long it will take, shown before it starts. Takes a `cost` range (`low` and optional `high`, formatted by you in money or credits), an optional `duration` in plain words, a `confidence` tier from Confidence Meter, a `basis` naming where the estimate comes from, an `items` breakdown of what the spend is made of, and a `balance` with the user's remaining budget or credits — including `exceeds` when this run would go past it, which is stated before the button rather than after. A range is the default shape on purpose: a single confident figure claims precision an estimate doesn't have, and the confidence is a tier rather than a percentage for the same reason. Purely presentational and provider-free: you compute the numbers from your own pricing and history and pass them in formatted, so the component never guesses a currency, a model price or a token count. Holds completely still — it is the user's turn. Use it before a costly or long run, beside Intent Preview or Agent Plan. Not for live spend during a run, not for a billing page, and not for showing raw token counts, which are not a unit people can judge.",
@@ -3882,6 +3979,93 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "customer-proof",
+      "title": "Customer Proof",
+      "description": "An attributed customer-story block for testimonials, optional outcome metrics, and a small set of navigable quotes. It accepts stories with stable ids, quote text, author, optional role and company, and optional metric and label. Use it to add customer evidence near a product or conversion decision; use a logo strip for recognition alone and do not invent customer claims or statistics.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/customer-proof/customer-proof.tsx",
+          "target": "components/blocks/customer-proof.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Use permissioned quotes and verifiable metrics, and always provide attribution. The carousel wraps previous and next navigation across the supplied stories.",
+      "meta": {
+        "engineeringNotes": "Keeps attribution, quote, and metric in one semantic figure so evidence is not separated from its source. Previous and Next are explicit buttons rather than autoplay or a swipe-only carousel, which keeps browsing under visitor control and available to keyboard users. A one-story collection omits unnecessary controls, and an empty collection gets an explicit fallback.",
+        "motionNotes": "Story changes are immediate and do not auto-advance; testimonials are evidence that visitors may need time to read, so timed motion would reduce comprehension. The live position indicator reports which story is active. No motion is used, so reduced-motion preferences do not remove or delay content.",
+        "schema": {
+          "component": "CustomerProof",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "CustomerProof",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "stories": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/CustomerStory"
+                }
+              }
+            },
+            "required": [
+              "stories"
+            ],
+            "$defs": {
+              "CustomerStory": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "quote": {
+                    "type": "string"
+                  },
+                  "author": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string"
+                  },
+                  "metric": {
+                    "type": "string"
+                  },
+                  "metricLabel": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "quote",
+                  "author"
+                ]
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "diff-accept",
       "title": "Diff Accept",
       "description": "Reviews an AI-proposed text change as an inline word-level diff, resolved hunk by hunk rather than all-or-nothing. Takes baseValue (the text the proposal was generated against), value (the current live value), and proposedValue (the AI's suggested replacement), and computes the diff between baseValue and proposedValue using the diff (jsdiff) library. Each contiguous run of changed words becomes one hunk with its own Accept/Reject controls, shown inline as struck-through removed text and underlined/tinted added text. If value no longer matches baseValue — the underlying text changed since the proposal was generated — the diff is not shown; a conflict banner renders instead with an optional onRegenerate callback. Apply commits the current resolution (accepted hunks use the proposed text, pending or rejected hunks keep the original) via onApply, with a brief Undo affordance after. Use for reviewing AI rewrites of existing text — a bio, a description, any content field — where accepting some proposed changes and rejecting others is a real, expected outcome. Not for a single atomic value with no internal structure to partially accept — use smart-field for that.",
@@ -4103,6 +4287,268 @@
               ]
             }
           ]
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "faq-section",
+      "title": "FAQ Section",
+      "description": "A page section for answering common product or purchase questions in native disclosure rows. It accepts a title, optional introduction, and question items with stable ids and React-node answers. Use it to make secondary details available without overwhelming the page; keep high-stakes terms and essential pricing information visible elsewhere rather than hiding them only inside disclosures.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/faq-section/faq-section.tsx",
+          "target": "components/blocks/faq-section.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Use unique ids for each question. Native disclosures are independent and allow multiple answers to remain open simultaneously.",
+      "meta": {
+        "engineeringNotes": "Uses the native details/summary disclosure pattern rather than recreating accordion state and keyboard semantics. It supports browser-native keyboard operation and independent open states, with no runtime dependency or forced single-open behavior. Answers remain React nodes so consumers can include links or structured details.",
+        "motionNotes": "The plus indicator rotates using the instant motion token only to reflect open state; the answer itself appears through the browser's native disclosure behavior. Under prefers-reduced-motion the indicator transition is disabled while its orientation and the answer state still communicate the change.",
+        "schema": {
+          "component": "FaqSection",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "FaqSection",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/FAQItem"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "items"
+            ],
+            "$defs": {
+              "FAQItem": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "question": {
+                    "type": "string"
+                  },
+                  "answer": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode"
+                  }
+                },
+                "required": [
+                  "id",
+                  "question",
+                  "answer"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "feature-comparison",
+      "title": "Feature Comparison",
+      "description": "A responsive semantic table for comparing product tiers or a small number of alternatives across named capabilities. It accepts plans with ids and names plus feature rows whose values map to plan ids; cells can contain text or React nodes. Use it when visitors need a direct side-by-side comparison, and keep the number of columns small enough to scan on mobile; use Pricing Section when price and plan actions are the main decision.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/feature-comparison/feature-comparison.tsx",
+          "target": "components/blocks/feature-comparison.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Feature values are rendered as provided; format labels and accessible descriptions for icon-only or abbreviated values in the consuming app.",
+      "meta": {
+        "engineeringNotes": "Uses a native HTML table with scoped column and row headers instead of visually aligned divs, because comparison depends on preserving each value's relationship to its plan and feature for assistive technology. A min-width and horizontal overflow wrapper retain readable columns on narrow screens rather than compressing the labels into illegibility. Missing cells render a neutral dash.",
+        "motionNotes": "The table is static and introduces no motion; comparisons benefit from stable row and column alignment rather than animated rearrangement. The mobile overflow is directly scrollable and does not rely on motion or hover to reveal values, so reduced-motion settings do not alter its behavior.",
+        "schema": {
+          "component": "FeatureComparison",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "FeatureComparison",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "plans": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ComparisonPlan"
+                }
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ComparisonFeature"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "plans",
+              "features"
+            ],
+            "$defs": {
+              "ComparisonPlan": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ]
+              },
+              "ComparisonFeature": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "values": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "$ref": "#/$defs/UINode"
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "x-react": "ReactNode"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "values"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
         }
       }
     },
@@ -7025,6 +7471,85 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "integrations-showcase",
+      "title": "Integrations Showcase",
+      "description": "A searchable directory section for showing product integrations with their category and optional explanatory copy. It accepts a title and integration items with stable ids, names, categories, and descriptions; visitors can filter by any of those text fields. Use it when integration fit is an important product question, rather than presenting a decorative wall of logos with no labels or context.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/integrations-showcase/integrations-showcase.tsx",
+          "target": "components/blocks/integrations-showcase.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Integration content is provided locally; if consumers link items to setup flows, provide explicit links as a future extension rather than implying the cards are interactive.",
+      "meta": {
+        "engineeringNotes": "Uses a native search input and client-side filtering over caller-provided data, avoiding a remote search dependency for a small marketing catalog. The result count is announced through one polite live region, while a visible empty state explains how to recover from no matches. Each result names both the integration and its category so meaning does not depend on a logo.",
+        "motionNotes": "Filtering updates the list immediately without stagger or layout animation; visitors need a quick and stable response to each query. Result count and empty-state copy provide feedback without movement. Reduced-motion preferences require no special fallback because no animation is introduced.",
+        "schema": {
+          "component": "IntegrationsShowcase",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "IntegrationsShowcase",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "integrations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/Integration"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "integrations"
+            ],
+            "$defs": {
+              "Integration": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "category"
+                ]
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "intent-preview",
       "title": "Intent Preview",
       "description": "An agent restates what it understood — and the guesses it made — before any work starts. Takes an `interpretation` (the request restated as one plain sentence), optional `assumptions` (each a labelled best guess, optionally with alternative readings the user can switch to in place), optional `boundaries` listing what the agent will deliberately not do, and `onStart`, which receives the confirmed values, plus optional `onRephrase` and `onCancel`. The guesses arrive pre-filled, so when they are right confirming costs one click; when one is wrong it is corrected in place from a list of the other readings rather than by rewriting the prompt, and the start button changes to 'Start with changes' so the difference is visible. The reason it exists: a model that misreads a request early builds every later step on that mistake, so the cheapest correction in an agentic run is the first one. Distinct from Agent Ask, which blocks until the user supplies something the agent cannot guess — this is for when the agent could proceed on its best guess, but being wrong would be expensive. Holds perfectly still, since it is the user's turn. Composes AI Action Toolbar. Use it before long runs, runs with side effects, or requests with ambiguous scope. Not for every request — adding a confirmation to a cheap, reversible action is friction that trains people to click through without reading.",
@@ -7749,9 +8274,9 @@
               "placement": {
                 "enum": [
                   "center",
+                  "left",
                   "top",
                   "bottom",
-                  "left",
                   "right"
                 ],
                 "description": "Which edge the content enters from. `center` is Dialog/Popover; the rest are Sheet/Drawer."
@@ -8164,6 +8689,400 @@
       "meta": {
         "engineeringNotes": "Shipped as a registry:theme item rather than baked into each component so that colour is a project-level decision made once, not a per-component import that would break the moment a consumer wants their own palette. Colours are OKLCH rather than HSL so the light and dark scales can be derived from matched perceptual lightness steps; the practical payoff is that a token pair like muted/muted-foreground holds its contrast ratio across both modes without per-mode hand-tuning. Motion values are emitted as CSS custom properties in addition to the TypeScript exports, so components that need only a CSS transition can honour the motion scale without pulling in a JS animation runtime.",
         "motionNotes": "This item defines the motion scale rather than animating anything itself. Durations are exposed in milliseconds (CSS) and seconds (TypeScript/Motion) from one source, because emitting only one unit guarantees a conversion bug at the first component that needs the other."
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "pricing-section",
+      "title": "Pricing Section",
+      "description": "A plan comparison section with a monthly or annual billing selector and caller-supplied actions. It accepts plans with names, descriptions, monthly and annual display prices, feature lists, and action nodes. Use it when visitors need to compare plan cost and included benefits; clarify billing terms and currency in the supplied price copy, and use Feature Comparison when feature differences matter more than checkout.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/pricing-section/pricing-section.tsx",
+          "target": "components/blocks/pricing-section.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Supply already formatted display prices and accurate billing terms; the component does not calculate tax, currency conversions, or subscription totals.",
+      "meta": {
+        "engineeringNotes": "Treats displayed prices as caller-formatted strings rather than embedding locale, currency, tax, and billing arithmetic in a presentation block. A native button pair with aria-pressed makes the billing selection keyboard operable without requiring a switch widget for two labelled choices. Plan actions are slots so consumers can connect them to their own checkout or sales flows.",
+        "motionNotes": "The billing selection updates price text immediately with no number-counting effect, since animated price changes can obscure the actual amount. Selected styling and the explicit billing note communicate the current state. Reduced-motion preferences do not alter the text or action availability.",
+        "schema": {
+          "component": "PricingSection",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "PricingSection",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "plans": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/PricingPlan"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "plans"
+            ],
+            "$defs": {
+              "PricingPlan": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "monthlyPrice": {
+                    "type": "string"
+                  },
+                  "annualPrice": {
+                    "type": "string"
+                  },
+                  "features": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "action": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "description",
+                  "monthlyPrice",
+                  "annualPrice",
+                  "features",
+                  "action"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "product-hero",
+      "title": "Product Hero",
+      "description": "A responsive opening section for product and marketing pages, with centered, split, product-preview, and editorial compositions. It renders an optional eyebrow, required headline, optional supporting description, caller-supplied action slot, and optional product visual. Use it to explain a product's core value and offer a next step near the top of a page; choose a different section when the visitor already understands the product and needs detailed feature comparison, proof, or pricing.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/product-hero/product-hero.tsx",
+          "target": "components/blocks/product-hero.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. Supply working action elements through the `actions` slot and a meaningful product visual through `visual`; omit `visual` when the product has no useful preview.",
+      "meta": {
+        "engineeringNotes": "Uses a composed slot API for actions and visual rather than embedding a product screenshot, CTA behavior, or a specific brand's copy. Product sites need control over links, analytics, responsive media, and server-rendered imagery, while the block's responsibility is the responsive composition and heading hierarchy. CVA defines the four named layout variants so consumers can extend the matrix without branching through conditional class strings. It is a Level 2 block intended for product-page templates, not a standalone control.",
+        "motionNotes": "The block has no entrance, autoplay, or decorative motion; its job is to establish page hierarchy immediately, and moving content would delay that orientation. CTA controls may use their own interaction feedback, but the hero itself does not animate. Because no motion is introduced, reduced-motion settings do not hide content or change the layout.",
+        "schema": {
+          "component": "ProductHero",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "ProductHero",
+            "type": "object",
+            "properties": {
+              "eyebrow": {
+                "type": "string",
+                "description": "Short context line above the headline."
+              },
+              "title": {
+                "type": "string",
+                "description": "The main value proposition."
+              },
+              "description": {
+                "type": "string",
+                "description": "Supporting sentence or paragraph."
+              },
+              "actions": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "Primary and secondary actions, supplied by the consuming page."
+              },
+              "visual": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "Product screenshot, illustration, or composed preview."
+              },
+              "headingLevel": {
+                "enum": [
+                  2,
+                  3,
+                  1
+                ],
+                "description": "Heading level in the consuming page's document outline."
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "$defs": {
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "product-spotlight",
+      "title": "Product Spotlight",
+      "description": "An interactive product section that pairs selectable feature descriptions with one matching visual. It accepts a heading and a list of feature items with ids, labels, titles, descriptions, and optional visuals; visitors select an item to update the adjacent explanation. Use it when a product page needs to explain several capabilities in one compact section, rather than stacking unrelated feature cards or showing a static screenshot.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/product-spotlight/product-spotlight.tsx",
+          "target": "components/blocks/product-spotlight.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Each feature item needs a stable unique id; provide a useful visual node when the selected feature benefits from a product preview.",
+      "meta": {
+        "engineeringNotes": "Uses a data-driven list and caller-supplied visual slot rather than hardcoding product screenshots or feature copy, so the same interaction can explain different products without forking layout code. Native buttons with aria-pressed provide predictable keyboard operation without a custom tab widget or an extra runtime dependency. The selected content is derived from the item id, and an empty collection renders an explicit empty message.",
+        "motionNotes": "Selection changes content directly without an entrance animation; the visitor needs the new explanation immediately, not a decorative transition. Focus and selected-state styling provide the interaction feedback. No content is hidden behind motion, so reduced-motion preferences require no special behavior.",
+        "schema": {
+          "component": "ProductSpotlight",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "ProductSpotlight",
+            "type": "object",
+            "properties": {
+              "eyebrow": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ProductSpotlightItem"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "items"
+            ],
+            "$defs": {
+              "ProductSpotlightItem": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "visual": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode"
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "title",
+                  "description"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
+        }
       }
     },
     {
@@ -9349,6 +10268,169 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "split-button",
+      "title": "Split Button",
+      "description": "A compound action control with a primary button and a separate menu trigger for related alternatives. It renders a native primary button beside a Radix dropdown-menu trigger, with primary, secondary, outline, and ghost variants; small, medium, and large sizes; top or bottom menu placement; optional leading icons, separators, disabled menu items, and disabled or loading states. Use it when one action should remain immediately available and related alternatives belong in a menu; use an Action Menu when none of the actions is primary, or a Button Group for peer actions that should all stay visible.",
+      "type": "registry:ui",
+      "categories": [
+        "actions"
+      ],
+      "dependencies": [
+        "@radix-ui/react-dropdown-menu",
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/split-button/split-button.tsx",
+          "target": "components/ui/split-button.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. Radix Dropdown Menu is installed as a direct dependency and provides menu focus management, keyboard navigation, dismissal, and portal behavior.",
+      "meta": {
+        "engineeringNotes": "Uses Radix Dropdown Menu rather than hand-rolled menu roles, pointer dismissal, and focus management: this preserves arrow-key navigation, typeahead, Escape handling, focus restoration, and collision-aware placement for the secondary actions. The primary action remains an independent native button, so its click behavior and form semantics do not depend on opening the menu. CVA owns the variant and size matrix and exports splitButtonVariants for consumer extension; semantic classes keep colors theme-driven, while the separate icon trigger has its own accessible name.",
+        "motionNotes": "Menu content appears without an entrance animation so focus movement and action availability remain the motion; adding a decorative menu transition would add little orientation value for this compact control. Button color feedback uses the generated instant duration and standard easing tokens. The loading indicator rotates only to communicate ongoing work and becomes static under prefers-reduced-motion; the button remains mounted, disabled, and marked busy so progress is still conveyed without animation.",
+        "schema": {
+          "component": "SplitButton",
+          "element": "button",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "SplitButton",
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Label for the always-visible primary action."
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/SplitButtonItem"
+                },
+                "description": "Additional actions shown in the menu segment."
+              },
+              "disabled": {
+                "type": "boolean",
+                "description": "Disable both segments."
+              },
+              "loading": {
+                "type": "boolean",
+                "description": "Keep the primary action mounted and announce that it is busy."
+              },
+              "menuPlacement": {
+                "enum": [
+                  "top",
+                  "bottom"
+                ],
+                "description": "Side of the trigger on which the menu opens."
+              },
+              "type": {
+                "enum": [
+                  "button",
+                  "submit",
+                  "reset"
+                ],
+                "description": "Native button type for the primary action."
+              }
+            },
+            "required": [
+              "label",
+              "items"
+            ],
+            "$defs": {
+              "SplitButtonItem": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "Visible action name and accessible name for this menu item."
+                  },
+                  "onClick": {
+                    "x-function": true,
+                    "x-host": true,
+                    "description": "Action to run when the menu item is selected."
+                  },
+                  "icon": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode",
+                    "description": "Optional leading icon."
+                  },
+                  "disabled": {
+                    "type": "boolean",
+                    "description": "Prevents this action while leaving it in the menu."
+                  },
+                  "separator": {
+                    "type": "boolean",
+                    "description": "Add a separator immediately before this item."
+                  }
+                },
+                "required": [
+                  "label",
+                  "onClick"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": [
+            {
+              "name": "onClick",
+              "required": true,
+              "params": [
+                {
+                  "name": "event",
+                  "type": "MouseEvent<HTMLButtonElement, MouseEvent>"
+                }
+              ],
+              "description": "Action to run when the primary segment is activated."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "suggestions",
       "title": "Suggestions",
       "description": "Follow-up suggestions after an AI answer, where what a tap does is always clear. `Suggestions` takes `items` (strings, or `{ id, label, prompt? }` when the visible label differs from what gets asked), `onSelect(prompt, item)`, a `mode` of 'fill' (put the text in the composer to edit, the default) or 'send' (ask immediately), `streaming` (hides them while an answer is still arriving), and a `layout` of 'chips' (wrapping pills) or 'list' (full-width rows for longer questions). Fill and send look different, with a pencil or an arrow, and are named differently for screen readers ('Edit before asking: …' vs 'Ask: …'), so a tap never commits someone to words they didn't expect to send. The group is one tab stop, and arrow keys, Home and End move between items. Items arrive with a short staggered fade and then hold still. Use it under assistant messages and in empty states. Not for autocomplete while typing. Use Ghost Input for that.",
@@ -10118,6 +11200,93 @@
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "use-case-explorer",
+      "title": "Use Case Explorer",
+      "description": "An interactive marketing section that lets visitors choose a role or scenario and see the relevant description and outcomes. It accepts a title and cases with stable ids, labels, headings, descriptions, and outcome lists. Use it to help different audiences recognize how the same product fits their workflow; use Product Spotlight when the distinction is between product capabilities instead of user groups.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/use-case-explorer/use-case-explorer.tsx",
+          "target": "components/blocks/use-case-explorer.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Provide short labels and outcome copy for each audience; all case content is local and available without a network request.",
+      "meta": {
+        "engineeringNotes": "Uses an explicit audience selector and a single associated content panel instead of rendering every persona as a separate long card. This makes the audience choice the organizing action and keeps each benefit list tied to its intended visitor. Native buttons and aria-pressed avoid a bespoke tab system while preserving standard keyboard activation.",
+        "motionNotes": "Changing audience replaces the panel content immediately with no slide or fade, preventing motion from obscuring the newly selected audience's message. A visible pressed state and clear labels communicate selection. Reduced-motion settings require no behavior change because the interaction has no animation.",
+        "schema": {
+          "component": "UseCaseExplorer",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "UseCaseExplorer",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "cases": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/UseCase"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "cases"
+            ],
+            "$defs": {
+              "UseCase": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "outcomes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "title",
+                  "description",
+                  "outcomes"
+                ]
+              }
+            }
+          },
+          "events": []
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
       "name": "variation-grid",
       "title": "Variation Grid",
       "description": "The results of one prompt, with the good ones kept. Takes `items` (each with your own `preview` node, a `label`, a per-cell `status` of `running`, `done` or `failed`, and a `note` explaining a failure), the `keptIds` the user is holding with `onKeptChange`, `onRegenerateRest` which replaces only what isn't kept, a `regenerateCost` shown on the button before the click, plus `onUse`, `onMore` and a per-cell `onRetry`. Keeping is the point: research on how people use generation tools describes them keeping the two results they like and running the rest again, which almost no tool supports, so people download favourites and re-prompt by hand. Failures are per cell, so one timed-out result shows its own reason and Retry while the others stay usable. Purely presentational: you render the previews and own the generation. Use it for any prompt that returns several candidates — images, video takes, copy, layouts. Not for a single result (that is Generation Placeholder or Media Result), and not as a gallery of past work.",
@@ -10319,6 +11488,126 @@
               "description": "Retries a single failed result."
             }
           ]
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "workflow-section",
+      "title": "Workflow Section",
+      "description": "An interactive process section that lets visitors select a step and read its explanation in a paired detail panel. It accepts a title, optional introduction, ordered steps with stable ids, titles, descriptions, optional detail content, and a horizontal or vertical layout. Use it to explain how a service or product works when sequence matters; use a static feature list when steps are independent.",
+      "type": "registry:block",
+      "categories": [
+        "content",
+        "block"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [
+        "@pixeldosa/pixeldosa-theme"
+      ],
+      "files": [
+        {
+          "path": "../../packages/ui/src/registry/workflow-section/workflow-section.tsx",
+          "target": "components/blocks/workflow-section.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "docs": "Requires `cn` at `@/lib/utils`. Give each step a stable unique id and provide a detail node only when it adds useful context beyond the description.",
+      "meta": {
+        "engineeringNotes": "Uses ordinary buttons to select one step and a separate detail region, rather than a custom carousel or a large timeline widget. This keeps every step discoverable, keyboard reachable, and usable without dragging or timed progression. Step content remains caller-authored, allowing product screenshots, simple text, or other local components without binding the block to a product domain.",
+        "motionNotes": "The active step changes without an animated slide; sequence and selection are conveyed by order, number, border, and text. This avoids implying that later steps are unavailable or that the visitor must wait for a timed transition. Reduced motion does not change the interaction or remove any content.",
+        "schema": {
+          "component": "WorkflowSection",
+          "props": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "WorkflowSection",
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/WorkflowStep"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "steps"
+            ],
+            "$defs": {
+              "WorkflowStep": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/UINode"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/$defs/UINode"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "x-react": "ReactNode"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "description"
+                ]
+              },
+              "UINode": {
+                "type": "object",
+                "description": "A nested component: a name from this catalogue, and the props to give it.",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "description": "The component's exported name, e.g. \"MediaResult\"."
+                  },
+                  "props": {
+                    "type": "object",
+                    "description": "That component's own props, matching its entry in this catalogue."
+                  }
+                }
+              }
+            }
+          },
+          "events": []
         }
       }
     },

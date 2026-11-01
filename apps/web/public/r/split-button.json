@@ -1,0 +1,164 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "split-button",
+  "title": "Split Button",
+  "description": "A compound action control with a primary button and a separate menu trigger for related alternatives. It renders a native primary button beside a Radix dropdown-menu trigger, with primary, secondary, outline, and ghost variants; small, medium, and large sizes; top or bottom menu placement; optional leading icons, separators, disabled menu items, and disabled or loading states. Use it when one action should remain immediately available and related alternatives belong in a menu; use an Action Menu when none of the actions is primary, or a Button Group for peer actions that should all stay visible.",
+  "dependencies": [
+    "@radix-ui/react-dropdown-menu",
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/split-button/split-button.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\nimport * as DropdownMenu from \"@radix-ui/react-dropdown-menu\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst splitButtonVariants = cva(\r\n  [\r\n    \"inline-flex shrink-0 items-center justify-center whitespace-nowrap font-medium\",\r\n    \"outline-none focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/40\",\r\n    \"disabled:pointer-events-none disabled:opacity-50\",\r\n    \"transition-colors duration-[var(--pd-duration-instant)] ease-[var(--pd-ease-standard)]\",\r\n  ],\r\n  {\r\n    variants: {\r\n      variant: {\r\n        primary: \"bg-primary text-primary-foreground hover:bg-primary/90\",\r\n        secondary: \"bg-secondary text-secondary-foreground hover:bg-secondary/80\",\r\n        outline:\r\n          \"border border-input bg-background hover:bg-accent hover:text-accent-foreground\",\r\n        ghost: \"hover:bg-accent hover:text-accent-foreground\",\r\n      },\r\n      size: {\r\n        sm: \"h-8 px-3 text-xs\",\r\n        md: \"h-9 px-4 text-sm\",\r\n        lg: \"h-11 px-5 text-base\",\r\n      },\r\n    },\r\n    defaultVariants: {\r\n      variant: \"primary\",\r\n      size: \"md\",\r\n    },\r\n  }\r\n);\r\n\r\nexport interface SplitButtonItem {\r\n  /** Visible action name and accessible name for this menu item. */\r\n  label: string;\r\n  /** Action to run when the menu item is selected. */\r\n  onClick: () => void;\r\n  /** Optional leading icon. */\r\n  icon?: React.ReactNode;\r\n  /** Prevents this action while leaving it in the menu. */\r\n  disabled?: boolean;\r\n  /** Add a separator immediately before this item. */\r\n  separator?: boolean;\r\n}\r\n\r\nexport interface SplitButtonProps\r\n  extends Omit<\r\n      React.ComponentPropsWithoutRef<\"button\">,\r\n      \"children\" | \"className\" | \"onClick\" | \"type\"\r\n    >,\r\n    VariantProps<typeof splitButtonVariants> {\r\n  /** Label for the always-visible primary action. */\r\n  label: string;\r\n  /** Action to run when the primary segment is activated. */\r\n  onClick: React.MouseEventHandler<HTMLButtonElement>;\r\n  /** Additional actions shown in the menu segment. */\r\n  items: SplitButtonItem[];\r\n  /** Disable both segments. */\r\n  disabled?: boolean;\r\n  /** Keep the primary action mounted and announce that it is busy. */\r\n  loading?: boolean;\r\n  /** Side of the trigger on which the menu opens. */\r\n  menuPlacement?: \"bottom\" | \"top\";\r\n  /** Classes applied to the two-button group. */\r\n  className?: string;\r\n  /** Native button type for the primary action. */\r\n  type?: \"button\" | \"submit\" | \"reset\";\r\n}\r\n\r\n/**\r\n * A primary action paired with a menu of related alternatives. Use it when one\r\n * action should stay immediately available and less common choices belong in a\r\n * menu; use an Action Menu when there is no primary action.\r\n */\r\nexport function SplitButton({\r\n  label,\r\n  onClick,\r\n  items,\r\n  variant,\r\n  size,\r\n  disabled = false,\r\n  loading = false,\r\n  menuPlacement = \"bottom\",\r\n  className,\r\n  type = \"button\",\r\n  ...buttonProps\r\n}: SplitButtonProps) {\r\n  const isDisabled = disabled || loading;\r\n  const classes = splitButtonVariants({ variant, size });\r\n\r\n  return (\r\n    <div\r\n      role=\"group\"\r\n      aria-label={`${label} actions`}\r\n      className={cn(\"relative inline-flex\", className)}\r\n    >\r\n      <button\r\n        {...buttonProps}\r\n        type={type}\r\n        onClick={onClick}\r\n        disabled={isDisabled}\r\n        aria-busy={loading || undefined}\r\n        className={cn(classes, \"rounded-l-md rounded-r-none\", {\r\n          \"gap-2\": loading,\r\n        })}\r\n      >\r\n        {loading ? <LoadingIndicator /> : null}\r\n        {label}\r\n      </button>\r\n\r\n      <DropdownMenu.Root>\r\n        <DropdownMenu.Trigger asChild>\r\n          <button\r\n            type=\"button\"\r\n            disabled={isDisabled}\r\n            aria-label=\"More actions\"\r\n            className={cn(\r\n              classes,\r\n              \"rounded-l-none rounded-r-md border-l border-border/50 px-2 focus-visible:border-ring\"\r\n            )}\r\n          >\r\n            <ChevronDownIcon />\r\n          </button>\r\n        </DropdownMenu.Trigger>\r\n        <DropdownMenu.Portal>\r\n          <DropdownMenu.Content\r\n            align=\"end\"\r\n            side={menuPlacement}\r\n            sideOffset={4}\r\n            className=\"z-50 min-w-48 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md\"\r\n          >\r\n            {items.map((item, index) => (\r\n              <React.Fragment key={`${item.label}-${index}`}>\r\n                {item.separator ? (\r\n                  <DropdownMenu.Separator className=\"-mx-1 my-1 h-px bg-border\" />\r\n                ) : null}\r\n                <DropdownMenu.Item\r\n                  disabled={isDisabled || item.disabled}\r\n                  onSelect={item.onClick}\r\n                  className={cn(\r\n                    \"relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none\",\r\n                    \"focus:bg-accent focus:text-accent-foreground\",\r\n                    \"data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"\r\n                  )}\r\n                >\r\n                  {item.icon ? (\r\n                    <span className=\"flex size-4 shrink-0 items-center justify-center\">\r\n                      {item.icon}\r\n                    </span>\r\n                  ) : null}\r\n                  {item.label}\r\n                </DropdownMenu.Item>\r\n              </React.Fragment>\r\n            ))}\r\n          </DropdownMenu.Content>\r\n        </DropdownMenu.Portal>\r\n      </DropdownMenu.Root>\r\n    </div>\r\n  );\r\n}\r\n\r\nfunction ChevronDownIcon() {\r\n  return (\r\n    <svg\r\n      viewBox=\"0 0 20 20\"\r\n      fill=\"none\"\r\n      className=\"size-4\"\r\n      aria-hidden=\"true\"\r\n    >\r\n      <path\r\n        d=\"m5 7.5 5 5 5-5\"\r\n        stroke=\"currentColor\"\r\n        strokeWidth=\"1.5\"\r\n        strokeLinecap=\"round\"\r\n        strokeLinejoin=\"round\"\r\n      />\r\n    </svg>\r\n  );\r\n}\r\n\r\nfunction LoadingIndicator() {\r\n  return (\r\n    <>\r\n      <svg\r\n        viewBox=\"0 0 24 24\"\r\n        fill=\"none\"\r\n        className=\"size-4 animate-spin motion-reduce:animate-none\"\r\n        aria-hidden=\"true\"\r\n      >\r\n        <circle\r\n          cx=\"12\"\r\n          cy=\"12\"\r\n          r=\"9\"\r\n          stroke=\"currentColor\"\r\n          strokeOpacity=\"0.25\"\r\n          strokeWidth=\"3\"\r\n        />\r\n        <path\r\n          d=\"M21 12a9 9 0 0 0-9-9\"\r\n          stroke=\"currentColor\"\r\n          strokeWidth=\"3\"\r\n          strokeLinecap=\"round\"\r\n        />\r\n      </svg>\r\n      <span className=\"sr-only\">Loading</span>\r\n    </>\r\n  );\r\n}\r\n\r\nexport { splitButtonVariants };\r\n",
+      "type": "registry:ui",
+      "target": "components/ui/split-button.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Uses Radix Dropdown Menu rather than hand-rolled menu roles, pointer dismissal, and focus management: this preserves arrow-key navigation, typeahead, Escape handling, focus restoration, and collision-aware placement for the secondary actions. The primary action remains an independent native button, so its click behavior and form semantics do not depend on opening the menu. CVA owns the variant and size matrix and exports splitButtonVariants for consumer extension; semantic classes keep colors theme-driven, while the separate icon trigger has its own accessible name.",
+    "motionNotes": "Menu content appears without an entrance animation so focus movement and action availability remain the motion; adding a decorative menu transition would add little orientation value for this compact control. Button color feedback uses the generated instant duration and standard easing tokens. The loading indicator rotates only to communicate ongoing work and becomes static under prefers-reduced-motion; the button remains mounted, disabled, and marked busy so progress is still conveyed without animation.",
+    "schema": {
+      "component": "SplitButton",
+      "element": "button",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "SplitButton",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Label for the always-visible primary action."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SplitButtonItem"
+            },
+            "description": "Additional actions shown in the menu segment."
+          },
+          "disabled": {
+            "type": "boolean",
+            "description": "Disable both segments."
+          },
+          "loading": {
+            "type": "boolean",
+            "description": "Keep the primary action mounted and announce that it is busy."
+          },
+          "menuPlacement": {
+            "enum": [
+              "top",
+              "bottom"
+            ],
+            "description": "Side of the trigger on which the menu opens."
+          },
+          "type": {
+            "enum": [
+              "button",
+              "submit",
+              "reset"
+            ],
+            "description": "Native button type for the primary action."
+          }
+        },
+        "required": [
+          "label",
+          "items"
+        ],
+        "$defs": {
+          "SplitButtonItem": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Visible action name and accessible name for this menu item."
+              },
+              "onClick": {
+                "x-function": true,
+                "x-host": true,
+                "description": "Action to run when the menu item is selected."
+              },
+              "icon": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/UINode"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/$defs/UINode"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "x-react": "ReactNode",
+                "description": "Optional leading icon."
+              },
+              "disabled": {
+                "type": "boolean",
+                "description": "Prevents this action while leaving it in the menu."
+              },
+              "separator": {
+                "type": "boolean",
+                "description": "Add a separator immediately before this item."
+              }
+            },
+            "required": [
+              "label",
+              "onClick"
+            ]
+          },
+          "UINode": {
+            "type": "object",
+            "description": "A nested component: a name from this catalogue, and the props to give it.",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "The component's exported name, e.g. \"MediaResult\"."
+              },
+              "props": {
+                "type": "object",
+                "description": "That component's own props, matching its entry in this catalogue."
+              }
+            }
+          }
+        }
+      },
+      "events": [
+        {
+          "name": "onClick",
+          "required": true,
+          "params": [
+            {
+              "name": "event",
+              "type": "MouseEvent<HTMLButtonElement, MouseEvent>"
+            }
+          ],
+          "description": "Action to run when the primary segment is activated."
+        }
+      ]
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`, which `npx shadcn init` creates. Radix Dropdown Menu is installed as a direct dependency and provides menu focus management, keyboard navigation, dismissal, and portal behavior.",
+  "categories": [
+    "actions"
+  ],
+  "type": "registry:ui"
+}

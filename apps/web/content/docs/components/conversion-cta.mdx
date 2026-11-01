@@ -1,0 +1,27 @@
+---
+title: Conversion CTA
+description: A closing call-to-action section with composable actions and optional reassurance.
+---
+
+## Usage
+
+```tsx
+<ConversionCTA
+  alignment="center"
+  title="Ready to get started?"
+  description="Bring your team together and move the next idea forward."
+  actions={<Button>Get started</Button>}
+  note="No credit card required."
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | CTA heading. |
+| `description` | `string` | — | Optional supporting copy. |
+| `actions` | `React.ReactNode` | — | Caller-supplied buttons or links. |
+| `note` | `string` | — | Optional reassurance below the actions. |
+| `alignment` | `"left" \| "center"` | `"left"` | Content alignment. |
+| `className` | `string` | — | Extra section classes. |

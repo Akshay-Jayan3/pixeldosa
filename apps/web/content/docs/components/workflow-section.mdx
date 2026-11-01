@@ -1,0 +1,26 @@
+---
+title: Workflow Section
+description: Explain a process with selectable steps and a matching detail panel.
+---
+
+## Usage
+
+```tsx
+<WorkflowSection
+  title="A clear path from idea to launch"
+  steps={[
+    { id: "discover", title: "Discover", description: "Bring context together." },
+    { id: "create", title: "Create", description: "Turn decisions into visible work." },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Section heading. |
+| `description` | `string` | — | Optional introduction. |
+| `steps` | `WorkflowStep[]` | — | Ordered steps with stable `id`, `title`, `description`, and optional `detail`. |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Layout preset for the step list and detail. |
+| `className` | `string` | — | Extra section classes. |

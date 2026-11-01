@@ -1,0 +1,88 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-case-explorer",
+  "title": "Use Case Explorer",
+  "description": "An interactive marketing section that lets visitors choose a role or scenario and see the relevant description and outcomes. It accepts a title and cases with stable ids, labels, headings, descriptions, and outcome lists. Use it to help different audiences recognize how the same product fits their workflow; use Product Spotlight when the distinction is between product capabilities instead of user groups.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "@pixeldosa/pixeldosa-theme"
+  ],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/use-case-explorer/use-case-explorer.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\nimport { cva, type VariantProps } from \"class-variance-authority\";\r\n\r\nimport { cn } from \"@/lib/utils\";\r\n\r\nconst useCaseExplorerVariants = cva(\"mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8\", {\r\n  variants: { layout: { cards: \"space-y-7\", compact: \"space-y-5\" } },\r\n  defaultVariants: { layout: \"cards\" },\r\n});\r\n\r\nexport interface UseCase {\r\n  id: string;\r\n  label: string;\r\n  title: string;\r\n  description: string;\r\n  outcomes: string[];\r\n}\r\n\r\nexport interface UseCaseExplorerProps extends VariantProps<typeof useCaseExplorerVariants> {\r\n  title: string;\r\n  cases: UseCase[];\r\n  className?: string;\r\n}\r\n\r\n/** Lets visitors choose a role or scenario and see the relevant product benefits. */\r\nexport function UseCaseExplorer({ title, cases, layout, className }: UseCaseExplorerProps) {\r\n  const [selectedId, setSelectedId] = React.useState(cases[0]?.id);\r\n  const selected = cases.find((useCase) => useCase.id === selectedId) ?? cases[0];\r\n\r\n  return (\r\n    <section className={cn(useCaseExplorerVariants({ layout }), className)}>\r\n      <h2 className=\"text-balance text-3xl font-semibold tracking-tight sm:text-4xl\">{title}</h2>\r\n      {cases.length ? (\r\n        <div className=\"space-y-6\">\r\n          <div className=\"flex flex-wrap gap-2\" role=\"group\" aria-label=\"Choose a use case\">\r\n            {cases.map((useCase) => (\r\n              <button\r\n                key={useCase.id}\r\n                type=\"button\"\r\n                aria-pressed={selected?.id === useCase.id}\r\n                onClick={() => setSelectedId(useCase.id)}\r\n                className=\"rounded-full border border-input px-4 py-2 text-sm outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/40 aria-pressed:border-primary aria-pressed:bg-primary/5\"\r\n              >\r\n                {useCase.label}\r\n              </button>\r\n            ))}\r\n          </div>\r\n          {selected ? (\r\n            <article className=\"grid gap-6 rounded-xl border border-border bg-card p-6 md:grid-cols-2 sm:p-8\">\r\n              <div><h3 className=\"text-xl font-semibold\">{selected.title}</h3><p className=\"mt-2 text-muted-foreground\">{selected.description}</p></div>\r\n              <ul className=\"space-y-3\">{selected.outcomes.map((outcome) => <li key={outcome} className=\"flex gap-3 text-sm\"><span aria-hidden=\"true\" className=\"text-primary\">✓</span><span>{outcome}</span></li>)}</ul>\r\n            </article>\r\n          ) : null}\r\n        </div>\r\n      ) : <p className=\"text-sm text-muted-foreground\">No use cases to show yet.</p>}\r\n    </section>\r\n  );\r\n}\r\n\r\nexport { useCaseExplorerVariants };\r\n",
+      "type": "registry:block",
+      "target": "components/blocks/use-case-explorer.tsx"
+    }
+  ],
+  "meta": {
+    "engineeringNotes": "Uses an explicit audience selector and a single associated content panel instead of rendering every persona as a separate long card. This makes the audience choice the organizing action and keeps each benefit list tied to its intended visitor. Native buttons and aria-pressed avoid a bespoke tab system while preserving standard keyboard activation.",
+    "motionNotes": "Changing audience replaces the panel content immediately with no slide or fade, preventing motion from obscuring the newly selected audience's message. A visible pressed state and clear labels communicate selection. Reduced-motion settings require no behavior change because the interaction has no animation.",
+    "schema": {
+      "component": "UseCaseExplorer",
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "UseCaseExplorer",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/UseCase"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "cases"
+        ],
+        "$defs": {
+          "UseCase": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "outcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "title",
+              "description",
+              "outcomes"
+            ]
+          }
+        }
+      },
+      "events": []
+    }
+  },
+  "docs": "Requires `cn` at `@/lib/utils`. Provide short labels and outcome copy for each audience; all case content is local and available without a network request.",
+  "categories": [
+    "content",
+    "block"
+  ],
+  "type": "registry:block"
+}

@@ -1,0 +1,33 @@
+---
+title: Pricing Section
+description: Compare plan features and switch between monthly and annual displayed prices.
+---
+
+## Usage
+
+```tsx
+<PricingSection
+  title="Plans that grow with your team"
+  plans={[
+    {
+      id: "team",
+      name: "Team",
+      description: "For teams building together.",
+      monthlyPrice: "$18",
+      annualPrice: "$14",
+      features: ["Unlimited projects", "Priority support"],
+      action: <Button>Choose Team</Button>,
+    },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Section heading. |
+| `description` | `string` | — | Optional introduction. |
+| `plans` | `PricingPlan[]` | — | Plans with display prices, feature strings, and an action node. |
+| `columns` | `"two" \| "three"` | `"three"` | Preferred plan-grid layout. |
+| `className` | `string` | — | Extra section classes. |

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "product-spotlight",
+  "title": "Product Spotlight",
+  "description": "An interactive product section that pairs selectable feature descriptions with one matching visual. It accepts a heading and a list of feature items with ids, labels, titles, descriptions, and optional visuals; visitors select an item to update the adjacent explanation. Use it when a product page needs to explain several capabilities in one compact section, rather than stacking unrelated feature cards or showing a static screenshot.",
+  "type": "registry:block",
+  "categories": ["content", "block"],
+  "dependencies": ["class-variance-authority", "clsx", "tailwind-merge"],
+  "registryDependencies": ["@pixeldosa/pixeldosa-theme"],
+  "files": [
+    {
+      "path": "../../packages/ui/src/registry/product-spotlight/product-spotlight.tsx",
+      "target": "components/blocks/product-spotlight.tsx",
+      "type": "registry:block"
+    }
+  ],
+  "docs": "Requires `cn` at `@/lib/utils`. Each feature item needs a stable unique id; provide a useful visual node when the selected feature benefits from a product preview.",
+  "meta": {
+    "engineeringNotes": "Uses a data-driven list and caller-supplied visual slot rather than hardcoding product screenshots or feature copy, so the same interaction can explain different products without forking layout code. Native buttons with aria-pressed provide predictable keyboard operation without a custom tab widget or an extra runtime dependency. The selected content is derived from the item id, and an empty collection renders an explicit empty message.",
+    "motionNotes": "Selection changes content directly without an entrance animation; the visitor needs the new explanation immediately, not a decorative transition. Focus and selected-state styling provide the interaction feedback. No content is hidden behind motion, so reduced-motion preferences require no special behavior."
+  }
+}
